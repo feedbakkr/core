@@ -1,0 +1,585 @@
+[
+	{
+		"title": "General Business Contact",
+		"templateKey": "general-business-contact",
+		"description": "A flexible contact form for company websites that captures general enquiries, the reason for contact, and enough detail for the team to respond appropriately.",
+		"tags": ["business", "contact", "general"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{ "k": "fullName", "label": "Full Name", "t": "text", "req": true, "min": 2, "max": 100 },
+				{ "k": "email", "label": "Email Address", "t": "text", "req": true, "min": 5, "max": 200 },
+				{ "k": "companyName", "label": "Company Name", "t": "text", "max": 150 },
+				{
+					"k": "enquiryType",
+					"label": "Enquiry Type",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{ "k": "general", "label": "General Question" },
+						{ "k": "sales", "label": "Sales" },
+						{ "k": "support", "label": "Support" },
+						{ "k": "partnership", "label": "Partnership" },
+						{ "k": "other", "label": "Other" }
+					]
+				},
+				{ "k": "subject", "label": "Subject", "t": "text", "req": true, "min": 3, "max": 150 },
+				{ "k": "message", "label": "Message", "t": "textarea", "req": true, "min": 20, "max": 2000 }
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["fullName", "subject"],
+				"separator": " · ",
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "Professional Services Enquiry",
+		"templateKey": "professional-services-enquiry",
+		"description": "Designed for consultants, agencies, and service providers to capture project type, budget, timeline, and a clear summary of the client's needs.",
+		"tags": ["services", "agency", "consulting"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "contactName",
+					"label": "Contact Name",
+					"t": "text",
+					"req": true,
+					"min": 2,
+					"max": 100
+				},
+				{ "k": "email", "label": "Email Address", "t": "text", "req": true, "min": 5, "max": 200 },
+				{ "k": "businessName", "label": "Business Name", "t": "text", "max": 150 },
+				{
+					"k": "serviceNeeded",
+					"label": "Service Needed",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{ "k": "consulting", "label": "Consulting" },
+						{ "k": "implementation", "label": "Implementation" },
+						{ "k": "training", "label": "Training" },
+						{ "k": "support", "label": "Ongoing Support" },
+						{ "k": "other", "label": "Other" }
+					]
+				},
+				{
+					"k": "budgetRange",
+					"label": "Budget Range",
+					"t": "fixed",
+					"opts": [
+						{ "k": "under_1000", "label": "Under £1,000" },
+						{ "k": "1000_5000", "label": "£1,000 - £5,000" },
+						{ "k": "5000_10000", "label": "£5,000 - £10,000" },
+						{ "k": "10000_plus", "label": "£10,000+" }
+					]
+				},
+				{ "k": "targetStartDate", "label": "Target Start Date", "t": "date" },
+				{
+					"k": "projectSummary",
+					"label": "Project Summary",
+					"t": "textarea",
+					"req": true,
+					"min": 30,
+					"max": 2500
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["contactName", "serviceNeeded"],
+				"separator": " · ",
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "Ecommerce Customer Contact",
+		"templateKey": "ecommerce-customer-contact",
+		"description": "A customer contact form for online shops covering order-related questions, returns, delivery issues, and general product enquiries.",
+		"tags": ["ecommerce", "support", "retail"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "customerName",
+					"label": "Customer Name",
+					"t": "text",
+					"req": true,
+					"min": 2,
+					"max": 100
+				},
+				{ "k": "email", "label": "Email Address", "t": "text", "req": true, "min": 5, "max": 200 },
+				{ "k": "orderNumber", "label": "Order Number", "t": "text", "max": 50 },
+				{
+					"k": "contactReason",
+					"label": "Reason for Contact",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{ "k": "order_update", "label": "Order Update" },
+						{ "k": "delivery_issue", "label": "Delivery Issue" },
+						{ "k": "return_refund", "label": "Return or Refund" },
+						{ "k": "product_question", "label": "Product Question" },
+						{ "k": "other", "label": "Other" }
+					]
+				},
+				{ "k": "productName", "label": "Product Name", "t": "text", "max": 200 },
+				{ "k": "message", "label": "Message", "t": "textarea", "req": true, "min": 20, "max": 2000 }
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["contactReason", "orderNumber"],
+				"separator": " · ",
+				"fallbackFields": ["customerName"],
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "Restaurant Booking and Enquiry",
+		"templateKey": "restaurant-booking-enquiry",
+		"description": "Useful for restaurants, cafés, and venues to manage booking requests, event enquiries, and general customer questions from their website.",
+		"tags": ["restaurant", "hospitality", "bookings"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{ "k": "name", "label": "Name", "t": "text", "req": true, "min": 2, "max": 100 },
+				{ "k": "email", "label": "Email Address", "t": "text", "req": true, "min": 5, "max": 200 },
+				{ "k": "phoneNumber", "label": "Phone Number", "t": "text", "max": 30 },
+				{
+					"k": "enquiryType",
+					"label": "Enquiry Type",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{ "k": "table_booking", "label": "Table Booking" },
+						{ "k": "private_event", "label": "Private Event" },
+						{ "k": "group_booking", "label": "Group Booking" },
+						{ "k": "general", "label": "General Enquiry" }
+					]
+				},
+				{ "k": "preferredDate", "label": "Preferred Date", "t": "date" },
+				{ "k": "partySize", "label": "Party Size", "t": "number", "min": 1, "max": 50 },
+				{ "k": "message", "label": "Additional Details", "t": "textarea", "min": 10, "max": 1500 }
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["name", "enquiryType"],
+				"separator": " · ",
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "Trades and Home Services Contact",
+		"templateKey": "trades-home-services-contact",
+		"description": "A practical contact form for builders, electricians, plumbers, landscapers, and similar businesses to gather job details and preferred appointment timing.",
+		"tags": ["trades", "home-services", "local"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{ "k": "fullName", "label": "Full Name", "t": "text", "req": true, "min": 2, "max": 100 },
+				{ "k": "email", "label": "Email Address", "t": "text", "max": 200 },
+				{
+					"k": "phoneNumber",
+					"label": "Phone Number",
+					"t": "text",
+					"req": true,
+					"min": 7,
+					"max": 30
+				},
+				{
+					"k": "serviceType",
+					"label": "Service Type",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{ "k": "quote_request", "label": "Quote Request" },
+						{ "k": "repair", "label": "Repair" },
+						{ "k": "installation", "label": "Installation" },
+						{ "k": "maintenance", "label": "Maintenance" },
+						{ "k": "emergency", "label": "Emergency" }
+					]
+				},
+				{ "k": "postcode", "label": "Postcode", "t": "text", "max": 20 },
+				{ "k": "preferredDate", "label": "Preferred Date", "t": "date" },
+				{
+					"k": "jobDetails",
+					"label": "Job Details",
+					"t": "textarea",
+					"req": true,
+					"min": 20,
+					"max": 2000
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["serviceType", "postcode"],
+				"separator": " · ",
+				"fallbackFields": ["fullName"],
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "Software Product Contact",
+		"templateKey": "software-product-contact",
+		"description": "A contact form for SaaS products and software companies covering demos, pricing questions, technical support, and partnership enquiries.",
+		"tags": ["saas", "software", "product"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{ "k": "name", "label": "Name", "t": "text", "req": true, "min": 2, "max": 100 },
+				{ "k": "workEmail", "label": "Work Email", "t": "text", "req": true, "min": 5, "max": 200 },
+				{ "k": "companyName", "label": "Company Name", "t": "text", "max": 150 },
+				{
+					"k": "teamSize",
+					"label": "Team Size",
+					"t": "fixed",
+					"opts": [
+						{ "k": "1_5", "label": "1-5" },
+						{ "k": "6_20", "label": "6-20" },
+						{ "k": "21_100", "label": "21-100" },
+						{ "k": "101_plus", "label": "101+" }
+					]
+				},
+				{
+					"k": "requestType",
+					"label": "Request Type",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{ "k": "demo", "label": "Book a Demo" },
+						{ "k": "pricing", "label": "Pricing Question" },
+						{ "k": "support", "label": "Technical Support" },
+						{ "k": "integration", "label": "Integration Enquiry" },
+						{ "k": "partnership", "label": "Partnership" }
+					]
+				},
+				{ "k": "message", "label": "Message", "t": "textarea", "req": true, "min": 20, "max": 2500 }
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["companyName", "requestType"],
+				"separator": " · ",
+				"fallbackFields": ["name"],
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "Creative Studio Project Enquiry",
+		"templateKey": "creative-studio-project-enquiry",
+		"description": "Ideal for design studios, photographers, video teams, and branding agencies collecting project type, timeline, and creative brief details.",
+		"tags": ["creative", "design", "agency"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "contactName",
+					"label": "Contact Name",
+					"t": "text",
+					"req": true,
+					"min": 2,
+					"max": 100
+				},
+				{ "k": "email", "label": "Email Address", "t": "text", "req": true, "min": 5, "max": 200 },
+				{ "k": "brandName", "label": "Brand or Business Name", "t": "text", "max": 150 },
+				{
+					"k": "projectType",
+					"label": "Project Type",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{ "k": "branding", "label": "Branding" },
+						{ "k": "web_design", "label": "Web Design" },
+						{ "k": "photography", "label": "Photography" },
+						{ "k": "video", "label": "Video" },
+						{ "k": "other", "label": "Other" }
+					]
+				},
+				{
+					"k": "timeline",
+					"label": "Timeline",
+					"t": "fixed",
+					"opts": [
+						{ "k": "asap", "label": "ASAP" },
+						{ "k": "1_month", "label": "Within 1 Month" },
+						{ "k": "3_months", "label": "Within 3 Months" },
+						{ "k": "flexible", "label": "Flexible" }
+					]
+				},
+				{
+					"k": "budgetRange",
+					"label": "Budget Range",
+					"t": "fixed",
+					"opts": [
+						{ "k": "under_2000", "label": "Under £2,000" },
+						{ "k": "2000_5000", "label": "£2,000 - £5,000" },
+						{ "k": "5000_10000", "label": "£5,000 - £10,000" },
+						{ "k": "10000_plus", "label": "£10,000+" }
+					]
+				},
+				{
+					"k": "projectBrief",
+					"label": "Project Brief",
+					"t": "textarea",
+					"req": true,
+					"min": 30,
+					"max": 2500
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["projectType", "brandName"],
+				"separator": " · ",
+				"fallbackFields": ["contactName"],
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "Nonprofit and Community Contact",
+		"templateKey": "nonprofit-community-contact",
+		"description": "A good fit for charities, community groups, and nonprofit organisations to collect volunteer offers, partnership ideas, donation questions, and general enquiries.",
+		"tags": ["nonprofit", "community", "charity"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{ "k": "fullName", "label": "Full Name", "t": "text", "req": true, "min": 2, "max": 100 },
+				{ "k": "email", "label": "Email Address", "t": "text", "req": true, "min": 5, "max": 200 },
+				{
+					"k": "interestType",
+					"label": "Reason for Contact",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{ "k": "general", "label": "General Enquiry" },
+						{ "k": "volunteering", "label": "Volunteering" },
+						{ "k": "partnership", "label": "Partnership" },
+						{ "k": "donation", "label": "Donation Question" },
+						{ "k": "media", "label": "Media Enquiry" }
+					]
+				},
+				{ "k": "organisationName", "label": "Organisation Name", "t": "text", "max": 150 },
+				{
+					"k": "message",
+					"label": "Message",
+					"t": "textarea",
+					"req": true,
+					"min": 20,
+					"max": 2000
+				},
+				{ "k": "subscribeToUpdates", "label": "I'd like to receive updates", "t": "bool" }
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["interestType", "fullName"],
+				"separator": " · ",
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "Real Estate Property Enquiry",
+		"templateKey": "real-estate-property-enquiry",
+		"description": "Built for estate agents, lettings businesses, and property websites to handle questions about specific listings, valuations, and viewings.",
+		"tags": ["property", "real-estate", "sales"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{ "k": "name", "label": "Name", "t": "text", "req": true, "min": 2, "max": 100 },
+				{ "k": "email", "label": "Email Address", "t": "text", "req": true, "min": 5, "max": 200 },
+				{ "k": "phoneNumber", "label": "Phone Number", "t": "text", "max": 30 },
+				{
+					"k": "enquiryType",
+					"label": "Enquiry Type",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{ "k": "property_viewing", "label": "Property Viewing" },
+						{ "k": "property_question", "label": "Property Question" },
+						{ "k": "valuation", "label": "Valuation Request" },
+						{ "k": "lettings", "label": "Lettings Enquiry" },
+						{ "k": "sales", "label": "Sales Enquiry" }
+					]
+				},
+				{ "k": "propertyReference", "label": "Property Reference", "t": "text", "max": 100 },
+				{ "k": "preferredDate", "label": "Preferred Date", "t": "date" },
+				{ "k": "message", "label": "Message", "t": "textarea", "req": true, "min": 15, "max": 2000 }
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["enquiryType", "propertyReference"],
+				"separator": " · ",
+				"fallbackFields": ["name"],
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "Education Course Enquiry",
+		"templateKey": "education-course-enquiry",
+		"description": "Suitable for schools, training companies, tutors, and course providers to capture programme interest, learner details, and questions about enrolment.",
+		"tags": ["education", "training", "courses"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{ "k": "fullName", "label": "Full Name", "t": "text", "req": true, "min": 2, "max": 100 },
+				{ "k": "email", "label": "Email Address", "t": "text", "req": true, "min": 5, "max": 200 },
+				{
+					"k": "courseInterest",
+					"label": "Course Interest",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{ "k": "short_course", "label": "Short Course" },
+						{ "k": "full_programme", "label": "Full Programme" },
+						{ "k": "private_tuition", "label": "Private Tuition" },
+						{ "k": "corporate_training", "label": "Corporate Training" },
+						{ "k": "other", "label": "Other" }
+					]
+				},
+				{
+					"k": "studyMode",
+					"label": "Preferred Study Mode",
+					"t": "fixed",
+					"opts": [
+						{ "k": "online", "label": "Online" },
+						{ "k": "in_person", "label": "In Person" },
+						{ "k": "hybrid", "label": "Hybrid" }
+					]
+				},
+				{ "k": "startDate", "label": "Preferred Start Date", "t": "date" },
+				{
+					"k": "message",
+					"label": "Question or Message",
+					"t": "textarea",
+					"req": true,
+					"min": 20,
+					"max": 2000
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["courseInterest", "fullName"],
+				"separator": " · ",
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "Healthcare Practice Enquiry",
+		"templateKey": "healthcare-practice-enquiry",
+		"description": "A simple enquiry form for clinics, dental practices, wellness providers, and other healthcare websites handling non-emergency appointment and service questions.",
+		"tags": ["healthcare", "appointments", "clinic"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{ "k": "patientName", "label": "Name", "t": "text", "req": true, "min": 2, "max": 100 },
+				{ "k": "email", "label": "Email Address", "t": "text", "max": 200 },
+				{
+					"k": "phoneNumber",
+					"label": "Phone Number",
+					"t": "text",
+					"req": true,
+					"min": 7,
+					"max": 30
+				},
+				{
+					"k": "enquiryType",
+					"label": "Enquiry Type",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{ "k": "appointment", "label": "Appointment Request" },
+						{ "k": "service_question", "label": "Service Question" },
+						{ "k": "billing", "label": "Billing Question" },
+						{ "k": "prescription", "label": "Prescription Query" },
+						{ "k": "other", "label": "Other" }
+					]
+				},
+				{ "k": "preferredDate", "label": "Preferred Date", "t": "date" },
+				{
+					"k": "message",
+					"label": "Message",
+					"t": "textarea",
+					"req": true,
+					"min": 10,
+					"max": 1500
+				},
+				{
+					"k": "confirmNonEmergency",
+					"label": "This is not a medical emergency",
+					"t": "bool",
+					"req": true
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["enquiryType", "patientName"],
+				"separator": " · ",
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "Event Venue Enquiry",
+		"templateKey": "event-venue-enquiry",
+		"description": "Great for venues and event spaces collecting availability requests, event type, guest counts, and other planning details from potential customers.",
+		"tags": ["events", "venue", "hospitality"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "contactName",
+					"label": "Contact Name",
+					"t": "text",
+					"req": true,
+					"min": 2,
+					"max": 100
+				},
+				{ "k": "email", "label": "Email Address", "t": "text", "req": true, "min": 5, "max": 200 },
+				{ "k": "phoneNumber", "label": "Phone Number", "t": "text", "max": 30 },
+				{
+					"k": "eventType",
+					"label": "Event Type",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{ "k": "wedding", "label": "Wedding" },
+						{ "k": "birthday", "label": "Birthday" },
+						{ "k": "corporate", "label": "Corporate Event" },
+						{ "k": "private_party", "label": "Private Party" },
+						{ "k": "other", "label": "Other" }
+					]
+				},
+				{ "k": "eventDate", "label": "Event Date", "t": "date" },
+				{
+					"k": "estimatedGuests",
+					"label": "Estimated Guests",
+					"t": "number",
+					"min": 1,
+					"max": 1000
+				},
+				{
+					"k": "details",
+					"label": "Event Details",
+					"t": "textarea",
+					"req": true,
+					"min": 20,
+					"max": 2500
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["eventType", "eventDate"],
+				"separator": " · ",
+				"fallbackFields": ["contactName"],
+				"maxLength": 100
+			}
+		}
+	}
+]

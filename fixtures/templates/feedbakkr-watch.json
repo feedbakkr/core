@@ -1,0 +1,100 @@
+[
+	{
+		"title": "Feedbakkr Watch — New Error",
+		"templateKey": "feedbakkr-watch-errors",
+		"description": "Receives a notification message each time the watch worker opens a new error group. Connect from project settings → Watch → Notifications. Channels created from this template are the only ones eligible to be selected as a watch notification target.",
+		"tags": ["watch", "errors", "monitoring", "operational", "internal"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "title",
+					"label": "Error",
+					"t": "textarea",
+					"req": true,
+					"min": 1,
+					"max": 500
+				},
+				{
+					"k": "severity",
+					"label": "Severity",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{ "k": "fatal", "label": "Fatal" },
+						{ "k": "error", "label": "Error" },
+						{ "k": "warning", "label": "Warning" },
+						{ "k": "info", "label": "Info" },
+						{ "k": "debug", "label": "Debug" }
+					]
+				},
+				{
+					"k": "source",
+					"label": "Source",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{ "k": "web", "label": "Web (browser)" },
+						{ "k": "api", "label": "API" },
+						{ "k": "worker", "label": "Worker" },
+						{ "k": "mobile", "label": "Mobile" },
+						{ "k": "cli", "label": "CLI" },
+						{ "k": "other", "label": "Other" }
+					]
+				},
+				{
+					"k": "projectName",
+					"label": "Project",
+					"t": "text",
+					"req": true,
+					"max": 100
+				},
+				{
+					"k": "environment",
+					"label": "Environment",
+					"t": "text",
+					"req": true,
+					"max": 50
+				},
+				{
+					"k": "firstSeenAt",
+					"label": "First seen at",
+					"t": "date",
+					"req": true
+				},
+				{
+					"k": "groupId",
+					"label": "Group ID",
+					"t": "text",
+					"req": true,
+					"max": 64
+				},
+				{
+					"k": "fingerprint",
+					"label": "Fingerprint",
+					"t": "text",
+					"max": 32
+				},
+				{
+					"k": "lastOccurrenceId",
+					"label": "Last occurrence ID",
+					"t": "text",
+					"max": 64
+				},
+				{
+					"k": "dashboardUrl",
+					"label": "Open in dashboard",
+					"t": "text",
+					"max": 500
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["severity", "title"],
+				"separator": " · ",
+				"maxLength": 100,
+				"fallbackFields": ["title"]
+			}
+		}
+	}
+]

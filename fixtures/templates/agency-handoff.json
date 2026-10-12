@@ -1,0 +1,658 @@
+[
+	{
+		"title": "Website Launch Feedback",
+		"templateKey": "website-launch-feedback",
+		"description": "Help agencies collect structured post-launch feedback from clients, including issues, polish items, and follow-up requests.",
+		"tags": ["agency", "launch", "client"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "clientName",
+					"label": "Client Name",
+					"t": "text",
+					"req": true,
+					"min": 2,
+					"max": 100
+				},
+				{
+					"k": "pageOrArea",
+					"label": "Page or Area",
+					"t": "text",
+					"max": 200
+				},
+				{
+					"k": "feedbackType",
+					"label": "Feedback Type",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "bug",
+							"label": "Bug / Issue"
+						},
+						{
+							"k": "content_change",
+							"label": "Content Change"
+						},
+						{
+							"k": "design_tweak",
+							"label": "Design Tweak"
+						},
+						{
+							"k": "enhancement",
+							"label": "Enhancement"
+						},
+						{
+							"k": "question",
+							"label": "Question"
+						}
+					]
+				},
+				{
+					"k": "priority",
+					"label": "Priority",
+					"t": "fixed",
+					"opts": [
+						{
+							"k": "low",
+							"label": "Low"
+						},
+						{
+							"k": "medium",
+							"label": "Medium"
+						},
+						{
+							"k": "high",
+							"label": "High"
+						}
+					]
+				},
+				{
+					"k": "details",
+					"label": "Details",
+					"t": "textarea",
+					"req": true,
+					"min": 20,
+					"max": 2000
+				},
+				{
+					"k": "launchBlocker",
+					"label": "Is this a launch blocker?",
+					"t": "bool"
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["feedbackType", "pageOrArea"],
+				"separator": " · ",
+				"fallbackFields": ["clientName"],
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "Design Feedback and Approval",
+		"templateKey": "design-feedback-approval",
+		"description": "Collect design review comments and an approval decision from clients or stakeholders during agency delivery.",
+		"tags": ["design", "review", "agency"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "reviewerName",
+					"label": "Reviewer Name",
+					"t": "text",
+					"req": true,
+					"min": 2,
+					"max": 100
+				},
+				{
+					"k": "designArea",
+					"label": "Design Area",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "homepage",
+							"label": "Homepage"
+						},
+						{
+							"k": "landing_page",
+							"label": "Landing Page"
+						},
+						{
+							"k": "brand_assets",
+							"label": "Brand Assets"
+						},
+						{
+							"k": "mobile_views",
+							"label": "Mobile Views"
+						},
+						{
+							"k": "other",
+							"label": "Other"
+						}
+					]
+				},
+				{
+					"k": "approvalStatus",
+					"label": "Approval Status",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "approved",
+							"label": "Approved"
+						},
+						{
+							"k": "approved_with_changes",
+							"label": "Approved with Changes"
+						},
+						{
+							"k": "needs_revision",
+							"label": "Needs Revision"
+						}
+					]
+				},
+				{
+					"k": "comments",
+					"label": "Comments",
+					"t": "textarea",
+					"req": true,
+					"min": 10,
+					"max": 2000
+				},
+				{
+					"k": "specificChanges",
+					"label": "Specific Changes Requested",
+					"t": "dynlist",
+					"maxItems": 10,
+					"item": {
+						"k": "change",
+						"label": "Change",
+						"t": "text",
+						"max": 500
+					}
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["designArea", "approvalStatus"],
+				"separator": " · ",
+				"fallbackFields": ["reviewerName"],
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "Content Review Feedback",
+		"templateKey": "content-review-feedback",
+		"description": "Collect feedback on website or campaign content before final approval.",
+		"tags": ["content", "review", "agency"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "reviewerName",
+					"label": "Reviewer Name",
+					"t": "text",
+					"req": true,
+					"min": 2,
+					"max": 100
+				},
+				{
+					"k": "contentType",
+					"label": "Content Type",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "website_copy",
+							"label": "Website Copy"
+						},
+						{
+							"k": "landing_page",
+							"label": "Landing Page"
+						},
+						{
+							"k": "email_campaign",
+							"label": "Email Campaign"
+						},
+						{
+							"k": "social_content",
+							"label": "Social Content"
+						},
+						{
+							"k": "ad_copy",
+							"label": "Ad Copy"
+						},
+						{
+							"k": "blog_post",
+							"label": "Blog Post"
+						},
+						{
+							"k": "other",
+							"label": "Other"
+						}
+					]
+				},
+				{
+					"k": "pageOrAsset",
+					"label": "Page or Asset",
+					"t": "text",
+					"req": true,
+					"min": 2,
+					"max": 200
+				},
+				{
+					"k": "reviewStatus",
+					"label": "Review Status",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "approved",
+							"label": "Approved"
+						},
+						{
+							"k": "approved_with_changes",
+							"label": "Approved with Changes"
+						},
+						{
+							"k": "needs_revision",
+							"label": "Needs Revision"
+						}
+					]
+				},
+				{
+					"k": "feedbackSummary",
+					"label": "Feedback Summary",
+					"t": "textarea",
+					"req": true,
+					"min": 20,
+					"max": 2000
+				},
+				{
+					"k": "specificChanges",
+					"label": "Specific Changes Requested",
+					"t": "dynlist",
+					"maxItems": 12,
+					"item": {
+						"k": "change",
+						"label": "Requested Change",
+						"t": "text",
+						"max": 500
+					}
+				},
+				{
+					"k": "deadlineDate",
+					"label": "Needed By",
+					"t": "date"
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["pageOrAsset", "reviewStatus"],
+				"separator": " · ",
+				"fallbackFields": ["reviewerName"],
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "Marketing Campaign Feedback",
+		"templateKey": "campaign-feedback",
+		"description": "Capture client and stakeholder feedback on live or proposed campaigns.",
+		"tags": ["marketing", "campaign", "feedback"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "reviewerName",
+					"label": "Reviewer Name",
+					"t": "text",
+					"req": true,
+					"min": 2,
+					"max": 100
+				},
+				{
+					"k": "campaignName",
+					"label": "Campaign Name",
+					"t": "text",
+					"req": true,
+					"min": 2,
+					"max": 150
+				},
+				{
+					"k": "campaignStage",
+					"label": "Campaign Stage",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "concept",
+							"label": "Concept"
+						},
+						{
+							"k": "draft",
+							"label": "Draft"
+						},
+						{
+							"k": "ready_for_launch",
+							"label": "Ready for Launch"
+						},
+						{
+							"k": "live",
+							"label": "Live"
+						},
+						{
+							"k": "post_launch",
+							"label": "Post-Launch Review"
+						}
+					]
+				},
+				{
+					"k": "feedbackArea",
+					"label": "Feedback Area",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "messaging",
+							"label": "Messaging"
+						},
+						{
+							"k": "creative",
+							"label": "Creative"
+						},
+						{
+							"k": "targeting",
+							"label": "Targeting"
+						},
+						{
+							"k": "landing_page",
+							"label": "Landing Page"
+						},
+						{
+							"k": "email_flow",
+							"label": "Email Flow"
+						},
+						{
+							"k": "performance",
+							"label": "Performance"
+						},
+						{
+							"k": "other",
+							"label": "Other"
+						}
+					]
+				},
+				{
+					"k": "sentiment",
+					"label": "Overall Sentiment",
+					"t": "fixed",
+					"opts": [
+						{
+							"k": "positive",
+							"label": "Positive"
+						},
+						{
+							"k": "mixed",
+							"label": "Mixed"
+						},
+						{
+							"k": "negative",
+							"label": "Negative"
+						}
+					]
+				},
+				{
+					"k": "feedbackDetails",
+					"label": "Feedback Details",
+					"t": "textarea",
+					"req": true,
+					"min": 20,
+					"max": 2000
+				},
+				{
+					"k": "recommendedActions",
+					"label": "Recommended Actions",
+					"t": "textarea",
+					"max": 1500
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["campaignName", "campaignStage", "feedbackArea"],
+				"separator": " · ",
+				"fallbackFields": ["reviewerName"],
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "Post-Launch Support Requests",
+		"templateKey": "post-launch-support",
+		"description": "Handle post-launch fixes, tweaks, and small requests in a structured way.",
+		"tags": ["support", "agency", "maintenance"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "requesterName",
+					"label": "Requester Name",
+					"t": "text",
+					"req": true,
+					"min": 2,
+					"max": 100
+				},
+				{
+					"k": "requestType",
+					"label": "Request Type",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "bug_fix",
+							"label": "Bug Fix"
+						},
+						{
+							"k": "content_update",
+							"label": "Content Update"
+						},
+						{
+							"k": "design_tweak",
+							"label": "Design Tweak"
+						},
+						{
+							"k": "feature_request",
+							"label": "Feature Request"
+						},
+						{
+							"k": "training_help",
+							"label": "Training / Help"
+						},
+						{
+							"k": "other",
+							"label": "Other"
+						}
+					]
+				},
+				{
+					"k": "affectedArea",
+					"label": "Affected Area",
+					"t": "text",
+					"req": true,
+					"min": 2,
+					"max": 200
+				},
+				{
+					"k": "priority",
+					"label": "Priority",
+					"t": "fixed",
+					"opts": [
+						{
+							"k": "low",
+							"label": "Low"
+						},
+						{
+							"k": "medium",
+							"label": "Medium"
+						},
+						{
+							"k": "high",
+							"label": "High"
+						},
+						{
+							"k": "urgent",
+							"label": "Urgent"
+						}
+					]
+				},
+				{
+					"k": "details",
+					"label": "Request Details",
+					"t": "textarea",
+					"req": true,
+					"min": 20,
+					"max": 2000
+				},
+				{
+					"k": "desiredDate",
+					"label": "Desired Completion Date",
+					"t": "date"
+				},
+				{
+					"k": "blocksBusiness",
+					"label": "Is this blocking business activity?",
+					"t": "bool"
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["requestType", "affectedArea", "priority"],
+				"separator": " · ",
+				"fallbackFields": ["requesterName"],
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "Stakeholder Review Form",
+		"templateKey": "stakeholder-review",
+		"description": "Enable multiple stakeholders to provide structured feedback during project delivery.",
+		"tags": ["stakeholder", "review", "agency"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "stakeholderName",
+					"label": "Stakeholder Name",
+					"t": "text",
+					"req": true,
+					"min": 2,
+					"max": 100
+				},
+				{
+					"k": "stakeholderRole",
+					"label": "Stakeholder Role",
+					"t": "text",
+					"max": 100
+				},
+				{
+					"k": "projectArea",
+					"label": "Project Area",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "strategy",
+							"label": "Strategy"
+						},
+						{
+							"k": "design",
+							"label": "Design"
+						},
+						{
+							"k": "content",
+							"label": "Content"
+						},
+						{
+							"k": "development",
+							"label": "Development"
+						},
+						{
+							"k": "seo",
+							"label": "SEO"
+						},
+						{
+							"k": "campaign",
+							"label": "Campaign"
+						},
+						{
+							"k": "other",
+							"label": "Other"
+						}
+					]
+				},
+				{
+					"k": "reviewDecision",
+					"label": "Review Decision",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "approved",
+							"label": "Approved"
+						},
+						{
+							"k": "approved_with_changes",
+							"label": "Approved with Changes"
+						},
+						{
+							"k": "needs_revision",
+							"label": "Needs Revision"
+						},
+						{
+							"k": "not_reviewed",
+							"label": "Not Reviewed Yet"
+						}
+					]
+				},
+				{
+					"k": "comments",
+					"label": "Comments",
+					"t": "textarea",
+					"req": true,
+					"min": 20,
+					"max": 2000
+				},
+				{
+					"k": "actionItems",
+					"label": "Action Items",
+					"t": "dynlist",
+					"maxItems": 10,
+					"item": {
+						"k": "actionItem",
+						"label": "Action Item",
+						"t": "text",
+						"max": 500
+					}
+				},
+				{
+					"k": "needsFollowUp",
+					"label": "Do you need a follow-up discussion?",
+					"t": "bool"
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["projectArea", "reviewDecision"],
+				"separator": " · ",
+				"fallbackFields": ["stakeholderName"],
+				"maxLength": 100
+			}
+		}
+	}
+]

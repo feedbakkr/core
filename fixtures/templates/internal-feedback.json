@@ -1,0 +1,670 @@
+[
+	{
+		"title": "Internal Tool Feedback",
+		"templateKey": "internal-tool-feedback",
+		"description": "Capture feedback from employees using internal tools, admin portals, and back-office systems.",
+		"tags": ["internal", "tools", "feedback"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "team",
+					"label": "Team",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "engineering",
+							"label": "Engineering"
+						},
+						{
+							"k": "operations",
+							"label": "Operations"
+						},
+						{
+							"k": "support",
+							"label": "Support"
+						},
+						{
+							"k": "sales",
+							"label": "Sales"
+						},
+						{
+							"k": "other",
+							"label": "Other"
+						}
+					]
+				},
+				{
+					"k": "toolName",
+					"label": "Tool Name",
+					"t": "text",
+					"req": true,
+					"min": 2,
+					"max": 150
+				},
+				{
+					"k": "feedbackType",
+					"label": "Feedback Type",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "bug",
+							"label": "Bug"
+						},
+						{
+							"k": "improvement",
+							"label": "Improvement"
+						},
+						{
+							"k": "usability",
+							"label": "Usability"
+						},
+						{
+							"k": "request",
+							"label": "Request"
+						}
+					]
+				},
+				{
+					"k": "details",
+					"label": "Details",
+					"t": "textarea",
+					"req": true,
+					"min": 20,
+					"max": 2000
+				},
+				{
+					"k": "blocksWork",
+					"label": "Does this block your work?",
+					"t": "bool"
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["toolName", "feedbackType"],
+				"separator": " · ",
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "Sprint Retrospective Input",
+		"templateKey": "sprint-retrospective-input",
+		"description": "Structured retrospective form for teams to share what went well, what did not, and what should improve next sprint.",
+		"tags": ["team", "retrospective", "agile"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "sprintName",
+					"label": "Sprint Name",
+					"t": "text",
+					"req": true,
+					"min": 2,
+					"max": 100
+				},
+				{
+					"k": "whatWentWell",
+					"label": "What went well?",
+					"t": "textarea",
+					"req": true,
+					"min": 10,
+					"max": 1500
+				},
+				{
+					"k": "whatDidNotGoWell",
+					"label": "What did not go well?",
+					"t": "textarea",
+					"req": true,
+					"min": 10,
+					"max": 1500
+				},
+				{
+					"k": "improvementIdeas",
+					"label": "Improvement Ideas",
+					"t": "textarea",
+					"req": true,
+					"min": 10,
+					"max": 1500
+				},
+				{
+					"k": "overallMood",
+					"label": "Overall Mood",
+					"t": "fixed",
+					"opts": [
+						{
+							"k": "great",
+							"label": "Great"
+						},
+						{
+							"k": "good",
+							"label": "Good"
+						},
+						{
+							"k": "mixed",
+							"label": "Mixed"
+						},
+						{
+							"k": "poor",
+							"label": "Poor"
+						}
+					]
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["sprintName", "overallMood"],
+				"separator": " · ",
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "Engineering Platform Feedback",
+		"templateKey": "engineering-feedback",
+		"description": "Collect feedback from engineers about platform stability, tooling, and processes.",
+		"tags": ["engineering", "internal", "platform"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "team",
+					"label": "Team",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "backend",
+							"label": "Backend"
+						},
+						{
+							"k": "frontend",
+							"label": "Frontend"
+						},
+						{
+							"k": "platform",
+							"label": "Platform"
+						},
+						{
+							"k": "devops",
+							"label": "DevOps"
+						},
+						{
+							"k": "data",
+							"label": "Data"
+						},
+						{
+							"k": "other",
+							"label": "Other"
+						}
+					]
+				},
+				{
+					"k": "area",
+					"label": "Area",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "build_pipeline",
+							"label": "Build / CI Pipeline"
+						},
+						{
+							"k": "deployment",
+							"label": "Deployment"
+						},
+						{
+							"k": "infrastructure",
+							"label": "Infrastructure"
+						},
+						{
+							"k": "developer_experience",
+							"label": "Developer Experience"
+						},
+						{
+							"k": "monitoring",
+							"label": "Monitoring"
+						},
+						{
+							"k": "tooling",
+							"label": "Tooling"
+						},
+						{
+							"k": "other",
+							"label": "Other"
+						}
+					]
+				},
+				{
+					"k": "feedbackType",
+					"label": "Feedback Type",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "issue",
+							"label": "Issue"
+						},
+						{
+							"k": "improvement",
+							"label": "Improvement"
+						},
+						{
+							"k": "idea",
+							"label": "Idea"
+						},
+						{
+							"k": "question",
+							"label": "Question"
+						}
+					]
+				},
+				{
+					"k": "summary",
+					"label": "Summary",
+					"t": "textarea",
+					"req": true,
+					"min": 20,
+					"max": 2000
+				},
+				{
+					"k": "impact",
+					"label": "Impact",
+					"t": "fixed",
+					"opts": [
+						{
+							"k": "low",
+							"label": "Low"
+						},
+						{
+							"k": "medium",
+							"label": "Medium"
+						},
+						{
+							"k": "high",
+							"label": "High"
+						},
+						{
+							"k": "critical",
+							"label": "Critical"
+						}
+					]
+				},
+				{
+					"k": "blocksWork",
+					"label": "Does this block your work?",
+					"t": "bool"
+				},
+				{
+					"k": "suggestedFix",
+					"label": "Suggested Fix",
+					"t": "textarea",
+					"max": 1500
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["area", "feedbackType", "impact"],
+				"separator": " · ",
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "Incident Report",
+		"templateKey": "internal-incident-report",
+		"description": "Capture internal incidents with severity, timeline, and impact.",
+		"tags": ["incident", "internal", "ops"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "incidentTitle",
+					"label": "Incident Title",
+					"t": "text",
+					"req": true,
+					"min": 3,
+					"max": 200
+				},
+				{
+					"k": "incidentType",
+					"label": "Incident Type",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "outage",
+							"label": "Outage"
+						},
+						{
+							"k": "degradation",
+							"label": "Service Degradation"
+						},
+						{
+							"k": "security",
+							"label": "Security Incident"
+						},
+						{
+							"k": "data_issue",
+							"label": "Data Issue"
+						},
+						{
+							"k": "performance",
+							"label": "Performance Issue"
+						},
+						{
+							"k": "other",
+							"label": "Other"
+						}
+					]
+				},
+				{
+					"k": "severity",
+					"label": "Severity",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "sev1",
+							"label": "SEV1 - Critical"
+						},
+						{
+							"k": "sev2",
+							"label": "SEV2 - High"
+						},
+						{
+							"k": "sev3",
+							"label": "SEV3 - Medium"
+						},
+						{
+							"k": "sev4",
+							"label": "SEV4 - Low"
+						}
+					]
+				},
+				{
+					"k": "startTime",
+					"label": "Start Time",
+					"t": "date"
+				},
+				{
+					"k": "endTime",
+					"label": "End Time",
+					"t": "date"
+				},
+				{
+					"k": "affectedSystems",
+					"label": "Affected Systems",
+					"t": "text",
+					"max": 300
+				},
+				{
+					"k": "impactDescription",
+					"label": "Impact Description",
+					"t": "textarea",
+					"req": true,
+					"min": 20,
+					"max": 2000
+				},
+				{
+					"k": "rootCause",
+					"label": "Root Cause (if known)",
+					"t": "textarea",
+					"max": 1500
+				},
+				{
+					"k": "resolution",
+					"label": "Resolution",
+					"t": "textarea",
+					"max": 1500
+				},
+				{
+					"k": "followUpRequired",
+					"label": "Follow-up Required",
+					"t": "bool"
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["incidentTitle", "severity", "incidentType"],
+				"separator": " · ",
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "Process Improvement Suggestion",
+		"templateKey": "process-improvement",
+		"description": "Allow team members to suggest improvements to workflows and processes.",
+		"tags": ["process", "internal", "improvement"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "processArea",
+					"label": "Process Area",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "development",
+							"label": "Development"
+						},
+						{
+							"k": "deployment",
+							"label": "Deployment"
+						},
+						{
+							"k": "qa",
+							"label": "QA / Testing"
+						},
+						{
+							"k": "support",
+							"label": "Support"
+						},
+						{
+							"k": "sales",
+							"label": "Sales"
+						},
+						{
+							"k": "operations",
+							"label": "Operations"
+						},
+						{
+							"k": "other",
+							"label": "Other"
+						}
+					]
+				},
+				{
+					"k": "currentProcess",
+					"label": "Current Process",
+					"t": "textarea",
+					"req": true,
+					"min": 20,
+					"max": 2000
+				},
+				{
+					"k": "problem",
+					"label": "What is the problem?",
+					"t": "textarea",
+					"req": true,
+					"min": 20,
+					"max": 2000
+				},
+				{
+					"k": "suggestedChange",
+					"label": "Suggested Change",
+					"t": "textarea",
+					"req": true,
+					"min": 20,
+					"max": 2000
+				},
+				{
+					"k": "expectedBenefit",
+					"label": "Expected Benefit",
+					"t": "textarea",
+					"max": 1500
+				},
+				{
+					"k": "effortLevel",
+					"label": "Estimated Effort",
+					"t": "fixed",
+					"opts": [
+						{
+							"k": "low",
+							"label": "Low Effort"
+						},
+						{
+							"k": "medium",
+							"label": "Medium Effort"
+						},
+						{
+							"k": "high",
+							"label": "High Effort"
+						}
+					]
+				},
+				{
+					"k": "affectsMultipleTeams",
+					"label": "Affects Multiple Teams",
+					"t": "bool"
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["processArea", "effortLevel"],
+				"separator": " · ",
+				"fallbackFields": ["problem"],
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "Support Escalation Form",
+		"templateKey": "support-escalation",
+		"description": "Enable support teams to escalate issues to engineering or product teams.",
+		"tags": ["support", "internal", "escalation"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "ticketId",
+					"label": "Support Ticket ID",
+					"t": "text",
+					"req": true,
+					"min": 2,
+					"max": 100
+				},
+				{
+					"k": "customerName",
+					"label": "Customer Name",
+					"t": "text",
+					"max": 150
+				},
+				{
+					"k": "issueType",
+					"label": "Issue Type",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "bug",
+							"label": "Bug"
+						},
+						{
+							"k": "outage",
+							"label": "Outage"
+						},
+						{
+							"k": "billing",
+							"label": "Billing Issue"
+						},
+						{
+							"k": "account",
+							"label": "Account Issue"
+						},
+						{
+							"k": "feature_request",
+							"label": "Feature Request"
+						},
+						{
+							"k": "other",
+							"label": "Other"
+						}
+					]
+				},
+				{
+					"k": "priority",
+					"label": "Priority",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "low",
+							"label": "Low"
+						},
+						{
+							"k": "medium",
+							"label": "Medium"
+						},
+						{
+							"k": "high",
+							"label": "High"
+						},
+						{
+							"k": "urgent",
+							"label": "Urgent"
+						}
+					]
+				},
+				{
+					"k": "customerImpact",
+					"label": "Customer Impact",
+					"t": "fixed",
+					"opts": [
+						{
+							"k": "single_user",
+							"label": "Single User"
+						},
+						{
+							"k": "multiple_users",
+							"label": "Multiple Users"
+						},
+						{
+							"k": "all_users",
+							"label": "All Users"
+						}
+					]
+				},
+				{
+					"k": "issueSummary",
+					"label": "Issue Summary",
+					"t": "textarea",
+					"req": true,
+					"min": 20,
+					"max": 2000
+				},
+				{
+					"k": "stepsTaken",
+					"label": "Steps Already Taken",
+					"t": "textarea",
+					"max": 1500
+				},
+				{
+					"k": "needsEngineering",
+					"label": "Requires Engineering Support",
+					"t": "bool"
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["ticketId", "issueType", "priority"],
+				"separator": " · ",
+				"maxLength": 100
+			}
+		}
+	}
+]

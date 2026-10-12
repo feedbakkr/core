@@ -1,0 +1,24 @@
+{
+	"name": "feedbakkr-core-workspace",
+	"version": "0.0.0",
+	"private": true,
+	"description": "Workspace for @ai-food-focus/feedbakkr-core.",
+	"type": "module",
+	"scripts": {
+		"build": "pnpm -r build",
+		"typecheck": "pnpm -r typecheck",
+		"test": "pnpm -r test",
+		"lint": "biome check .",
+		"format": "biome format --write .",
+		"check:package": "pnpm -r check:package",
+		"verify": "biome check . && pnpm build && pnpm typecheck && pnpm test && pnpm check:package"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.5.15",
+		"typescript": "~6.0.3"
+	},
+	"engines": {
+		"node": ">=22"
+	},
+	"packageManager": "pnpm@11.25.0"
+}

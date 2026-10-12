@@ -1,0 +1,422 @@
+[
+	{
+		"title": "Generic Product Feedback",
+		"templateKey": "generic-product-feedback",
+		"description": "A reusable feedback form suitable across multiple apps or websites in a shared Feedbakkr workspace.",
+		"tags": ["feedback", "product", "general"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "feedbackType",
+					"label": "Feedback Type",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "idea",
+							"label": "Idea"
+						},
+						{
+							"k": "issue",
+							"label": "Issue"
+						},
+						{
+							"k": "question",
+							"label": "Question"
+						},
+						{
+							"k": "praise",
+							"label": "Praise"
+						},
+						{
+							"k": "other",
+							"label": "Other"
+						}
+					]
+				},
+				{
+					"k": "title",
+					"label": "Title",
+					"t": "text",
+					"req": true,
+					"min": 3,
+					"max": 200
+				},
+				{
+					"k": "message",
+					"label": "Message",
+					"t": "textarea",
+					"req": true,
+					"min": 10,
+					"max": 2000
+				},
+				{
+					"k": "email",
+					"label": "Email Address",
+					"t": "text",
+					"max": 200
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["feedbackType", "title"],
+				"separator": " · ",
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "Quick Issue Report",
+		"templateKey": "quick-issue-report",
+		"description": "A low-friction issue reporting form for portfolios and multi-project dashboards where speed matters more than detail.",
+		"tags": ["issues", "simple", "feedback"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "issueTitle",
+					"label": "Issue Title",
+					"t": "text",
+					"req": true,
+					"min": 3,
+					"max": 200
+				},
+				{
+					"k": "whereDidItHappen",
+					"label": "Where did it happen?",
+					"t": "text",
+					"max": 200
+				},
+				{
+					"k": "impact",
+					"label": "Impact",
+					"t": "fixed",
+					"opts": [
+						{
+							"k": "minor",
+							"label": "Minor"
+						},
+						{
+							"k": "annoying",
+							"label": "Annoying"
+						},
+						{
+							"k": "blocking",
+							"label": "Blocking"
+						}
+					]
+				},
+				{
+					"k": "details",
+					"label": "Details",
+					"t": "textarea",
+					"req": true,
+					"min": 10,
+					"max": 1500
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["issueTitle", "impact"],
+				"separator": " · ",
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "Idea Submission Box",
+		"templateKey": "idea-submission",
+		"description": "Collect user ideas and suggestions in a lightweight, structured format.",
+		"tags": ["ideas", "feedback", "product"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "ideaTitle",
+					"label": "Idea Title",
+					"t": "text",
+					"req": true,
+					"min": 3,
+					"max": 200
+				},
+				{
+					"k": "category",
+					"label": "Category",
+					"t": "fixed",
+					"opts": [
+						{
+							"k": "feature",
+							"label": "New Feature"
+						},
+						{
+							"k": "improvement",
+							"label": "Improvement"
+						},
+						{
+							"k": "automation",
+							"label": "Automation"
+						},
+						{
+							"k": "ux",
+							"label": "User Experience"
+						},
+						{
+							"k": "integration",
+							"label": "Integration"
+						},
+						{
+							"k": "other",
+							"label": "Other"
+						}
+					]
+				},
+				{
+					"k": "ideaDescription",
+					"label": "Describe your idea",
+					"t": "textarea",
+					"req": true,
+					"min": 20,
+					"max": 2000
+				},
+				{
+					"k": "problemSolved",
+					"label": "What problem does this solve?",
+					"t": "textarea",
+					"max": 1500
+				},
+				{
+					"k": "importance",
+					"label": "How important is this?",
+					"t": "fixed",
+					"opts": [
+						{
+							"k": "nice_to_have",
+							"label": "Nice to Have"
+						},
+						{
+							"k": "important",
+							"label": "Important"
+						},
+						{
+							"k": "critical",
+							"label": "Critical"
+						}
+					]
+				},
+				{
+					"k": "contactEmail",
+					"label": "Contact Email",
+					"t": "text",
+					"max": 200
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["ideaTitle", "category"],
+				"separator": " · ",
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "User Sentiment Capture",
+		"templateKey": "user-sentiment",
+		"description": "Capture simple sentiment with optional comments for quick insights.",
+		"tags": ["sentiment", "ux", "feedback"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "sentiment",
+					"label": "How was your experience?",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "very_positive",
+							"label": "Very Positive"
+						},
+						{
+							"k": "positive",
+							"label": "Positive"
+						},
+						{
+							"k": "neutral",
+							"label": "Neutral"
+						},
+						{
+							"k": "negative",
+							"label": "Negative"
+						},
+						{
+							"k": "very_negative",
+							"label": "Very Negative"
+						}
+					]
+				},
+				{
+					"k": "area",
+					"label": "Area",
+					"t": "fixed",
+					"opts": [
+						{
+							"k": "onboarding",
+							"label": "Onboarding"
+						},
+						{
+							"k": "navigation",
+							"label": "Navigation"
+						},
+						{
+							"k": "features",
+							"label": "Features"
+						},
+						{
+							"k": "performance",
+							"label": "Performance"
+						},
+						{
+							"k": "support",
+							"label": "Support"
+						},
+						{
+							"k": "other",
+							"label": "Other"
+						}
+					]
+				},
+				{
+					"k": "comment",
+					"label": "Additional Comments",
+					"t": "textarea",
+					"max": 1000
+				},
+				{
+					"k": "wouldReturn",
+					"label": "Would you return?",
+					"t": "fixed",
+					"opts": [
+						{
+							"k": "yes",
+							"label": "Yes"
+						},
+						{
+							"k": "maybe",
+							"label": "Maybe"
+						},
+						{
+							"k": "no",
+							"label": "No"
+						}
+					]
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["sentiment", "area"],
+				"separator": " · ",
+				"fallbackFields": ["comment"],
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "Public Feedback Board Submission",
+		"templateKey": "public-feedback-board",
+		"description": "Collect submissions intended for public feedback boards or roadmap tools.",
+		"tags": ["public", "feedback", "community"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "title",
+					"label": "Title",
+					"t": "text",
+					"req": true,
+					"min": 3,
+					"max": 200
+				},
+				{
+					"k": "submissionType",
+					"label": "Submission Type",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "feature_request",
+							"label": "Feature Request"
+						},
+						{
+							"k": "improvement",
+							"label": "Improvement"
+						},
+						{
+							"k": "bug",
+							"label": "Bug"
+						},
+						{
+							"k": "question",
+							"label": "Question"
+						},
+						{
+							"k": "other",
+							"label": "Other"
+						}
+					]
+				},
+				{
+					"k": "description",
+					"label": "Description",
+					"t": "textarea",
+					"req": true,
+					"min": 20,
+					"max": 2000
+				},
+				{
+					"k": "useCase",
+					"label": "Use Case",
+					"t": "textarea",
+					"max": 1500
+				},
+				{
+					"k": "impact",
+					"label": "Impact",
+					"t": "fixed",
+					"opts": [
+						{
+							"k": "low",
+							"label": "Low"
+						},
+						{
+							"k": "medium",
+							"label": "Medium"
+						},
+						{
+							"k": "high",
+							"label": "High"
+						}
+					]
+				},
+				{
+					"k": "contactName",
+					"label": "Your Name",
+					"t": "text",
+					"max": 100
+				},
+				{
+					"k": "contactEmail",
+					"label": "Email Address",
+					"t": "text",
+					"max": 200
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["title", "submissionType", "impact"],
+				"separator": " · ",
+				"maxLength": 100
+			}
+		}
+	}
+]

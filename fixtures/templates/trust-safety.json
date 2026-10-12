@@ -1,0 +1,167 @@
+[
+	{
+		"title": "Report Abuse",
+		"templateKey": "report-abuse",
+		"description": "Allow users to report spam, phishing, offensive content, or impersonation on hosted forms or public content.",
+		"tags": ["trust", "safety", "moderation", "abuse"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "category",
+					"label": "What type of issue are you reporting?",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{ "k": "spam", "label": "Spam" },
+						{ "k": "phishing", "label": "Phishing or scam" },
+						{ "k": "offensive_content", "label": "Offensive or inappropriate content" },
+						{ "k": "impersonation", "label": "Impersonation" },
+						{ "k": "privacy_concern", "label": "Privacy concern" },
+						{ "k": "other", "label": "Other" }
+					]
+				},
+				{
+					"k": "details",
+					"label": "Please describe the issue",
+					"t": "textarea",
+					"req": true,
+					"min": 10,
+					"max": 2000
+				},
+				{
+					"k": "formUrl",
+					"label": "URL of the form or page (if known)",
+					"t": "text",
+					"max": 500
+				},
+				{
+					"k": "email",
+					"label": "Your email (optional, for follow-up)",
+					"t": "text",
+					"max": 200
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["category", "details"],
+				"separator": " · ",
+				"maxLength": 100,
+				"fallbackFields": ["category"]
+			}
+		}
+	},
+	{
+		"title": "Flag Content Issue",
+		"templateKey": "flag-content-issue",
+		"description": "Let users flag problems with published content — outdated information, broken links, offensive material, or factual errors.",
+		"tags": ["trust", "content", "moderation", "documentation"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "issueType",
+					"label": "What's wrong with this content?",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{ "k": "outdated", "label": "Outdated or incorrect information" },
+						{ "k": "broken_link", "label": "Broken link or missing resource" },
+						{ "k": "offensive", "label": "Offensive or inappropriate" },
+						{ "k": "misleading", "label": "Misleading or confusing" },
+						{ "k": "typo", "label": "Typo or grammatical error" },
+						{ "k": "other", "label": "Other" }
+					]
+				},
+				{
+					"k": "pageUrl",
+					"label": "Page URL or location",
+					"t": "text",
+					"max": 500
+				},
+				{
+					"k": "details",
+					"label": "Describe the issue",
+					"t": "textarea",
+					"req": true,
+					"min": 10,
+					"max": 1500
+				},
+				{
+					"k": "suggestedFix",
+					"label": "Suggested correction (optional)",
+					"t": "textarea",
+					"max": 1000
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["issueType", "details"],
+				"separator": " · ",
+				"maxLength": 100,
+				"fallbackFields": ["issueType"]
+			}
+		}
+	},
+	{
+		"title": "DMCA / Copyright Takedown Request",
+		"templateKey": "dmca-takedown-request",
+		"description": "Collect structured copyright takedown requests with the required information for DMCA compliance.",
+		"tags": ["trust", "legal", "copyright", "moderation"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "fullName",
+					"label": "Full legal name",
+					"t": "text",
+					"req": true,
+					"min": 2,
+					"max": 150
+				},
+				{
+					"k": "email",
+					"label": "Contact email",
+					"t": "text",
+					"req": true,
+					"min": 5,
+					"max": 200
+				},
+				{
+					"k": "copyrightOwner",
+					"label": "Copyright owner (if different from you)",
+					"t": "text",
+					"max": 200
+				},
+				{
+					"k": "infringingUrl",
+					"label": "URL of the infringing content",
+					"t": "text",
+					"req": true,
+					"max": 500
+				},
+				{
+					"k": "originalWorkDescription",
+					"label": "Description of the original copyrighted work",
+					"t": "textarea",
+					"req": true,
+					"min": 20,
+					"max": 2000
+				},
+				{
+					"k": "goodFaithStatement",
+					"label": "I have a good faith belief that use of the material is not authorised by the copyright owner",
+					"t": "bool",
+					"req": true
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["fullName", "infringingUrl"],
+				"separator": " · ",
+				"maxLength": 100,
+				"fallbackFields": ["fullName"]
+			}
+		}
+	}
+]

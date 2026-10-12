@@ -1,0 +1,74 @@
+name: Release
+
+# Publishes @ai-food-focus/feedbakkr-core to GitHub Packages when a version
+# tag is pushed. The tag must match packages/core/package.json:
+#
+#   v0.1.0          -> published under the `latest` dist-tag
+#   v0.2.0-next.1   -> published under the `next` dist-tag
+#
+# Auth is the workflow's own GITHUB_TOKEN with `packages: write`. The package
+# lives in the ai-food-focus namespace, the same organisation as this repo,
+# so no personal token is needed.
+
+on:
+  push:
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: ".nvmrc"
+          cache: pnpm
+
+      - name: Check the tag matches the package version
+        run: |
+          version=$(node -p "require('./packages/core/package.json').version")
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match package version $version"
+            exit 1
+          fi
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify
+        run: pnpm verify
+
+      - name: Audit (high+)
+        run: pnpm audit --audit-level high
+
+      # Logs the tarball's file list as a last check against shipping a stray
+      # file, and fails if a workspace: specifier survived packing.
+      - name: Pack
+        working-directory: packages/core
+        run: |
+          pnpm pack --pack-destination "$RUNNER_TEMP"
+          tgz=$(ls "$RUNNER_TEMP"/*.tgz)
+          tar -tzf "$tgz"
+          if tar -xzOf "$tgz" package/package.json | grep -q '"workspace:'; then
+            echo "::error::package.json still contains a workspace: dependency"
+            exit 1
+          fi
+
+      - name: Publish
+        working-directory: packages/core
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" >> ~/.npmrc
+          case "$GITHUB_REF_NAME" in
+            *-*) tag=next ;;
+            *) tag=latest ;;
+          esac
+          pnpm publish --no-git-checks --tag "$tag"

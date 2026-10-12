@@ -1,0 +1,727 @@
+[
+	{
+		"title": "SaaS Demo Request",
+		"templateKey": "saas-demo-request",
+		"description": "Capture qualified demo requests from prospective customers with details about their company, team size, and intended use case.",
+		"tags": ["saas", "sales", "demo"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "fullName",
+					"label": "Full Name",
+					"t": "text",
+					"req": true,
+					"min": 2,
+					"max": 100
+				},
+				{
+					"k": "workEmail",
+					"label": "Work Email",
+					"t": "text",
+					"req": true,
+					"min": 5,
+					"max": 200
+				},
+				{
+					"k": "companyName",
+					"label": "Company Name",
+					"t": "text",
+					"req": true,
+					"min": 2,
+					"max": 150
+				},
+				{
+					"k": "jobTitle",
+					"label": "Job Title",
+					"t": "text",
+					"max": 100
+				},
+				{
+					"k": "teamSize",
+					"label": "Team Size",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "1_5",
+							"label": "1-5"
+						},
+						{
+							"k": "6_20",
+							"label": "6-20"
+						},
+						{
+							"k": "21_50",
+							"label": "21-50"
+						},
+						{
+							"k": "51_200",
+							"label": "51-200"
+						},
+						{
+							"k": "201_plus",
+							"label": "201+"
+						}
+					]
+				},
+				{
+					"k": "useCase",
+					"label": "Primary Use Case",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "customer_support",
+							"label": "Customer Support"
+						},
+						{
+							"k": "product_feedback",
+							"label": "Product Feedback"
+						},
+						{
+							"k": "bug_reports",
+							"label": "Bug Reports"
+						},
+						{
+							"k": "feature_requests",
+							"label": "Feature Requests"
+						},
+						{
+							"k": "multi_project",
+							"label": "Multi-Project Inbox"
+						},
+						{
+							"k": "other",
+							"label": "Other"
+						}
+					]
+				},
+				{
+					"k": "message",
+					"label": "What are you looking for?",
+					"t": "textarea",
+					"req": true,
+					"min": 20,
+					"max": 2000
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["companyName", "useCase"],
+				"separator": " · ",
+				"fallbackFields": ["fullName"],
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "Request a Quote",
+		"templateKey": "request-a-quote",
+		"description": "Collect structured quote requests for agencies, freelancers, and service businesses with scope, budget, and timeline details.",
+		"tags": ["services", "quote", "contact"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "contactName",
+					"label": "Contact Name",
+					"t": "text",
+					"req": true,
+					"min": 2,
+					"max": 100
+				},
+				{
+					"k": "email",
+					"label": "Email Address",
+					"t": "text",
+					"req": true,
+					"min": 5,
+					"max": 200
+				},
+				{
+					"k": "companyName",
+					"label": "Company Name",
+					"t": "text",
+					"max": 150
+				},
+				{
+					"k": "serviceType",
+					"label": "Service Type",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "website",
+							"label": "Website"
+						},
+						{
+							"k": "branding",
+							"label": "Branding"
+						},
+						{
+							"k": "marketing",
+							"label": "Marketing"
+						},
+						{
+							"k": "consulting",
+							"label": "Consulting"
+						},
+						{
+							"k": "development",
+							"label": "Development"
+						},
+						{
+							"k": "other",
+							"label": "Other"
+						}
+					]
+				},
+				{
+					"k": "budgetRange",
+					"label": "Budget Range",
+					"t": "fixed",
+					"opts": [
+						{
+							"k": "under_1000",
+							"label": "Under £1,000"
+						},
+						{
+							"k": "1000_5000",
+							"label": "£1,000 - £5,000"
+						},
+						{
+							"k": "5000_10000",
+							"label": "£5,000 - £10,000"
+						},
+						{
+							"k": "10000_plus",
+							"label": "£10,000+"
+						}
+					]
+				},
+				{
+					"k": "targetStartDate",
+					"label": "Target Start Date",
+					"t": "date"
+				},
+				{
+					"k": "projectSummary",
+					"label": "Project Summary",
+					"t": "textarea",
+					"req": true,
+					"min": 20,
+					"max": 2500
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["contactName", "serviceType"],
+				"separator": " · ",
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "Sales Enquiry with Qualification",
+		"templateKey": "sales-enquiry-qualification",
+		"description": "Structured sales contact form that captures budget, timeline, and intent to help teams prioritise inbound opportunities.",
+		"tags": ["sales", "contact", "leads"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "fullName",
+					"label": "Full Name",
+					"t": "text",
+					"req": true,
+					"min": 2,
+					"max": 100
+				},
+				{
+					"k": "workEmail",
+					"label": "Work Email",
+					"t": "text",
+					"req": true,
+					"min": 5,
+					"max": 200
+				},
+				{
+					"k": "companyName",
+					"label": "Company Name",
+					"t": "text",
+					"req": true,
+					"min": 2,
+					"max": 150
+				},
+				{
+					"k": "jobTitle",
+					"label": "Job Title",
+					"t": "text",
+					"max": 100
+				},
+				{
+					"k": "enquiryType",
+					"label": "Enquiry Type",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "demo",
+							"label": "Book a Demo"
+						},
+						{
+							"k": "pricing",
+							"label": "Pricing Question"
+						},
+						{
+							"k": "enterprise",
+							"label": "Enterprise Enquiry"
+						},
+						{
+							"k": "procurement",
+							"label": "Procurement / Vendor Review"
+						},
+						{
+							"k": "general_sales",
+							"label": "General Sales Enquiry"
+						}
+					]
+				},
+				{
+					"k": "teamSize",
+					"label": "Team Size",
+					"t": "fixed",
+					"opts": [
+						{
+							"k": "1_5",
+							"label": "1-5"
+						},
+						{
+							"k": "6_20",
+							"label": "6-20"
+						},
+						{
+							"k": "21_50",
+							"label": "21-50"
+						},
+						{
+							"k": "51_200",
+							"label": "51-200"
+						},
+						{
+							"k": "201_plus",
+							"label": "201+"
+						}
+					]
+				},
+				{
+					"k": "budgetRange",
+					"label": "Budget Range",
+					"t": "fixed",
+					"opts": [
+						{
+							"k": "under_1000",
+							"label": "Under £1,000"
+						},
+						{
+							"k": "1000_5000",
+							"label": "£1,000 - £5,000"
+						},
+						{
+							"k": "5000_10000",
+							"label": "£5,000 - £10,000"
+						},
+						{
+							"k": "10000_25000",
+							"label": "£10,000 - £25,000"
+						},
+						{
+							"k": "25000_plus",
+							"label": "£25,000+"
+						}
+					]
+				},
+				{
+					"k": "timeline",
+					"label": "Expected Timeline",
+					"t": "fixed",
+					"opts": [
+						{
+							"k": "asap",
+							"label": "ASAP"
+						},
+						{
+							"k": "this_month",
+							"label": "This Month"
+						},
+						{
+							"k": "next_quarter",
+							"label": "Next Quarter"
+						},
+						{
+							"k": "researching",
+							"label": "Just Researching"
+						}
+					]
+				},
+				{
+					"k": "message",
+					"label": "How can we help?",
+					"t": "textarea",
+					"req": true,
+					"min": 20,
+					"max": 2000
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["companyName", "enquiryType"],
+				"separator": " · ",
+				"fallbackFields": ["fullName"],
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "Partnership & Collaboration Enquiry",
+		"templateKey": "partnership-enquiry",
+		"description": "Collect partnership proposals with details on company, type of collaboration, and expected outcomes.",
+		"tags": ["partnership", "business", "growth"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "contactName",
+					"label": "Contact Name",
+					"t": "text",
+					"req": true,
+					"min": 2,
+					"max": 100
+				},
+				{
+					"k": "email",
+					"label": "Email Address",
+					"t": "text",
+					"req": true,
+					"min": 5,
+					"max": 200
+				},
+				{
+					"k": "companyName",
+					"label": "Company Name",
+					"t": "text",
+					"req": true,
+					"min": 2,
+					"max": 150
+				},
+				{
+					"k": "website",
+					"label": "Website",
+					"t": "text",
+					"max": 300
+				},
+				{
+					"k": "partnershipType",
+					"label": "Partnership Type",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "referral",
+							"label": "Referral Partnership"
+						},
+						{
+							"k": "reseller",
+							"label": "Reseller"
+						},
+						{
+							"k": "integration",
+							"label": "Integration Partner"
+						},
+						{
+							"k": "marketing",
+							"label": "Marketing Collaboration"
+						},
+						{
+							"k": "technology",
+							"label": "Technology Partnership"
+						},
+						{
+							"k": "other",
+							"label": "Other"
+						}
+					]
+				},
+				{
+					"k": "audienceType",
+					"label": "Primary Audience",
+					"t": "fixed",
+					"opts": [
+						{
+							"k": "startups",
+							"label": "Startups"
+						},
+						{
+							"k": "agencies",
+							"label": "Agencies"
+						},
+						{
+							"k": "smb",
+							"label": "SMBs"
+						},
+						{
+							"k": "enterprise",
+							"label": "Enterprise"
+						},
+						{
+							"k": "developers",
+							"label": "Developers"
+						},
+						{
+							"k": "other",
+							"label": "Other"
+						}
+					]
+				},
+				{
+					"k": "proposalSummary",
+					"label": "Proposal Summary",
+					"t": "textarea",
+					"req": true,
+					"min": 20,
+					"max": 2000
+				},
+				{
+					"k": "expectedOutcome",
+					"label": "What outcome are you looking for?",
+					"t": "textarea",
+					"max": 1500
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["companyName", "partnershipType"],
+				"separator": " · ",
+				"fallbackFields": ["contactName"],
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "Press & Media Enquiry",
+		"templateKey": "press-media-enquiry",
+		"description": "A focused form for journalists and media contacts to request interviews, quotes, or press materials.",
+		"tags": ["media", "press", "pr"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "fullName",
+					"label": "Full Name",
+					"t": "text",
+					"req": true,
+					"min": 2,
+					"max": 100
+				},
+				{
+					"k": "email",
+					"label": "Email Address",
+					"t": "text",
+					"req": true,
+					"min": 5,
+					"max": 200
+				},
+				{
+					"k": "publicationName",
+					"label": "Publication or Outlet",
+					"t": "text",
+					"req": true,
+					"min": 2,
+					"max": 150
+				},
+				{
+					"k": "role",
+					"label": "Role",
+					"t": "text",
+					"max": 100
+				},
+				{
+					"k": "requestType",
+					"label": "Request Type",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "interview",
+							"label": "Interview Request"
+						},
+						{
+							"k": "comment",
+							"label": "Comment / Quote"
+						},
+						{
+							"k": "press_pack",
+							"label": "Press Pack"
+						},
+						{
+							"k": "product_info",
+							"label": "Product Information"
+						},
+						{
+							"k": "event_media",
+							"label": "Event / Launch Coverage"
+						},
+						{
+							"k": "other",
+							"label": "Other"
+						}
+					]
+				},
+				{
+					"k": "deadlineDate",
+					"label": "Deadline Date",
+					"t": "date"
+				},
+				{
+					"k": "topic",
+					"label": "Topic or Story Angle",
+					"t": "text",
+					"max": 200
+				},
+				{
+					"k": "message",
+					"label": "Request Details",
+					"t": "textarea",
+					"req": true,
+					"min": 20,
+					"max": 2000
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["publicationName", "requestType"],
+				"separator": " · ",
+				"fallbackFields": ["fullName"],
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "Careers Enquiry (Pre-Application)",
+		"templateKey": "careers-enquiry",
+		"description": "Lightweight careers form for candidates to express interest before a full application process.",
+		"tags": ["careers", "hiring", "hr"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "fullName",
+					"label": "Full Name",
+					"t": "text",
+					"req": true,
+					"min": 2,
+					"max": 100
+				},
+				{
+					"k": "email",
+					"label": "Email Address",
+					"t": "text",
+					"req": true,
+					"min": 5,
+					"max": 200
+				},
+				{
+					"k": "location",
+					"label": "Location",
+					"t": "text",
+					"max": 100
+				},
+				{
+					"k": "roleInterest",
+					"label": "Role of Interest",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "engineering",
+							"label": "Engineering"
+						},
+						{
+							"k": "product",
+							"label": "Product"
+						},
+						{
+							"k": "design",
+							"label": "Design"
+						},
+						{
+							"k": "marketing",
+							"label": "Marketing"
+						},
+						{
+							"k": "operations",
+							"label": "Operations"
+						},
+						{
+							"k": "other",
+							"label": "Other"
+						}
+					]
+				},
+				{
+					"k": "experienceLevel",
+					"label": "Experience Level",
+					"t": "fixed",
+					"opts": [
+						{
+							"k": "junior",
+							"label": "Junior"
+						},
+						{
+							"k": "mid",
+							"label": "Mid-Level"
+						},
+						{
+							"k": "senior",
+							"label": "Senior"
+						},
+						{
+							"k": "lead",
+							"label": "Lead"
+						},
+						{
+							"k": "contract",
+							"label": "Contract / Freelance"
+						}
+					]
+				},
+				{
+					"k": "portfolioUrl",
+					"label": "Portfolio or LinkedIn URL",
+					"t": "text",
+					"max": 300
+				},
+				{
+					"k": "whyInterested",
+					"label": "Why are you interested?",
+					"t": "textarea",
+					"req": true,
+					"min": 20,
+					"max": 1500
+				},
+				{
+					"k": "availableToStart",
+					"label": "Available to Start",
+					"t": "date"
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["fullName", "roleInterest"],
+				"separator": " · ",
+				"maxLength": 100
+			}
+		}
+	}
+]

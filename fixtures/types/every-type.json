@@ -1,0 +1,49 @@
+{
+	"v": 1,
+	"title": "Every field type",
+	"desc": "One field per type, with the limits each type supports. The marketplace templates never use email, url, phone, integer, daterange or markdown, so this schema covers them.",
+	"fields": [
+		{ "k": "name", "label": "Name", "t": "text", "req": true, "min": 2, "max": 80 },
+		{ "k": "story", "label": "Story", "t": "textarea", "min": 10, "max": 2000 },
+		{ "k": "notes", "label": "Notes", "t": "markdown", "max": 5000 },
+		{ "k": "email", "label": "Email", "t": "email", "req": true, "max": 200 },
+		{ "k": "website", "label": "Website", "t": "url" },
+		{ "k": "phone", "label": "Phone", "t": "phone", "max": 30 },
+		{ "k": "visitDate", "label": "Visit date", "t": "date", "min": "2020-01-01", "max": "today" },
+		{ "k": "meetingAt", "label": "Meeting", "t": "datetime", "min": "now" },
+		{ "k": "openAt", "label": "Opening time", "t": "time", "min": "08:00", "max": "18:00" },
+		{ "k": "stay", "label": "Stay", "t": "daterange", "minSpanDays": 1, "maxSpanDays": 14 },
+		{ "k": "agree", "label": "I agree", "t": "bool", "req": true },
+		{ "k": "budget", "label": "Budget", "t": "number", "min": 0, "max": 10000.5 },
+		{ "k": "people", "label": "People", "t": "integer", "min": 1, "max": 20, "default": 2 },
+		{
+			"k": "topic",
+			"label": "Topic",
+			"t": "fixed",
+			"req": true,
+			"opts": [{ "k": "sales", "label": "Sales" }, { "k": "support", "label": "Support" }, { "k": "other" }],
+			"default": "sales"
+		},
+		{
+			"k": "links",
+			"label": "Links",
+			"t": "dynlist",
+			"maxItems": 5,
+			"item": { "k": "link", "label": "Link", "t": "url" }
+		},
+		{
+			"k": "sizes",
+			"label": "Sizes",
+			"t": "dynlist",
+			"item": {
+				"k": "size",
+				"label": "Size",
+				"t": "fixed",
+				"opts": [{ "k": "s", "label": "Small" }, { "k": "l", "label": "Large" }]
+			}
+		},
+		{ "k": "ref", "label": "Reference", "t": "text", "hidden": true, "default": "web" },
+		{ "k": "secret", "label": "Account number", "t": "text", "sensitive": true, "meta": "Never shown in exports" }
+	],
+	"preview": { "mode": "custom", "fields": ["name", "topic"], "separator": " · ", "maxLength": 80, "prefix": "From " }
+}

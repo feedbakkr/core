@@ -1,0 +1,664 @@
+[
+	{
+		"title": "Simple Feature Request",
+		"templateKey": "simple-feature-request",
+		"description": "Collect feature ideas from users with a clear title, problem statement, and expected benefit.",
+		"tags": ["features", "product", "ideas"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "title",
+					"label": "Feature Title",
+					"t": "text",
+					"req": true,
+					"min": 3,
+					"max": 200
+				},
+				{
+					"k": "priority",
+					"label": "Priority",
+					"t": "fixed",
+					"opts": [
+						{
+							"k": "nice_to_have",
+							"label": "Nice to Have"
+						},
+						{
+							"k": "important",
+							"label": "Important"
+						},
+						{
+							"k": "critical",
+							"label": "Critical"
+						}
+					]
+				},
+				{
+					"k": "problem",
+					"label": "What problem are you trying to solve?",
+					"t": "textarea",
+					"req": true,
+					"min": 20,
+					"max": 2000
+				},
+				{
+					"k": "suggestion",
+					"label": "What would you like to see?",
+					"t": "textarea",
+					"req": true,
+					"min": 20,
+					"max": 2000
+				},
+				{
+					"k": "expectedBenefit",
+					"label": "Expected Benefit",
+					"t": "textarea",
+					"max": 1500
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["title", "priority"],
+				"separator": " · ",
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "Integration Request",
+		"templateKey": "integration-request",
+		"description": "Capture requests for new integrations with details about the target platform, use case, and business need.",
+		"tags": ["integration", "product", "b2b"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "integrationName",
+					"label": "Integration Name",
+					"t": "text",
+					"req": true,
+					"min": 2,
+					"max": 150
+				},
+				{
+					"k": "integrationType",
+					"label": "Integration Type",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "crm",
+							"label": "CRM"
+						},
+						{
+							"k": "helpdesk",
+							"label": "Helpdesk"
+						},
+						{
+							"k": "payments",
+							"label": "Payments"
+						},
+						{
+							"k": "analytics",
+							"label": "Analytics"
+						},
+						{
+							"k": "automation",
+							"label": "Automation"
+						},
+						{
+							"k": "other",
+							"label": "Other"
+						}
+					]
+				},
+				{
+					"k": "howYouUseIt",
+					"label": "How do you use this tool today?",
+					"t": "textarea",
+					"req": true,
+					"min": 20,
+					"max": 2000
+				},
+				{
+					"k": "whyItMatters",
+					"label": "Why is this integration important?",
+					"t": "textarea",
+					"req": true,
+					"min": 20,
+					"max": 2000
+				},
+				{
+					"k": "urgency",
+					"label": "Urgency",
+					"t": "fixed",
+					"opts": [
+						{
+							"k": "low",
+							"label": "Low"
+						},
+						{
+							"k": "medium",
+							"label": "Medium"
+						},
+						{
+							"k": "high",
+							"label": "High"
+						}
+					]
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["integrationName", "integrationType"],
+				"separator": " · ",
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "Product Improvement Suggestion",
+		"templateKey": "product-improvement",
+		"description": "Capture improvement suggestions tied to existing features or workflows.",
+		"tags": ["product", "feedback", "ux"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "featureArea",
+					"label": "Feature or Workflow Area",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "onboarding",
+							"label": "Onboarding"
+						},
+						{
+							"k": "dashboard",
+							"label": "Dashboard"
+						},
+						{
+							"k": "navigation",
+							"label": "Navigation"
+						},
+						{
+							"k": "notifications",
+							"label": "Notifications"
+						},
+						{
+							"k": "forms",
+							"label": "Forms"
+						},
+						{
+							"k": "reporting",
+							"label": "Reporting"
+						},
+						{
+							"k": "settings",
+							"label": "Settings"
+						},
+						{
+							"k": "other",
+							"label": "Other"
+						}
+					]
+				},
+				{
+					"k": "currentPainPoint",
+					"label": "Current Pain Point",
+					"t": "textarea",
+					"req": true,
+					"min": 20,
+					"max": 2000
+				},
+				{
+					"k": "suggestedImprovement",
+					"label": "Suggested Improvement",
+					"t": "textarea",
+					"req": true,
+					"min": 20,
+					"max": 2000
+				},
+				{
+					"k": "expectedBenefit",
+					"label": "Expected Benefit",
+					"t": "textarea",
+					"max": 1500
+				},
+				{
+					"k": "impactLevel",
+					"label": "Impact Level",
+					"t": "fixed",
+					"opts": [
+						{
+							"k": "small",
+							"label": "Small Improvement"
+						},
+						{
+							"k": "moderate",
+							"label": "Moderate Improvement"
+						},
+						{
+							"k": "major",
+							"label": "Major Improvement"
+						},
+						{
+							"k": "transformational",
+							"label": "Transformational"
+						}
+					]
+				},
+				{
+					"k": "affectsDailyWork",
+					"label": "Does this affect your regular workflow?",
+					"t": "bool"
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["featureArea", "impactLevel"],
+				"separator": " · ",
+				"fallbackFields": ["currentPainPoint"],
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "Feature Voting Submission",
+		"templateKey": "feature-voting-submission",
+		"description": "Structured submission for features that can later be prioritised or voted on.",
+		"tags": ["features", "voting", "community"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "featureTitle",
+					"label": "Feature Title",
+					"t": "text",
+					"req": true,
+					"min": 3,
+					"max": 200
+				},
+				{
+					"k": "featureCategory",
+					"label": "Feature Category",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "ux",
+							"label": "User Experience"
+						},
+						{
+							"k": "automation",
+							"label": "Automation"
+						},
+						{
+							"k": "integrations",
+							"label": "Integrations"
+						},
+						{
+							"k": "reporting",
+							"label": "Reporting"
+						},
+						{
+							"k": "collaboration",
+							"label": "Collaboration"
+						},
+						{
+							"k": "developer_tools",
+							"label": "Developer Tools"
+						},
+						{
+							"k": "other",
+							"label": "Other"
+						}
+					]
+				},
+				{
+					"k": "problemStatement",
+					"label": "What problem would this solve?",
+					"t": "textarea",
+					"req": true,
+					"min": 20,
+					"max": 2000
+				},
+				{
+					"k": "proposedSolution",
+					"label": "What should the feature do?",
+					"t": "textarea",
+					"req": true,
+					"min": 20,
+					"max": 2000
+				},
+				{
+					"k": "whoBenefits",
+					"label": "Who would benefit most?",
+					"t": "fixed",
+					"opts": [
+						{
+							"k": "all_users",
+							"label": "All Users"
+						},
+						{
+							"k": "new_users",
+							"label": "New Users"
+						},
+						{
+							"k": "power_users",
+							"label": "Power Users"
+						},
+						{
+							"k": "admins",
+							"label": "Admins"
+						},
+						{
+							"k": "developers",
+							"label": "Developers"
+						},
+						{
+							"k": "teams",
+							"label": "Teams"
+						}
+					]
+				},
+				{
+					"k": "importance",
+					"label": "How important is this?",
+					"t": "fixed",
+					"opts": [
+						{
+							"k": "nice_to_have",
+							"label": "Nice to Have"
+						},
+						{
+							"k": "important",
+							"label": "Important"
+						},
+						{
+							"k": "very_important",
+							"label": "Very Important"
+						},
+						{
+							"k": "critical",
+							"label": "Critical"
+						}
+					]
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["featureTitle", "featureCategory"],
+				"separator": " · ",
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "API Feature Request",
+		"templateKey": "api-feature-request",
+		"description": "Developer-focused feature request capturing endpoints, use cases, and technical requirements.",
+		"tags": ["api", "developer", "features"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "requestTitle",
+					"label": "Request Title",
+					"t": "text",
+					"req": true,
+					"min": 3,
+					"max": 200
+				},
+				{
+					"k": "apiArea",
+					"label": "API Area",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "auth",
+							"label": "Authentication"
+						},
+						{
+							"k": "messages",
+							"label": "Messages"
+						},
+						{
+							"k": "channels",
+							"label": "Channels"
+						},
+						{
+							"k": "webhooks",
+							"label": "Webhooks"
+						},
+						{
+							"k": "templates",
+							"label": "Templates"
+						},
+						{
+							"k": "sdk",
+							"label": "SDK / Client Libraries"
+						},
+						{
+							"k": "other",
+							"label": "Other"
+						}
+					]
+				},
+				{
+					"k": "relatedEndpoint",
+					"label": "Related Endpoint or Resource",
+					"t": "text",
+					"max": 300
+				},
+				{
+					"k": "currentLimitation",
+					"label": "Current Limitation",
+					"t": "textarea",
+					"req": true,
+					"min": 20,
+					"max": 2000
+				},
+				{
+					"k": "requestedCapability",
+					"label": "Requested Capability",
+					"t": "textarea",
+					"req": true,
+					"min": 20,
+					"max": 2000
+				},
+				{
+					"k": "technicalUseCase",
+					"label": "Technical Use Case",
+					"t": "textarea",
+					"req": true,
+					"min": 20,
+					"max": 2000
+				},
+				{
+					"k": "workaroundExists",
+					"label": "Do you currently have a workaround?",
+					"t": "bool"
+				},
+				{
+					"k": "priority",
+					"label": "Priority",
+					"t": "fixed",
+					"opts": [
+						{
+							"k": "low",
+							"label": "Low"
+						},
+						{
+							"k": "medium",
+							"label": "Medium"
+						},
+						{
+							"k": "high",
+							"label": "High"
+						},
+						{
+							"k": "critical",
+							"label": "Critical"
+						}
+					]
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["requestTitle", "apiArea", "priority"],
+				"separator": " · ",
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "Enterprise Feature Request",
+		"templateKey": "enterprise-feature-request",
+		"description": "Advanced feature request form capturing scale, company context, and business impact.",
+		"tags": ["enterprise", "features", "b2b"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "companyName",
+					"label": "Company Name",
+					"t": "text",
+					"req": true,
+					"min": 2,
+					"max": 150
+				},
+				{
+					"k": "contactName",
+					"label": "Contact Name",
+					"t": "text",
+					"req": true,
+					"min": 2,
+					"max": 100
+				},
+				{
+					"k": "workEmail",
+					"label": "Work Email",
+					"t": "text",
+					"req": true,
+					"min": 5,
+					"max": 200
+				},
+				{
+					"k": "teamSize",
+					"label": "Team Size",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "1_50",
+							"label": "1-50"
+						},
+						{
+							"k": "51_200",
+							"label": "51-200"
+						},
+						{
+							"k": "201_1000",
+							"label": "201-1000"
+						},
+						{
+							"k": "1001_plus",
+							"label": "1001+"
+						}
+					]
+				},
+				{
+					"k": "featureArea",
+					"label": "Feature Area",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "security",
+							"label": "Security"
+						},
+						{
+							"k": "permissions",
+							"label": "Permissions"
+						},
+						{
+							"k": "compliance",
+							"label": "Compliance"
+						},
+						{
+							"k": "reporting",
+							"label": "Reporting"
+						},
+						{
+							"k": "integrations",
+							"label": "Integrations"
+						},
+						{
+							"k": "workflow",
+							"label": "Workflow"
+						},
+						{
+							"k": "other",
+							"label": "Other"
+						}
+					]
+				},
+				{
+					"k": "requestSummary",
+					"label": "Request Summary",
+					"t": "textarea",
+					"req": true,
+					"min": 20,
+					"max": 2000
+				},
+				{
+					"k": "businessImpact",
+					"label": "Business Impact",
+					"t": "textarea",
+					"req": true,
+					"min": 20,
+					"max": 2000
+				},
+				{
+					"k": "urgency",
+					"label": "Urgency",
+					"t": "fixed",
+					"opts": [
+						{
+							"k": "planning",
+							"label": "Planning Ahead"
+						},
+						{
+							"k": "this_quarter",
+							"label": "Needed This Quarter"
+						},
+						{
+							"k": "urgent",
+							"label": "Urgent"
+						},
+						{
+							"k": "blocking",
+							"label": "Currently Blocking Adoption"
+						}
+					]
+				},
+				{
+					"k": "complianceDriver",
+					"label": "Driven by Compliance or Procurement?",
+					"t": "bool"
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["companyName", "featureArea", "urgency"],
+				"separator": " · ",
+				"fallbackFields": ["contactName"],
+				"maxLength": 100
+			}
+		}
+	}
+]

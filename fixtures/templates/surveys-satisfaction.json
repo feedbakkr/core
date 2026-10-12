@@ -1,0 +1,416 @@
+[
+	{
+		"title": "Customer Satisfaction (CSAT)",
+		"templateKey": "customer-satisfaction-csat",
+		"description": "Post-interaction customer satisfaction survey. Quick 1-5 rating with optional follow-up comment.",
+		"tags": ["survey", "csat", "satisfaction", "support"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "satisfaction",
+					"label": "How satisfied are you with your experience?",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{ "k": "very_satisfied", "label": "Very satisfied" },
+						{ "k": "satisfied", "label": "Satisfied" },
+						{ "k": "neutral", "label": "Neutral" },
+						{ "k": "dissatisfied", "label": "Dissatisfied" },
+						{ "k": "very_dissatisfied", "label": "Very dissatisfied" }
+					]
+				},
+				{
+					"k": "comment",
+					"label": "What could we have done better?",
+					"t": "textarea",
+					"max": 1500
+				},
+				{
+					"k": "contactEmail",
+					"label": "Email (optional, if you'd like a follow-up)",
+					"t": "text",
+					"max": 200
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["satisfaction", "comment"],
+				"separator": " · ",
+				"maxLength": 100,
+				"fallbackFields": ["satisfaction"]
+			}
+		}
+	},
+	{
+		"title": "Net Promoter Score (NPS)",
+		"templateKey": "nps-survey",
+		"description": "Standard NPS survey — 'How likely are you to recommend us?' with score and open-ended follow-up.",
+		"tags": ["survey", "nps", "satisfaction", "growth"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "score",
+					"label": "How likely are you to recommend us to a friend or colleague? (0-10)",
+					"t": "number",
+					"req": true,
+					"min": 0,
+					"max": 10
+				},
+				{
+					"k": "reason",
+					"label": "What's the primary reason for your score?",
+					"t": "textarea",
+					"req": true,
+					"min": 5,
+					"max": 2000
+				},
+				{
+					"k": "improvementArea",
+					"label": "What's one thing we could improve?",
+					"t": "textarea",
+					"max": 1500
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["score", "reason"],
+				"separator": " · ",
+				"maxLength": 100,
+				"fallbackFields": ["score"]
+			}
+		}
+	},
+	{
+		"title": "Post-Purchase Feedback",
+		"templateKey": "post-purchase-feedback",
+		"description": "Collect feedback after a purchase — product quality, delivery experience, and likelihood to buy again.",
+		"tags": ["survey", "ecommerce", "purchase", "satisfaction"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "overallRating",
+					"label": "Overall experience rating (1-5)",
+					"t": "number",
+					"req": true,
+					"min": 1,
+					"max": 5
+				},
+				{
+					"k": "productQuality",
+					"label": "Product quality",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{ "k": "excellent", "label": "Excellent" },
+						{ "k": "good", "label": "Good" },
+						{ "k": "average", "label": "Average" },
+						{ "k": "poor", "label": "Poor" }
+					]
+				},
+				{
+					"k": "deliveryExperience",
+					"label": "Delivery experience",
+					"t": "fixed",
+					"opts": [
+						{ "k": "fast_smooth", "label": "Fast and smooth" },
+						{ "k": "acceptable", "label": "Acceptable" },
+						{ "k": "slow", "label": "Slow" },
+						{ "k": "issues", "label": "Had issues" }
+					]
+				},
+				{
+					"k": "wouldBuyAgain",
+					"label": "Would you buy from us again?",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{ "k": "definitely", "label": "Definitely" },
+						{ "k": "probably", "label": "Probably" },
+						{ "k": "unlikely", "label": "Unlikely" },
+						{ "k": "no", "label": "No" }
+					]
+				},
+				{
+					"k": "comments",
+					"label": "Any additional comments?",
+					"t": "textarea",
+					"max": 1500
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["overallRating", "productQuality"],
+				"separator": " · ",
+				"maxLength": 100,
+				"fallbackFields": ["overallRating"]
+			}
+		}
+	},
+	{
+		"title": "Event / Webinar Feedback",
+		"templateKey": "event-webinar-feedback",
+		"description": "Post-event feedback form for conferences, webinars, workshops, or meetups.",
+		"tags": ["survey", "event", "webinar", "satisfaction"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "eventName",
+					"label": "Event name",
+					"t": "text",
+					"req": true,
+					"max": 200
+				},
+				{
+					"k": "overallRating",
+					"label": "Overall rating (1-5)",
+					"t": "number",
+					"req": true,
+					"min": 1,
+					"max": 5
+				},
+				{
+					"k": "contentQuality",
+					"label": "Content quality",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{ "k": "excellent", "label": "Excellent" },
+						{ "k": "good", "label": "Good" },
+						{ "k": "average", "label": "Average" },
+						{ "k": "poor", "label": "Poor" }
+					]
+				},
+				{
+					"k": "speakerRating",
+					"label": "Speaker/presenter quality",
+					"t": "fixed",
+					"opts": [
+						{ "k": "excellent", "label": "Excellent" },
+						{ "k": "good", "label": "Good" },
+						{ "k": "average", "label": "Average" },
+						{ "k": "poor", "label": "Poor" }
+					]
+				},
+				{
+					"k": "mostValuable",
+					"label": "What was the most valuable part?",
+					"t": "textarea",
+					"max": 1500
+				},
+				{
+					"k": "improvement",
+					"label": "What could be improved?",
+					"t": "textarea",
+					"max": 1500
+				},
+				{
+					"k": "wouldAttendAgain",
+					"label": "Would you attend a similar event again?",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{ "k": "yes", "label": "Yes, definitely" },
+						{ "k": "maybe", "label": "Maybe" },
+						{ "k": "no", "label": "No" }
+					]
+				},
+				{
+					"k": "topicSuggestions",
+					"label": "Topics you'd like to see covered next",
+					"t": "textarea",
+					"max": 1000
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["eventName", "overallRating"],
+				"separator": " · ",
+				"maxLength": 100,
+				"fallbackFields": ["eventName"]
+			}
+		}
+	},
+	{
+		"title": "Support Interaction Feedback",
+		"templateKey": "support-interaction-feedback",
+		"description": "Post-support ticket satisfaction survey. Was the issue resolved? How was the experience?",
+		"tags": ["survey", "support", "csat", "helpdesk"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "ticketRef",
+					"label": "Ticket or case reference (if known)",
+					"t": "text",
+					"max": 100
+				},
+				{
+					"k": "resolved",
+					"label": "Was your issue resolved?",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{ "k": "yes", "label": "Yes, fully" },
+						{ "k": "partially", "label": "Partially" },
+						{ "k": "no", "label": "No" }
+					]
+				},
+				{
+					"k": "agentRating",
+					"label": "How would you rate the support you received? (1-5)",
+					"t": "number",
+					"req": true,
+					"min": 1,
+					"max": 5
+				},
+				{
+					"k": "responseTime",
+					"label": "Response time",
+					"t": "fixed",
+					"opts": [
+						{ "k": "fast", "label": "Fast" },
+						{ "k": "reasonable", "label": "Reasonable" },
+						{ "k": "slow", "label": "Slow" },
+						{ "k": "very_slow", "label": "Very slow" }
+					]
+				},
+				{
+					"k": "comments",
+					"label": "Any additional comments?",
+					"t": "textarea",
+					"max": 1500
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["resolved", "agentRating"],
+				"separator": " · ",
+				"maxLength": 100,
+				"fallbackFields": ["resolved"]
+			}
+		}
+	},
+	{
+		"title": "Employee Pulse Check",
+		"templateKey": "employee-pulse-check",
+		"description": "Quick anonymous pulse survey for team health — morale, workload, and engagement.",
+		"tags": ["survey", "hr", "employee", "pulse", "internal"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "mood",
+					"label": "How are you feeling about work this week?",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{ "k": "great", "label": "Great" },
+						{ "k": "good", "label": "Good" },
+						{ "k": "okay", "label": "Okay" },
+						{ "k": "stressed", "label": "Stressed" },
+						{ "k": "burnt_out", "label": "Burnt out" }
+					]
+				},
+				{
+					"k": "workload",
+					"label": "How is your workload?",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{ "k": "too_light", "label": "Too light" },
+						{ "k": "about_right", "label": "About right" },
+						{ "k": "heavy", "label": "Heavy" },
+						{ "k": "overwhelming", "label": "Overwhelming" }
+					]
+				},
+				{
+					"k": "blockers",
+					"label": "Is anything blocking your progress?",
+					"t": "textarea",
+					"max": 1000
+				},
+				{
+					"k": "highlight",
+					"label": "What's been a highlight this week?",
+					"t": "textarea",
+					"max": 1000
+				},
+				{
+					"k": "needsSupport",
+					"label": "Do you need any support from leadership?",
+					"t": "bool"
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["mood", "workload"],
+				"separator": " · ",
+				"maxLength": 80,
+				"fallbackFields": ["mood"]
+			}
+		}
+	},
+	{
+		"title": "Meeting / Workshop Feedback",
+		"templateKey": "meeting-workshop-feedback",
+		"description": "Quick post-meeting or workshop feedback — was it useful? What would improve it?",
+		"tags": ["survey", "internal", "meeting", "workshop"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "meetingName",
+					"label": "Meeting or workshop name",
+					"t": "text",
+					"req": true,
+					"max": 200
+				},
+				{
+					"k": "usefulness",
+					"label": "How useful was this session?",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{ "k": "very_useful", "label": "Very useful" },
+						{ "k": "somewhat_useful", "label": "Somewhat useful" },
+						{ "k": "not_useful", "label": "Not useful" },
+						{ "k": "waste_of_time", "label": "Could have been an email" }
+					]
+				},
+				{
+					"k": "bestPart",
+					"label": "What was the most valuable part?",
+					"t": "textarea",
+					"max": 1000
+				},
+				{
+					"k": "improvement",
+					"label": "What could be improved?",
+					"t": "textarea",
+					"max": 1000
+				},
+				{
+					"k": "actionClarity",
+					"label": "Were action items clear?",
+					"t": "fixed",
+					"opts": [
+						{ "k": "yes", "label": "Yes" },
+						{ "k": "somewhat", "label": "Somewhat" },
+						{ "k": "no", "label": "No" }
+					]
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["meetingName", "usefulness"],
+				"separator": " · ",
+				"maxLength": 100,
+				"fallbackFields": ["meetingName"]
+			}
+		}
+	}
+]

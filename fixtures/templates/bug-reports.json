@@ -1,0 +1,870 @@
+[
+	{
+		"title": "Public Bug Report",
+		"templateKey": "public-bug-report",
+		"description": "A user-friendly bug report form for customer-facing apps that captures the essentials without being too technical.",
+		"tags": ["bugs", "support", "users"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "fullName",
+					"label": "Your Name",
+					"t": "text",
+					"max": 100
+				},
+				{
+					"k": "email",
+					"label": "Email Address",
+					"t": "text",
+					"max": 200
+				},
+				{
+					"k": "bugTitle",
+					"label": "Issue Title",
+					"t": "text",
+					"req": true,
+					"min": 3,
+					"max": 200
+				},
+				{
+					"k": "category",
+					"label": "Category",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "ui",
+							"label": "UI / Layout"
+						},
+						{
+							"k": "login",
+							"label": "Login / Access"
+						},
+						{
+							"k": "performance",
+							"label": "Performance"
+						},
+						{
+							"k": "data",
+							"label": "Data / Content"
+						},
+						{
+							"k": "billing",
+							"label": "Billing"
+						},
+						{
+							"k": "other",
+							"label": "Other"
+						}
+					]
+				},
+				{
+					"k": "severity",
+					"label": "How serious is it?",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "low",
+							"label": "Low"
+						},
+						{
+							"k": "medium",
+							"label": "Medium"
+						},
+						{
+							"k": "high",
+							"label": "High"
+						}
+					]
+				},
+				{
+					"k": "whatHappened",
+					"label": "What happened?",
+					"t": "textarea",
+					"req": true,
+					"min": 20,
+					"max": 2000
+				},
+				{
+					"k": "stepsToReproduce",
+					"label": "Steps to Reproduce",
+					"t": "dynlist",
+					"maxItems": 8,
+					"item": {
+						"k": "step",
+						"label": "Step",
+						"t": "text",
+						"max": 500
+					}
+				},
+				{
+					"k": "pageUrl",
+					"label": "Page URL",
+					"t": "text",
+					"max": 500
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["bugTitle", "severity"],
+				"separator": " · ",
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "API Bug Report",
+		"templateKey": "api-bug-report",
+		"description": "A developer-focused bug report template for API issues including endpoint, method, environment, and expected versus actual behaviour.",
+		"tags": ["api", "developer", "bugs"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "title",
+					"label": "Bug Title",
+					"t": "text",
+					"req": true,
+					"min": 3,
+					"max": 200
+				},
+				{
+					"k": "environment",
+					"label": "Environment",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "production",
+							"label": "Production"
+						},
+						{
+							"k": "staging",
+							"label": "Staging"
+						},
+						{
+							"k": "development",
+							"label": "Development"
+						}
+					]
+				},
+				{
+					"k": "httpMethod",
+					"label": "HTTP Method",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "get",
+							"label": "GET"
+						},
+						{
+							"k": "post",
+							"label": "POST"
+						},
+						{
+							"k": "put",
+							"label": "PUT"
+						},
+						{
+							"k": "patch",
+							"label": "PATCH"
+						},
+						{
+							"k": "delete",
+							"label": "DELETE"
+						}
+					]
+				},
+				{
+					"k": "endpoint",
+					"label": "Endpoint",
+					"t": "text",
+					"req": true,
+					"min": 2,
+					"max": 300
+				},
+				{
+					"k": "severity",
+					"label": "Severity",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "low",
+							"label": "Low"
+						},
+						{
+							"k": "medium",
+							"label": "Medium"
+						},
+						{
+							"k": "high",
+							"label": "High"
+						},
+						{
+							"k": "critical",
+							"label": "Critical"
+						}
+					]
+				},
+				{
+					"k": "expectedBehavior",
+					"label": "Expected Behaviour",
+					"t": "textarea",
+					"req": true,
+					"min": 10,
+					"max": 1500
+				},
+				{
+					"k": "actualBehavior",
+					"label": "Actual Behaviour",
+					"t": "textarea",
+					"req": true,
+					"min": 10,
+					"max": 1500
+				},
+				{
+					"k": "responseCode",
+					"label": "Response Code",
+					"t": "number",
+					"min": 100,
+					"max": 599
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["title", "environment", "endpoint"],
+				"separator": " · ",
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "Internal Engineering Bug Report",
+		"templateKey": "engineering-bug-report",
+		"description": "Detailed bug report template with environment, severity, and reproducibility for engineering teams.",
+		"tags": ["engineering", "bugs", "internal"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "title",
+					"label": "Bug Title",
+					"t": "text",
+					"req": true,
+					"min": 3,
+					"max": 200
+				},
+				{
+					"k": "environment",
+					"label": "Environment",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "development",
+							"label": "Development"
+						},
+						{
+							"k": "staging",
+							"label": "Staging"
+						},
+						{
+							"k": "production",
+							"label": "Production"
+						}
+					]
+				},
+				{
+					"k": "serviceArea",
+					"label": "Service or Area",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "frontend",
+							"label": "Frontend"
+						},
+						{
+							"k": "backend",
+							"label": "Backend"
+						},
+						{
+							"k": "api",
+							"label": "API"
+						},
+						{
+							"k": "database",
+							"label": "Database"
+						},
+						{
+							"k": "auth",
+							"label": "Authentication"
+						},
+						{
+							"k": "infrastructure",
+							"label": "Infrastructure"
+						},
+						{
+							"k": "other",
+							"label": "Other"
+						}
+					]
+				},
+				{
+					"k": "severity",
+					"label": "Severity",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "low",
+							"label": "Low"
+						},
+						{
+							"k": "medium",
+							"label": "Medium"
+						},
+						{
+							"k": "high",
+							"label": "High"
+						},
+						{
+							"k": "critical",
+							"label": "Critical"
+						}
+					]
+				},
+				{
+					"k": "reproducibility",
+					"label": "Reproducibility",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "always",
+							"label": "Always"
+						},
+						{
+							"k": "often",
+							"label": "Often"
+						},
+						{
+							"k": "sometimes",
+							"label": "Sometimes"
+						},
+						{
+							"k": "once",
+							"label": "Happened Once"
+						}
+					]
+				},
+				{
+					"k": "summary",
+					"label": "Summary",
+					"t": "textarea",
+					"req": true,
+					"min": 20,
+					"max": 1500
+				},
+				{
+					"k": "stepsToReproduce",
+					"label": "Steps to Reproduce",
+					"t": "dynlist",
+					"maxItems": 12,
+					"item": {
+						"k": "step",
+						"label": "Step",
+						"t": "text",
+						"max": 500
+					}
+				},
+				{
+					"k": "expectedBehavior",
+					"label": "Expected Behaviour",
+					"t": "textarea",
+					"req": true,
+					"min": 10,
+					"max": 1000
+				},
+				{
+					"k": "actualBehavior",
+					"label": "Actual Behaviour",
+					"t": "textarea",
+					"req": true,
+					"min": 10,
+					"max": 1000
+				},
+				{
+					"k": "blocker",
+					"label": "Is this blocking work?",
+					"t": "bool"
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["title", "severity", "environment"],
+				"separator": " · ",
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "QA Test Report",
+		"templateKey": "qa-test-report",
+		"description": "Structured template for QA teams to log test results, expected vs actual outcomes, and test cases.",
+		"tags": ["qa", "testing", "bugs"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "testCaseId",
+					"label": "Test Case ID",
+					"t": "text",
+					"req": true,
+					"min": 2,
+					"max": 100
+				},
+				{
+					"k": "testTitle",
+					"label": "Test Title",
+					"t": "text",
+					"req": true,
+					"min": 3,
+					"max": 200
+				},
+				{
+					"k": "environment",
+					"label": "Environment",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "development",
+							"label": "Development"
+						},
+						{
+							"k": "staging",
+							"label": "Staging"
+						},
+						{
+							"k": "production",
+							"label": "Production"
+						}
+					]
+				},
+				{
+					"k": "platform",
+					"label": "Platform",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "web",
+							"label": "Web"
+						},
+						{
+							"k": "ios",
+							"label": "iOS"
+						},
+						{
+							"k": "android",
+							"label": "Android"
+						},
+						{
+							"k": "api",
+							"label": "API"
+						},
+						{
+							"k": "other",
+							"label": "Other"
+						}
+					]
+				},
+				{
+					"k": "result",
+					"label": "Test Result",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "passed",
+							"label": "Passed"
+						},
+						{
+							"k": "failed",
+							"label": "Failed"
+						},
+						{
+							"k": "blocked",
+							"label": "Blocked"
+						},
+						{
+							"k": "not_run",
+							"label": "Not Run"
+						}
+					]
+				},
+				{
+					"k": "severity",
+					"label": "Severity",
+					"t": "fixed",
+					"opts": [
+						{
+							"k": "low",
+							"label": "Low"
+						},
+						{
+							"k": "medium",
+							"label": "Medium"
+						},
+						{
+							"k": "high",
+							"label": "High"
+						},
+						{
+							"k": "critical",
+							"label": "Critical"
+						}
+					]
+				},
+				{
+					"k": "preconditions",
+					"label": "Preconditions",
+					"t": "textarea",
+					"max": 1000
+				},
+				{
+					"k": "stepsExecuted",
+					"label": "Steps Executed",
+					"t": "dynlist",
+					"maxItems": 15,
+					"item": {
+						"k": "step",
+						"label": "Executed Step",
+						"t": "text",
+						"max": 500
+					}
+				},
+				{
+					"k": "expectedOutcome",
+					"label": "Expected Outcome",
+					"t": "textarea",
+					"req": true,
+					"min": 10,
+					"max": 1200
+				},
+				{
+					"k": "actualOutcome",
+					"label": "Actual Outcome",
+					"t": "textarea",
+					"req": true,
+					"min": 10,
+					"max": 1200
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["testCaseId", "result", "severity"],
+				"separator": " · ",
+				"fallbackFields": ["testTitle"],
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "Accessibility Issue Report",
+		"templateKey": "accessibility-issue-report",
+		"description": "Collect accessibility issues with assistive technology context and impact description.",
+		"tags": ["accessibility", "compliance", "ux"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "issueTitle",
+					"label": "Issue Title",
+					"t": "text",
+					"req": true,
+					"min": 3,
+					"max": 200
+				},
+				{
+					"k": "pageOrFeature",
+					"label": "Page or Feature",
+					"t": "text",
+					"req": true,
+					"min": 2,
+					"max": 200
+				},
+				{
+					"k": "issueCategory",
+					"label": "Issue Category",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "keyboard_navigation",
+							"label": "Keyboard Navigation"
+						},
+						{
+							"k": "screen_reader",
+							"label": "Screen Reader"
+						},
+						{
+							"k": "colour_contrast",
+							"label": "Colour Contrast"
+						},
+						{
+							"k": "focus_management",
+							"label": "Focus Management"
+						},
+						{
+							"k": "forms_labels",
+							"label": "Forms and Labels"
+						},
+						{
+							"k": "media_content",
+							"label": "Media Content"
+						},
+						{
+							"k": "other",
+							"label": "Other"
+						}
+					]
+				},
+				{
+					"k": "impactLevel",
+					"label": "Impact Level",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "minor",
+							"label": "Minor"
+						},
+						{
+							"k": "moderate",
+							"label": "Moderate"
+						},
+						{
+							"k": "serious",
+							"label": "Serious"
+						},
+						{
+							"k": "blocking",
+							"label": "Blocking"
+						}
+					]
+				},
+				{
+					"k": "assistiveTechnology",
+					"label": "Assistive Technology Used",
+					"t": "fixed",
+					"opts": [
+						{
+							"k": "screen_reader",
+							"label": "Screen Reader"
+						},
+						{
+							"k": "keyboard_only",
+							"label": "Keyboard Only"
+						},
+						{
+							"k": "voice_control",
+							"label": "Voice Control"
+						},
+						{
+							"k": "screen_magnifier",
+							"label": "Screen Magnifier"
+						},
+						{
+							"k": "other",
+							"label": "Other"
+						}
+					]
+				},
+				{
+					"k": "browserOrDevice",
+					"label": "Browser or Device",
+					"t": "text",
+					"max": 200
+				},
+				{
+					"k": "description",
+					"label": "Issue Description",
+					"t": "textarea",
+					"req": true,
+					"min": 20,
+					"max": 2000
+				},
+				{
+					"k": "stepsToReproduce",
+					"label": "Steps to Reproduce",
+					"t": "dynlist",
+					"maxItems": 10,
+					"item": {
+						"k": "step",
+						"label": "Step",
+						"t": "text",
+						"max": 500
+					}
+				},
+				{
+					"k": "expectedExperience",
+					"label": "Expected Accessible Experience",
+					"t": "textarea",
+					"max": 1200
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["issueTitle", "impactLevel", "issueCategory"],
+				"separator": " · ",
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "Security Vulnerability Report",
+		"templateKey": "security-vulnerability-report",
+		"description": "Responsible disclosure form for reporting security issues with severity and reproduction details.",
+		"tags": ["security", "bugs", "compliance"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "reportTitle",
+					"label": "Report Title",
+					"t": "text",
+					"req": true,
+					"min": 3,
+					"max": 200
+				},
+				{
+					"k": "reporterName",
+					"label": "Your Name",
+					"t": "text",
+					"max": 100
+				},
+				{
+					"k": "contactEmail",
+					"label": "Contact Email",
+					"t": "text",
+					"req": true,
+					"min": 5,
+					"max": 200
+				},
+				{
+					"k": "vulnerabilityType",
+					"label": "Vulnerability Type",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "xss",
+							"label": "Cross-Site Scripting (XSS)"
+						},
+						{
+							"k": "sql_injection",
+							"label": "SQL Injection"
+						},
+						{
+							"k": "auth_bypass",
+							"label": "Authentication Bypass"
+						},
+						{
+							"k": "idor",
+							"label": "Insecure Direct Object Reference"
+						},
+						{
+							"k": "data_exposure",
+							"label": "Data Exposure"
+						},
+						{
+							"k": "csrf",
+							"label": "CSRF"
+						},
+						{
+							"k": "other",
+							"label": "Other"
+						}
+					]
+				},
+				{
+					"k": "severity",
+					"label": "Severity",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "low",
+							"label": "Low"
+						},
+						{
+							"k": "medium",
+							"label": "Medium"
+						},
+						{
+							"k": "high",
+							"label": "High"
+						},
+						{
+							"k": "critical",
+							"label": "Critical"
+						}
+					]
+				},
+				{
+					"k": "affectedArea",
+					"label": "Affected Area",
+					"t": "text",
+					"req": true,
+					"min": 2,
+					"max": 200
+				},
+				{
+					"k": "summary",
+					"label": "Summary",
+					"t": "textarea",
+					"req": true,
+					"min": 20,
+					"max": 1500
+				},
+				{
+					"k": "stepsToReproduce",
+					"label": "Steps to Reproduce",
+					"t": "dynlist",
+					"maxItems": 12,
+					"item": {
+						"k": "step",
+						"label": "Step",
+						"t": "text",
+						"max": 500
+					}
+				},
+				{
+					"k": "potentialImpact",
+					"label": "Potential Impact",
+					"t": "textarea",
+					"req": true,
+					"min": 10,
+					"max": 1500
+				},
+				{
+					"k": "requiresFollowUp",
+					"label": "Can we contact you for follow-up questions?",
+					"t": "bool"
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["reportTitle", "severity", "vulnerabilityType"],
+				"separator": " · ",
+				"maxLength": 100
+			}
+		}
+	}
+]

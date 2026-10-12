@@ -1,0 +1,8 @@
+packages:
+  - "packages/*"
+
+# Dependencies allowed to run install scripts (pnpm 11 fails the install on an
+# unapproved one). esbuild fetches its platform binary, which tsup needs.
+allowBuilds:
+  "@biomejs/biome": true
+  esbuild: true

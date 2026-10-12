@@ -1,0 +1,598 @@
+[
+	{
+		"title": "General Beta Feedback",
+		"templateKey": "general-beta-feedback",
+		"description": "Collect structured feedback from beta testers across onboarding, usability, and overall product experience.",
+		"tags": ["beta", "feedback", "product"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "name",
+					"label": "Name",
+					"t": "text",
+					"max": 100
+				},
+				{
+					"k": "email",
+					"label": "Email Address",
+					"t": "text",
+					"max": 200
+				},
+				{
+					"k": "productArea",
+					"label": "Product Area",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "onboarding",
+							"label": "Onboarding"
+						},
+						{
+							"k": "core_workflow",
+							"label": "Core Workflow"
+						},
+						{
+							"k": "ui",
+							"label": "UI / Design"
+						},
+						{
+							"k": "performance",
+							"label": "Performance"
+						},
+						{
+							"k": "notifications",
+							"label": "Notifications"
+						},
+						{
+							"k": "other",
+							"label": "Other"
+						}
+					]
+				},
+				{
+					"k": "rating",
+					"label": "Overall Rating",
+					"t": "number",
+					"req": true,
+					"min": 1,
+					"max": 10
+				},
+				{
+					"k": "whatWorkedWell",
+					"label": "What worked well?",
+					"t": "textarea",
+					"max": 1500
+				},
+				{
+					"k": "whatWasConfusing",
+					"label": "What was confusing or frustrating?",
+					"t": "textarea",
+					"req": true,
+					"min": 10,
+					"max": 2000
+				},
+				{
+					"k": "wouldRecommend",
+					"label": "Would you recommend it to others?",
+					"t": "bool"
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["productArea", "rating"],
+				"separator": " · ",
+				"fallbackFields": ["name"],
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "Onboarding Feedback",
+		"templateKey": "onboarding-feedback",
+		"description": "Focused feedback template for beta testers to report how clear and smooth the signup and setup process felt.",
+		"tags": ["beta", "onboarding", "ux"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "completedSetup",
+					"label": "Did you complete setup?",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "yes",
+							"label": "Yes"
+						},
+						{
+							"k": "partially",
+							"label": "Partially"
+						},
+						{
+							"k": "no",
+							"label": "No"
+						}
+					]
+				},
+				{
+					"k": "setupDifficulty",
+					"label": "How easy was setup?",
+					"t": "number",
+					"req": true,
+					"min": 1,
+					"max": 10
+				},
+				{
+					"k": "mostConfusingStep",
+					"label": "Most Confusing Step",
+					"t": "text",
+					"max": 200
+				},
+				{
+					"k": "missingInformation",
+					"label": "What information was missing?",
+					"t": "textarea",
+					"max": 1500
+				},
+				{
+					"k": "improvementSuggestion",
+					"label": "Suggested Improvement",
+					"t": "textarea",
+					"req": true,
+					"min": 10,
+					"max": 1500
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["completedSetup", "setupDifficulty"],
+				"separator": " · ",
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "First Impressions Feedback",
+		"templateKey": "beta-first-impressions",
+		"description": "Understand initial reactions from new users during onboarding or first use.",
+		"tags": ["beta", "onboarding", "ux"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "firstReaction",
+					"label": "Overall First Reaction",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "very_positive",
+							"label": "Very Positive"
+						},
+						{
+							"k": "positive",
+							"label": "Positive"
+						},
+						{
+							"k": "neutral",
+							"label": "Neutral"
+						},
+						{
+							"k": "confused",
+							"label": "Confused"
+						},
+						{
+							"k": "negative",
+							"label": "Negative"
+						}
+					]
+				},
+				{
+					"k": "mostUsefulPart",
+					"label": "Most Useful Part",
+					"t": "text",
+					"max": 200
+				},
+				{
+					"k": "mostConfusingPart",
+					"label": "Most Confusing Part",
+					"t": "text",
+					"max": 200
+				},
+				{
+					"k": "expectationsMet",
+					"label": "Did it match your expectations?",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "yes",
+							"label": "Yes"
+						},
+						{
+							"k": "partly",
+							"label": "Partly"
+						},
+						{
+							"k": "no",
+							"label": "No"
+						}
+					]
+				},
+				{
+					"k": "whatStoodOut",
+					"label": "What stood out most?",
+					"t": "textarea",
+					"max": 1500
+				},
+				{
+					"k": "initialFeedback",
+					"label": "Initial Feedback",
+					"t": "textarea",
+					"req": true,
+					"min": 20,
+					"max": 2000
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["firstReaction", "expectationsMet"],
+				"separator": " · ",
+				"fallbackFields": ["mostUsefulPart"],
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "Usability Feedback Session",
+		"templateKey": "beta-usability-feedback",
+		"description": "Capture usability issues and friction points from guided or unguided sessions.",
+		"tags": ["beta", "usability", "ux"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "sessionType",
+					"label": "Session Type",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "guided",
+							"label": "Guided Session"
+						},
+						{
+							"k": "unguided",
+							"label": "Unguided Session"
+						},
+						{
+							"k": "task_based",
+							"label": "Task-Based Session"
+						}
+					]
+				},
+				{
+					"k": "areaTested",
+					"label": "Area Tested",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "onboarding",
+							"label": "Onboarding"
+						},
+						{
+							"k": "navigation",
+							"label": "Navigation"
+						},
+						{
+							"k": "forms",
+							"label": "Forms"
+						},
+						{
+							"k": "dashboard",
+							"label": "Dashboard"
+						},
+						{
+							"k": "settings",
+							"label": "Settings"
+						},
+						{
+							"k": "core_workflow",
+							"label": "Core Workflow"
+						},
+						{
+							"k": "other",
+							"label": "Other"
+						}
+					]
+				},
+				{
+					"k": "taskCompleted",
+					"label": "Was the task completed?",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "yes",
+							"label": "Yes"
+						},
+						{
+							"k": "partially",
+							"label": "Partially"
+						},
+						{
+							"k": "no",
+							"label": "No"
+						}
+					]
+				},
+				{
+					"k": "difficultyRating",
+					"label": "Difficulty Rating",
+					"t": "number",
+					"req": true,
+					"min": 1,
+					"max": 10
+				},
+				{
+					"k": "frictionPoints",
+					"label": "Friction Points",
+					"t": "dynlist",
+					"maxItems": 10,
+					"item": {
+						"k": "frictionPoint",
+						"label": "Friction Point",
+						"t": "text",
+						"max": 500
+					}
+				},
+				{
+					"k": "confusingElements",
+					"label": "What felt confusing?",
+					"t": "textarea",
+					"max": 1500
+				},
+				{
+					"k": "improvementSuggestions",
+					"label": "Improvement Suggestions",
+					"t": "textarea",
+					"req": true,
+					"min": 20,
+					"max": 2000
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["areaTested", "taskCompleted", "difficultyRating"],
+				"separator": " · ",
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "Release Candidate Feedback",
+		"templateKey": "release-candidate-feedback",
+		"description": "Collect final-stage feedback before public release, including blockers and polish items.",
+		"tags": ["beta", "release", "qa"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "releaseVersion",
+					"label": "Release Version",
+					"t": "text",
+					"req": true,
+					"min": 1,
+					"max": 50
+				},
+				{
+					"k": "testArea",
+					"label": "Test Area",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "onboarding",
+							"label": "Onboarding"
+						},
+						{
+							"k": "core_workflow",
+							"label": "Core Workflow"
+						},
+						{
+							"k": "billing",
+							"label": "Billing"
+						},
+						{
+							"k": "notifications",
+							"label": "Notifications"
+						},
+						{
+							"k": "settings",
+							"label": "Settings"
+						},
+						{
+							"k": "performance",
+							"label": "Performance"
+						},
+						{
+							"k": "other",
+							"label": "Other"
+						}
+					]
+				},
+				{
+					"k": "feedbackType",
+					"label": "Feedback Type",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "blocker",
+							"label": "Blocker"
+						},
+						{
+							"k": "major_issue",
+							"label": "Major Issue"
+						},
+						{
+							"k": "minor_issue",
+							"label": "Minor Issue"
+						},
+						{
+							"k": "polish",
+							"label": "Polish / Improvement"
+						},
+						{
+							"k": "ready",
+							"label": "Looks Ready"
+						}
+					]
+				},
+				{
+					"k": "severity",
+					"label": "Severity",
+					"t": "fixed",
+					"opts": [
+						{
+							"k": "low",
+							"label": "Low"
+						},
+						{
+							"k": "medium",
+							"label": "Medium"
+						},
+						{
+							"k": "high",
+							"label": "High"
+						},
+						{
+							"k": "critical",
+							"label": "Critical"
+						}
+					]
+				},
+				{
+					"k": "summary",
+					"label": "Summary",
+					"t": "textarea",
+					"req": true,
+					"min": 20,
+					"max": 1500
+				},
+				{
+					"k": "stepsToReproduce",
+					"label": "Steps to Reproduce",
+					"t": "dynlist",
+					"maxItems": 10,
+					"item": {
+						"k": "step",
+						"label": "Step",
+						"t": "text",
+						"max": 500
+					}
+				},
+				{
+					"k": "readyForRelease",
+					"label": "Is this ready for release?",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "yes",
+							"label": "Yes"
+						},
+						{
+							"k": "with_minor_fixes",
+							"label": "With Minor Fixes"
+						},
+						{
+							"k": "no",
+							"label": "No"
+						}
+					]
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["releaseVersion", "feedbackType", "testArea"],
+				"separator": " · ",
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "Beta NPS Feedback",
+		"templateKey": "beta-nps-feedback",
+		"description": "Capture satisfaction scores and qualitative feedback from beta testers.",
+		"tags": ["beta", "nps", "feedback"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "npsScore",
+					"label": "How likely are you to recommend this product?",
+					"t": "number",
+					"req": true,
+					"min": 0,
+					"max": 10
+				},
+				{
+					"k": "primaryReason",
+					"label": "What is the main reason for your score?",
+					"t": "textarea",
+					"req": true,
+					"min": 20,
+					"max": 2000
+				},
+				{
+					"k": "mostValuableFeature",
+					"label": "Most Valuable Feature",
+					"t": "text",
+					"max": 200
+				},
+				{
+					"k": "missingFeature",
+					"label": "What is missing?",
+					"t": "textarea",
+					"max": 1500
+				},
+				{
+					"k": "wouldUseInProduction",
+					"label": "Would you use this in production?",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "yes",
+							"label": "Yes"
+						},
+						{
+							"k": "maybe",
+							"label": "Maybe"
+						},
+						{
+							"k": "no",
+							"label": "No"
+						}
+					]
+				},
+				{
+					"k": "followUpAllowed",
+					"label": "Can we contact you for follow-up?",
+					"t": "bool"
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["npsScore", "wouldUseInProduction"],
+				"separator": " · ",
+				"fallbackFields": ["mostValuableFeature"],
+				"maxLength": 100
+			}
+		}
+	}
+]

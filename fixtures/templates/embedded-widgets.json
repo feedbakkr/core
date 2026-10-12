@@ -1,0 +1,360 @@
+[
+	{
+		"title": "Quick Feedback Widget",
+		"templateKey": "quick-feedback-widget",
+		"description": "A tiny embedded widget for collecting fast user feedback from any page with almost no friction.",
+		"tags": ["widget", "feedback", "ux"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "sentiment",
+					"label": "How was your experience?",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "great",
+							"label": "Great"
+						},
+						{
+							"k": "okay",
+							"label": "Okay"
+						},
+						{
+							"k": "poor",
+							"label": "Poor"
+						}
+					]
+				},
+				{
+					"k": "comment",
+					"label": "Comment",
+					"t": "textarea",
+					"max": 1000
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["sentiment", "comment"],
+				"separator": " · ",
+				"maxLength": 100,
+				"fallbackFields": ["sentiment"]
+			}
+		}
+	},
+	{
+		"title": "Report a Problem Widget",
+		"templateKey": "report-a-problem-widget",
+		"description": "An embedded widget for reporting issues directly from the current page or app screen.",
+		"tags": ["widget", "bugs", "support"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "problemType",
+					"label": "Problem Type",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "broken_feature",
+							"label": "Broken Feature"
+						},
+						{
+							"k": "layout_issue",
+							"label": "Layout Issue"
+						},
+						{
+							"k": "performance",
+							"label": "Performance"
+						},
+						{
+							"k": "confusing",
+							"label": "Confusing UX"
+						},
+						{
+							"k": "other",
+							"label": "Other"
+						}
+					]
+				},
+				{
+					"k": "summary",
+					"label": "Summary",
+					"t": "text",
+					"req": true,
+					"min": 3,
+					"max": 200
+				},
+				{
+					"k": "details",
+					"label": "Details",
+					"t": "textarea",
+					"req": true,
+					"min": 10,
+					"max": 1500
+				},
+				{
+					"k": "contactEmail",
+					"label": "Contact Email",
+					"t": "text",
+					"max": 200
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["problemType", "summary"],
+				"separator": " · ",
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "Page Feedback Widget",
+		"templateKey": "page-feedback-widget",
+		"description": "Capture feedback tied to a specific page or context within the app so teams can understand issues and suggestions in the right place.",
+		"tags": ["widget", "page", "feedback"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "feedbackType",
+					"label": "Feedback Type",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "issue",
+							"label": "Issue"
+						},
+						{
+							"k": "suggestion",
+							"label": "Suggestion"
+						},
+						{
+							"k": "question",
+							"label": "Question"
+						},
+						{
+							"k": "praise",
+							"label": "Praise"
+						}
+					]
+				},
+				{
+					"k": "pageContext",
+					"label": "Page or Context",
+					"t": "text",
+					"max": 300
+				},
+				{
+					"k": "message",
+					"label": "Your Feedback",
+					"t": "textarea",
+					"req": true,
+					"min": 10,
+					"max": 1500
+				},
+				{
+					"k": "contactEmail",
+					"label": "Contact Email",
+					"t": "text",
+					"max": 200
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["feedbackType", "pageContext"],
+				"separator": " · ",
+				"fallbackFields": ["message"],
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "Exit Intent Feedback",
+		"templateKey": "exit-intent-feedback",
+		"description": "Ask users why they are leaving or abandoning a journey so teams can identify friction, confusion, or missing value.",
+		"tags": ["widget", "conversion", "ux"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "reasonForLeaving",
+					"label": "Why are you leaving?",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "just_browsing",
+							"label": "Just Browsing"
+						},
+						{
+							"k": "too_expensive",
+							"label": "Too Expensive"
+						},
+						{
+							"k": "not_ready",
+							"label": "Not Ready Yet"
+						},
+						{
+							"k": "missing_feature",
+							"label": "Missing Feature"
+						},
+						{
+							"k": "confusing",
+							"label": "Confusing Experience"
+						},
+						{
+							"k": "technical_issue",
+							"label": "Technical Issue"
+						},
+						{
+							"k": "other",
+							"label": "Other"
+						}
+					]
+				},
+				{
+					"k": "whatStoppedYou",
+					"label": "What stopped you today?",
+					"t": "textarea",
+					"max": 1500
+				},
+				{
+					"k": "wouldLikeFollowUp",
+					"label": "I'd like someone to follow up",
+					"t": "bool"
+				},
+				{
+					"k": "email",
+					"label": "Email Address",
+					"t": "text",
+					"max": 200
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["reasonForLeaving", "email"],
+				"separator": " · ",
+				"fallbackFields": ["whatStoppedYou"],
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "Rating + Comment Widget",
+		"templateKey": "rating-comment-widget",
+		"description": "Capture a quick satisfaction rating with an optional comment for lightweight feedback across pages, features, or flows.",
+		"tags": ["widget", "rating", "feedback"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "rating",
+					"label": "Rating",
+					"t": "number",
+					"req": true,
+					"min": 1,
+					"max": 5
+				},
+				{
+					"k": "feedbackArea",
+					"label": "Feedback Area",
+					"t": "text",
+					"max": 200
+				},
+				{
+					"k": "comment",
+					"label": "Comment",
+					"t": "textarea",
+					"max": 1000
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["rating", "feedbackArea"],
+				"separator": " · ",
+				"fallbackFields": ["comment"],
+				"maxLength": 100
+			}
+		}
+	},
+	{
+		"title": "In-App Support Widget",
+		"templateKey": "in-app-support-widget",
+		"description": "Allow users to contact support directly from within the application with a clear category, message, and optional reply details.",
+		"tags": ["widget", "support", "saas"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "supportType",
+					"label": "Support Type",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{
+							"k": "question",
+							"label": "Question"
+						},
+						{
+							"k": "bug",
+							"label": "Bug"
+						},
+						{
+							"k": "billing",
+							"label": "Billing"
+						},
+						{
+							"k": "account",
+							"label": "Account"
+						},
+						{
+							"k": "feature_help",
+							"label": "Feature Help"
+						},
+						{
+							"k": "other",
+							"label": "Other"
+						}
+					]
+				},
+				{
+					"k": "subject",
+					"label": "Subject",
+					"t": "text",
+					"req": true,
+					"min": 3,
+					"max": 150
+				},
+				{
+					"k": "message",
+					"label": "How can we help?",
+					"t": "textarea",
+					"req": true,
+					"min": 10,
+					"max": 2000
+				},
+				{
+					"k": "urgent",
+					"label": "This is urgent",
+					"t": "bool"
+				},
+				{
+					"k": "replyEmail",
+					"label": "Reply Email",
+					"t": "text",
+					"max": 200
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["supportType", "subject"],
+				"separator": " · ",
+				"maxLength": 100
+			}
+		}
+	}
+]

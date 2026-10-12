@@ -1,0 +1,214 @@
+[
+	{
+		"title": "Documentation Page Feedback",
+		"templateKey": "docs-page-feedback",
+		"description": "Simple thumbs up/down feedback for documentation pages with optional comments. Perfect for 'Was this helpful?' widgets.",
+		"tags": ["documentation", "docs", "widget", "content"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "helpful",
+					"label": "Was this page helpful?",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{ "k": "yes", "label": "Yes" },
+						{ "k": "somewhat", "label": "Somewhat" },
+						{ "k": "no", "label": "No" }
+					]
+				},
+				{
+					"k": "pageUrl",
+					"label": "Page",
+					"t": "text",
+					"max": 500
+				},
+				{
+					"k": "comment",
+					"label": "How could we improve this page?",
+					"t": "textarea",
+					"max": 1000
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["helpful", "comment"],
+				"separator": " · ",
+				"maxLength": 100,
+				"fallbackFields": ["helpful"]
+			}
+		}
+	},
+	{
+		"title": "Documentation Improvement Request",
+		"templateKey": "docs-improvement-request",
+		"description": "Collect detailed requests for documentation improvements — missing topics, unclear explanations, or outdated examples.",
+		"tags": ["documentation", "docs", "content", "improvement"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "requestType",
+					"label": "What kind of improvement?",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{ "k": "missing_topic", "label": "Missing topic or guide" },
+						{ "k": "unclear", "label": "Unclear or confusing explanation" },
+						{ "k": "outdated", "label": "Outdated information or examples" },
+						{ "k": "code_example", "label": "Need a code example" },
+						{ "k": "typo", "label": "Typo or formatting issue" },
+						{ "k": "other", "label": "Other" }
+					]
+				},
+				{
+					"k": "pageOrTopic",
+					"label": "Which page or topic?",
+					"t": "text",
+					"req": true,
+					"max": 300
+				},
+				{
+					"k": "details",
+					"label": "Describe what needs improving",
+					"t": "textarea",
+					"req": true,
+					"min": 10,
+					"max": 2000
+				},
+				{
+					"k": "suggestedContent",
+					"label": "Suggested content or wording (optional)",
+					"t": "textarea",
+					"max": 2000
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["requestType", "pageOrTopic"],
+				"separator": " · ",
+				"maxLength": 100,
+				"fallbackFields": ["requestType"]
+			}
+		}
+	},
+	{
+		"title": "API Documentation Feedback",
+		"templateKey": "api-docs-feedback",
+		"description": "Targeted feedback for API documentation — endpoint descriptions, request/response examples, error code explanations.",
+		"tags": ["documentation", "api", "developer", "docs"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "feedbackType",
+					"label": "Feedback type",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{ "k": "incorrect_example", "label": "Incorrect code example" },
+						{ "k": "missing_endpoint", "label": "Missing endpoint documentation" },
+						{ "k": "unclear_params", "label": "Unclear parameters or types" },
+						{ "k": "missing_error_codes", "label": "Missing error codes" },
+						{ "k": "outdated_response", "label": "Outdated response format" },
+						{ "k": "other", "label": "Other" }
+					]
+				},
+				{
+					"k": "endpoint",
+					"label": "Endpoint or section",
+					"t": "text",
+					"req": true,
+					"max": 300
+				},
+				{
+					"k": "details",
+					"label": "What's wrong or missing?",
+					"t": "textarea",
+					"req": true,
+					"min": 10,
+					"max": 2000
+				},
+				{
+					"k": "language",
+					"label": "Programming language (if relevant)",
+					"t": "fixed",
+					"opts": [
+						{ "k": "javascript", "label": "JavaScript / TypeScript" },
+						{ "k": "python", "label": "Python" },
+						{ "k": "go", "label": "Go" },
+						{ "k": "ruby", "label": "Ruby" },
+						{ "k": "curl", "label": "cURL" },
+						{ "k": "other", "label": "Other" }
+					]
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["feedbackType", "endpoint"],
+				"separator": " · ",
+				"maxLength": 100,
+				"fallbackFields": ["feedbackType"]
+			}
+		}
+	},
+	{
+		"title": "Tutorial Feedback",
+		"templateKey": "tutorial-feedback",
+		"description": "Collect feedback on tutorials and guides — did users get stuck? Was the tutorial complete? What would improve it?",
+		"tags": ["documentation", "tutorial", "learning", "content"],
+		"schema": {
+			"v": 1,
+			"fields": [
+				{
+					"k": "tutorialName",
+					"label": "Which tutorial?",
+					"t": "text",
+					"req": true,
+					"max": 200
+				},
+				{
+					"k": "completed",
+					"label": "Did you complete the tutorial?",
+					"t": "fixed",
+					"req": true,
+					"opts": [
+						{ "k": "yes", "label": "Yes, fully" },
+						{ "k": "partially", "label": "Partially — got stuck" },
+						{ "k": "no", "label": "No — gave up" }
+					]
+				},
+				{
+					"k": "difficulty",
+					"label": "Difficulty level",
+					"t": "fixed",
+					"opts": [
+						{ "k": "too_easy", "label": "Too easy" },
+						{ "k": "just_right", "label": "Just right" },
+						{ "k": "too_hard", "label": "Too hard" }
+					]
+				},
+				{
+					"k": "stuckAt",
+					"label": "Where did you get stuck? (if applicable)",
+					"t": "textarea",
+					"max": 1500
+				},
+				{
+					"k": "improvement",
+					"label": "How could this tutorial be improved?",
+					"t": "textarea",
+					"max": 1500
+				}
+			],
+			"preview": {
+				"mode": "custom",
+				"fields": ["tutorialName", "completed"],
+				"separator": " · ",
+				"maxLength": 100,
+				"fallbackFields": ["tutorialName"]
+			}
+		}
+	}
+]

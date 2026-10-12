@@ -1,0 +1,474 @@
+{
+	"version": "1.0",
+	"exportedAt": "2026-04-22T04:29:49.496Z",
+	"project": {
+		"name": "Feedbakkr Web",
+		"slug": "feedbakkr-web",
+		"description": null
+	},
+	"defaultStatuses": [
+		{
+			"key": "new",
+			"label": "New",
+			"color": "#6b7280",
+			"sortOrder": 0
+		},
+		{
+			"key": "archived",
+			"label": "Archived",
+			"color": "#22c55e",
+			"sortOrder": 1
+		}
+	],
+	"dxProfile": null,
+	"channels": [
+		{
+			"title": "App Feedback",
+			"slug": "app-feedback",
+			"description": null,
+			"draftSchemaJson": {
+				"v": 1,
+				"fields": [
+					{
+						"k": "feedbackType",
+						"label": "What type of feedback is this?",
+						"req": true,
+						"t": "fixed",
+						"opts": [
+							{
+								"k": "general",
+								"label": "General feedback"
+							},
+							{
+								"k": "bug",
+								"label": "Bug / issue"
+							},
+							{
+								"k": "improvement",
+								"label": "Improvement idea"
+							},
+							{
+								"k": "confusing",
+								"label": "Something confusing"
+							}
+						]
+					},
+					{
+						"k": "message",
+						"label": "What would you like to tell us?",
+						"req": true,
+						"t": "textarea",
+						"min": 5,
+						"max": 4000
+					},
+					{
+						"k": "contactMe",
+						"label": "I’m happy to be contacted about this",
+						"t": "bool"
+					},
+					{
+						"k": "pageUrl",
+						"label": "Page URL",
+						"hidden": true,
+						"t": "text",
+						"max": 500
+					},
+					{
+						"k": "email",
+						"label": "Email",
+						"t": "text"
+					}
+				],
+				"preview": {
+					"mode": "custom",
+					"fields": ["feedbackType", "message"],
+					"separator": " · ",
+					"fallbackFields": ["pageUrl"]
+				}
+			},
+			"schemaFormatVersion": 1,
+			"schemaTemplateId": null,
+			"schemaTemplateTitle": null,
+			"statuses": [
+				{
+					"key": "new",
+					"label": "New",
+					"color": "#6b7280",
+					"sortOrder": 0,
+					"isPublished": false,
+					"isDraft": true
+				},
+				{
+					"key": "archived",
+					"label": "Archived",
+					"color": "#22c55e",
+					"sortOrder": 1,
+					"isPublished": false,
+					"isDraft": true
+				}
+			],
+			"integrations": [],
+			"publishedForm": {
+				"status": "published",
+				"settingsJson": {
+					"formsOriginAllowed": true,
+					"showConfirmation": true,
+					"themeColor": "#00898b",
+					"widget": {
+						"mode": "inline",
+						"position": "bottom-right",
+						"label": "Feedback",
+						"color": "#1e293b"
+					}
+				},
+				"turnstileSiteKey": null
+			}
+		},
+		{
+			"title": "Documentation Page Feedback",
+			"slug": "documentation-page-feedback",
+			"description": "Simple thumbs up/down feedback for documentation pages with optional comments. Perfect for 'Was this helpful?' widgets.",
+			"draftSchemaJson": {
+				"v": 1,
+				"fields": [
+					{
+						"k": "helpful",
+						"label": "Was this page helpful?",
+						"req": true,
+						"t": "fixed",
+						"opts": [
+							{
+								"k": "yes",
+								"label": "Yes"
+							},
+							{
+								"k": "somewhat",
+								"label": "Somewhat"
+							},
+							{
+								"k": "no",
+								"label": "No"
+							}
+						]
+					},
+					{
+						"k": "pageUrl",
+						"label": "Page",
+						"t": "text",
+						"max": 500
+					},
+					{
+						"k": "comment",
+						"label": "How could we improve this page?",
+						"t": "textarea",
+						"max": 1000
+					}
+				],
+				"preview": {
+					"mode": "custom",
+					"maxLength": 100,
+					"fields": ["helpful", "comment"],
+					"separator": " · ",
+					"fallbackFields": ["helpful"]
+				}
+			},
+			"schemaFormatVersion": 1,
+			"schemaTemplateId": "documentation-page-feedback-o8klbq",
+			"schemaTemplateTitle": "Documentation Page Feedback",
+			"statuses": [
+				{
+					"key": "new",
+					"label": "New",
+					"color": "#6b7280",
+					"sortOrder": 0,
+					"isPublished": false,
+					"isDraft": true
+				},
+				{
+					"key": "archived",
+					"label": "Archived",
+					"color": "#22c55e",
+					"sortOrder": 1,
+					"isPublished": false,
+					"isDraft": true
+				}
+			],
+			"integrations": [],
+			"publishedForm": {
+				"status": "published",
+				"settingsJson": {
+					"formsOriginAllowed": true
+				},
+				"turnstileSiteKey": null
+			}
+		},
+		{
+			"title": "Report Abuse",
+			"slug": "report-abuse",
+			"description": null,
+			"draftSchemaJson": {
+				"v": 1,
+				"meta": "{\"layout\":[[\"formUrl\",\"email\"]]}",
+				"fields": [
+					{
+						"k": "category",
+						"label": "What type of issue are you reporting?",
+						"req": true,
+						"t": "fixed",
+						"opts": [
+							{
+								"k": "spam",
+								"label": "Spam"
+							},
+							{
+								"k": "phishing",
+								"label": "Phishing or scam"
+							},
+							{
+								"k": "offensive_content",
+								"label": "Offensive or inappropriate content"
+							},
+							{
+								"k": "impersonation",
+								"label": "Impersonation"
+							},
+							{
+								"k": "privacy_concern",
+								"label": "Privacy concern"
+							},
+							{
+								"k": "other",
+								"label": "Other"
+							}
+						]
+					},
+					{
+						"k": "details",
+						"label": "Please describe the issue",
+						"req": true,
+						"t": "textarea",
+						"min": 10,
+						"max": 2000
+					},
+					{
+						"k": "formUrl",
+						"label": "URL of the form or page (if known)",
+						"t": "text",
+						"max": 500
+					},
+					{
+						"k": "email",
+						"label": "Your email (optional, for follow-up)",
+						"t": "text",
+						"max": 200
+					}
+				],
+				"preview": {
+					"mode": "custom",
+					"maxLength": 100,
+					"fields": ["category", "details"],
+					"separator": " · ",
+					"fallbackFields": ["category"]
+				}
+			},
+			"schemaFormatVersion": 1,
+			"schemaTemplateId": null,
+			"schemaTemplateTitle": null,
+			"statuses": [
+				{
+					"key": "new",
+					"label": "New",
+					"color": "#6b7280",
+					"sortOrder": 0,
+					"isPublished": false,
+					"isDraft": true
+				},
+				{
+					"key": "archived",
+					"label": "Archived",
+					"color": "#22c55e",
+					"sortOrder": 1,
+					"isPublished": false,
+					"isDraft": true
+				}
+			],
+			"integrations": [],
+			"publishedForm": {
+				"status": "published",
+				"settingsJson": {
+					"formsOriginAllowed": true,
+					"showConfirmation": true,
+					"widget": {
+						"mode": "inline",
+						"position": "bottom-right",
+						"label": "Feedback",
+						"color": "#1e293b"
+					}
+				},
+				"turnstileSiteKey": null
+			}
+		},
+		{
+			"title": "Web Enquiry",
+			"slug": "web-enquiry",
+			"description": null,
+			"draftSchemaJson": {
+				"v": 1,
+				"title": "General enquiry",
+				"desc": "Contact Feedbakkr about sales, support, partnerships, billing, or general questions.",
+				"meta": "{\"layout\":[[\"name\",\"email\"],[\"phone\",\"company\"]]}",
+				"fields": [
+					{
+						"k": "name",
+						"label": "Your name",
+						"req": true,
+						"t": "text",
+						"min": 2,
+						"max": 100
+					},
+					{
+						"k": "email",
+						"label": "Email address",
+						"req": true,
+						"t": "text",
+						"max": 200
+					},
+					{
+						"k": "phone",
+						"label": "Phone number",
+						"t": "text",
+						"max": 50
+					},
+					{
+						"k": "company",
+						"label": "Company or organisation",
+						"t": "text",
+						"max": 120
+					},
+					{
+						"k": "website",
+						"label": "Website or app URL",
+						"t": "text",
+						"max": 300
+					},
+					{
+						"k": "enquiryType",
+						"label": "What can we help you with?",
+						"req": true,
+						"t": "fixed",
+						"opts": [
+							{
+								"k": "general",
+								"label": "General question"
+							},
+							{
+								"k": "sales",
+								"label": "Sales / pricing"
+							},
+							{
+								"k": "support",
+								"label": "Technical support"
+							},
+							{
+								"k": "bug",
+								"label": "Bug report"
+							},
+							{
+								"k": "feature",
+								"label": "Feature request"
+							},
+							{
+								"k": "partnership",
+								"label": "Partnership / integration"
+							},
+							{
+								"k": "agency",
+								"label": "Agency / reseller"
+							},
+							{
+								"k": "billing",
+								"label": "Billing / account"
+							},
+							{
+								"k": "media",
+								"label": "Press / media"
+							},
+							{
+								"k": "other",
+								"label": "Other"
+							}
+						]
+					},
+					{
+						"k": "urgency",
+						"label": "How urgent is this?",
+						"t": "fixed",
+						"opts": [
+							{
+								"k": "not_urgent",
+								"label": "Not urgent"
+							},
+							{
+								"k": "soon",
+								"label": "Soon"
+							},
+							{
+								"k": "urgent",
+								"label": "Urgent"
+							}
+						]
+					},
+					{
+						"k": "message",
+						"label": "How can we help?",
+						"req": true,
+						"t": "textarea",
+						"min": 10,
+						"max": 4000
+					},
+					{
+						"k": "contactConsent",
+						"label": "I agree to be contacted about this enquiry",
+						"req": false,
+						"t": "bool"
+					}
+				],
+				"preview": {
+					"mode": "custom",
+					"fields": ["enquiryType", "name", "message"],
+					"separator": " · ",
+					"fallbackFields": ["email"]
+				}
+			},
+			"schemaFormatVersion": 1,
+			"schemaTemplateId": null,
+			"schemaTemplateTitle": null,
+			"statuses": [
+				{
+					"key": "new",
+					"label": "New",
+					"color": "#6b7280",
+					"sortOrder": 0,
+					"isPublished": false,
+					"isDraft": true
+				},
+				{
+					"key": "archived",
+					"label": "Archived",
+					"color": "#22c55e",
+					"sortOrder": 1,
+					"isPublished": false,
+					"isDraft": true
+				}
+			],
+			"integrations": [],
+			"publishedForm": {
+				"status": "published",
+				"settingsJson": {
+					"formsOriginAllowed": true
+				},
+				"turnstileSiteKey": null
+			}
+		}
+	]
+}
