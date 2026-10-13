@@ -15,5 +15,5 @@
 	],
 	// React code needs the DOM types, which clash with the Workers ones, so it
 	// is checked by tsconfig.react.json instead.
-	"exclude": ["src/react/**/*", "test/**/*.tsx"]
+	"exclude": ["src/react/**/*", "src/builder/**/*", "test/**/*.tsx"]
 }

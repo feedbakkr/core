@@ -42,6 +42,8 @@
 			"!**/build",
 			"!**/.wrangler",
 			"!**/.turbo",
+			"!**/test-results",
+			"!**/playwright-report",
 			"!**/fixtures"
 		]
 	}

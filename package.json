@@ -11,7 +11,8 @@
 		"lint": "biome check .",
 		"format": "biome format --write .",
 		"check:package": "pnpm -r check:package",
-		"verify": "biome check . && pnpm build && pnpm typecheck && pnpm test && pnpm check:package"
+		"verify": "biome check . && pnpm build && pnpm typecheck && pnpm test && pnpm test:e2e && pnpm check:package",
+		"test:e2e": "pnpm -r test:e2e"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.5.15",

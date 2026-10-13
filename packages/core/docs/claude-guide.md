@@ -17,8 +17,8 @@ Core holds the form schema format and the code that checks it:
 - `hashSchema(schema)` gives a stable id for a schema version.
 
 It runs in Workers, Node and browsers, and depends only on `zod`. The
-React form, `DynamicForm`, is a separate entry, `/react`, so servers never
-load React.
+React form, `DynamicForm`, and the builder, `FeedbakkrBuilder`, are separate
+entries, `/react` and `/builder`, so servers never load React.
 
 ## Tools
 
@@ -92,6 +92,15 @@ if (!answers.success) {
 
 Add a test that runs `validateSchema(contactForm, { publish: true })` and
 expects `ok: true`, so a later edit cannot break the form unnoticed.
+
+## Letting people edit a form
+
+`FeedbakkrBuilder` from `@ai-food-focus/feedbakkr-core/builder` is the form
+builder. The app loads the schema, passes it as `value`, and saves it in
+`onSave`, which the builder calls only after `validateSchema` passes. Import
+`@ai-food-focus/feedbakkr-core/builder.css` once. The route that stores the
+schema must still run `validateSchema` (rule 4), with `publish: true` when it
+goes live. See the README for its props and peer dependencies.
 
 ## Showing the form
 
