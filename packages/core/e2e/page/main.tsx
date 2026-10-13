@@ -4,7 +4,7 @@ import { StrictMode, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { FeedbakkrBuilder } from "../../dist/builder.js";
 import "../../dist/builder.css";
-import type { SchemaDslV1 } from "../../dist/index.js";
+import type { SchemaDsl, SchemaDslV1 } from "../../dist/index.js";
 
 const start: SchemaDslV1 = {
 	v: 1,
@@ -17,9 +17,30 @@ const start: SchemaDslV1 = {
 	preview: { mode: "custom", fields: ["name"] },
 };
 
+// /?v2 starts from an enquiry with a choice, and offers v2 editing.
+const v2 = new URLSearchParams(location.search).has("v2");
+const enquiry: SchemaDslV1 = {
+	v: 1,
+	title: "Work with us",
+	fields: [
+		{
+			k: "kind",
+			label: "Enquiry type",
+			t: "fixed",
+			req: true,
+			opts: [
+				{ k: "supplier", label: "Supplier" },
+				{ k: "other", label: "Other" },
+			],
+		},
+		{ k: "volume", label: "Monthly volume", t: "integer", req: true },
+		{ k: "email", label: "Email", t: "email", req: true },
+	],
+};
+
 function Page() {
-	const [schema, setSchema] = useState(start);
-	const [saved, setSaved] = useState<SchemaDslV1 | null>(null);
+	const [schema, setSchema] = useState<SchemaDsl>(v2 ? enquiry : start);
+	const [saved, setSaved] = useState<SchemaDsl | null>(null);
 	const [dirty, setDirty] = useState(false);
 	const [notices, setNotices] = useState<string[]>([]);
 	return (
@@ -30,6 +51,8 @@ function Page() {
 				onSave={(s) => setSaved(s)}
 				onDirtyChange={setDirty}
 				onNotify={(n) => setNotices((all) => [...all, n.message])}
+				allowV2={v2}
+				lockedFields={v2 ? ["email"] : []}
 			/>
 			<pre data-testid="schema" hidden>
 				{JSON.stringify(schema)}

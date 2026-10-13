@@ -121,7 +121,10 @@ builder. The app loads the schema, passes it as `value`, and saves it in
 `onSave`, which the builder calls only after `validateSchema` passes. Import
 `@ai-food-focus/feedbakkr-core/builder.css` once. The route that stores the
 schema must still run `validateSchema` (rule 4), with `publish: true` when it
-goes live. See the README for its props and peer dependencies.
+goes live. Pass `allowV2` to offer conditions and sections (only where the
+app renders forms with `FeedbakkrForm`), and `lockedFields` for fields the
+app relies on, such as `name` and `email`. See the README for its props and
+peer dependencies.
 
 ## Building the form from the app's components
 

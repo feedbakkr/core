@@ -1,17 +1,61 @@
 // The builder's preview, from FeedBakkr's TestFormPanel
 // (apps/app/app/components/test-form-panel.tsx at 8ae744e). It keeps the
-// autofill button and DynamicForm. FeedBakkr sent the answers to the channel's
-// dev inbox, with an optional sent date; here they are only checked, and the
-// answers that pass are shown.
+// autofill button. FeedBakkr rendered DynamicForm and sent the answers to the
+// channel's dev inbox, with an optional sent date; here FeedbakkrForm renders
+// v1 and v2 schemas, so fields appear and disappear as conditions change, and
+// the answers are only checked, with those that pass shown.
 import { Check, Wand2 } from "lucide-react";
 import { useState } from "react";
-import { DynamicForm } from "../react/dynamic-form.js";
+import { FeedbakkrForm, type FormComponents } from "../react/feedbakkr-form.js";
 import { generateSampleData } from "../schema/generate-sample-data.js";
 import type { SchemaDslV1 } from "../schema/schema-dsl.js";
+import type { SchemaDsl } from "../schema/schema-dsl-v2.js";
 import { CodePreview } from "./code-preview.js";
 import { Button } from "./ui/button.js";
+import { Checkbox } from "./ui/checkbox.js";
+import { Input } from "./ui/input.js";
+import { Label } from "./ui/label.js";
+import { Select } from "./ui/select.js";
+import { Textarea } from "./ui/textarea.js";
 
-export function TestFormPanel({ schema }: { schema: SchemaDslV1 }) {
+/** The preview drawn with the builder's own pieces, so it matches the builder. */
+const PREVIEW_COMPONENTS: Partial<FormComponents> = {
+	Input: (props) => <Input {...props} />,
+	Textarea: (props) => <Textarea {...props} />,
+	Select: (props) => <Select {...props} />,
+	Checkbox: (props) => <Checkbox {...props} className="inline-block align-middle mr-2" />,
+	Label: ({ required, children, ...props }) => (
+		<Label className="mb-1 text-sm" {...props}>
+			{children}
+			{required && (
+				<span aria-hidden="true" className="text-destructive">
+					{" *"}
+				</span>
+			)}
+		</Label>
+	),
+	FieldWrapper: ({ children }) => <div className="mb-4 space-y-1">{children}</div>,
+	Help: ({ id, children }) => (
+		<p id={id} className="text-xs text-muted-foreground">
+			{children}
+		</p>
+	),
+	Error: ({ id, children }) => (
+		<p id={id} role="alert" className="text-xs text-destructive">
+			{children}
+		</p>
+	),
+	Button: (props) => <Button type="button" variant="outline" size="sm" {...props} />,
+	Section: ({ section, children }) => (
+		<fieldset className="mb-4 rounded-md border p-3">
+			<legend className="px-1 text-sm font-semibold">{section.title}</legend>
+			{section.desc && <p className="mb-2 text-xs text-muted-foreground">{section.desc}</p>}
+			{children}
+		</fieldset>
+	),
+};
+
+export function TestFormPanel({ schema }: { schema: SchemaDsl }) {
 	const [formKey, setFormKey] = useState(0);
 	const [autofillValues, setAutofillValues] = useState<Record<string, unknown> | undefined>();
 	const [result, setResult] = useState<{ schema: string; answers: Record<string, unknown> }>();
@@ -21,7 +65,7 @@ export function TestFormPanel({ schema }: { schema: SchemaDslV1 }) {
 	const checked = result?.schema === schemaJson ? result.answers : undefined;
 
 	const handleAutofill = () => {
-		setAutofillValues(generateSampleData(schema));
+		setAutofillValues(generateSampleData(schema as SchemaDslV1));
 		setFormKey((k) => k + 1);
 		setResult(undefined);
 	};
@@ -40,7 +84,8 @@ export function TestFormPanel({ schema }: { schema: SchemaDslV1 }) {
 					Autofill sample data
 				</Button>
 			</div>
-			<DynamicForm
+			<FeedbakkrForm
+				components={PREVIEW_COMPONENTS}
 				key={`${formKey}:${schemaJson}`}
 				schema={schema}
 				initialValues={autofillValues}
