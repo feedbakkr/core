@@ -1,6 +1,6 @@
 {
 	"name": "@ai-food-focus/feedbakkr-core",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"description": "FeedBakkr form toolkit: schema format, validation, text format and exports.",
 	"license": "UNLICENSED",
 	"repository": {
@@ -10,6 +10,9 @@
 	},
 	"type": "module",
 	"sideEffects": false,
+	"bin": {
+		"feedbakkr": "./bin/feedbakkr.js"
+	},
 	"main": "./dist/index.js",
 	"types": "./dist/index.d.ts",
 	"exports": {
@@ -32,7 +35,9 @@
 		"./package.json": "./package.json"
 	},
 	"files": [
+		"bin",
 		"dist",
+		"docs",
 		"README.md"
 	],
 	"publishConfig": {
@@ -50,6 +55,7 @@
 	"devDependencies": {
 		"@arethetypeswrong/cli": "^0.18.5",
 		"@cloudflare/vitest-plugin": "^1.4.0",
+		"@modelcontextprotocol/sdk": "^1.32.1",
 		"@types/node": "^22.0.0",
 		"publint": "^0.3.25",
 		"tsup": "^8.5.1",

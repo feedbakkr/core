@@ -1,0 +1,82 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`feedbakkr guide, mcp, help and errors > prints its version and help 1`] = `
+{
+  "code": 0,
+  "stderr": "",
+  "stdout": "Usage: feedbakkr <command> [options]
+
+Commands:
+  validate [--publish] [--json] <file...>  Check schemas (JSON or the text format)
+  text <file>                              JSON to the text format, or text to JSON
+  sample <file>                            Example answers that pass the schema
+  guide [schema|claude]                    Print the schema guide, or the notes for agents
+  mcp                                      Run the MCP server on stdin and stdout
+
+A file of "-" reads standard input. Exit codes: 0 success, 1 invalid input,
+2 a usage error or a file that cannot be read.
+",
+}
+`;
+
+exports[`feedbakkr sample > prints answers that pass the schema 1`] = `
+{
+  "code": 0,
+  "stderr": "",
+  "stdout": "{
+  "name": "Example Name",
+  "topic": "order"
+}
+",
+}
+`;
+
+exports[`feedbakkr text > fails on text it cannot read 1`] = `
+{
+  "code": 1,
+  "stderr": "The text could not be read:
+- line 2: Could not parse field: name: nonsense
+",
+  "stdout": "",
+}
+`;
+
+exports[`feedbakkr text > writes JSON as text 1`] = `
+{
+  "code": 0,
+  "stderr": "",
+  "stdout": "@version 1
+@title Contact
+@preview name
+
+name: text "Name" required min=1
+topic: fixed "Topic"
+  - order "An order"
+  - other
+",
+}
+`;
+
+exports[`feedbakkr validate > fails and lists the issues 1`] = `
+{
+  "code": 1,
+  "stderr": "",
+  "stdout": "contact.json: Valid schema (2 fields), including the publish checks.
+empty.json: Invalid schema, 1 issue:
+- Schema must have at least one field (not_publishable)
+long-names.json: Invalid schema, 1 issue:
+- fields.0.t: Invalid discriminator value. Expected 'text' | 'textarea' | 'markdown' | 'date' | 'datetime' | 'time' | 'daterange' | 'bool' | 'number' | 'integer' | 'email' | 'url' | 'phone' | 'fixed' | 'dynlist' (invalid_structure)
+Fields use k, t and req, not key, type and required.
+",
+}
+`;
+
+exports[`feedbakkr validate > passes valid schemas in either format 1`] = `
+{
+  "code": 0,
+  "stderr": "",
+  "stdout": "contact.json: Valid schema (2 fields), including the publish checks.
+contact.fbk: Valid schema (2 fields), including the publish checks.
+",
+}
+`;
