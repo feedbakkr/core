@@ -17,7 +17,7 @@ form, a form hook and the form builder are separate entries.
 | `@ai-food-focus/feedbakkr-core/form` | Form state as plain data: `createFormState`, `setValue`, `checkFields` |
 | `@ai-food-focus/feedbakkr-core/text` | `parseFormDslText`, `schemaToTextDsl` |
 | `@ai-food-focus/feedbakkr-core/export` | `generateJsonSchema`, `generateZodCode` |
-| `@ai-food-focus/feedbakkr-core/react` | `DynamicForm` and `useFeedbakkrForm`. Needs `react` 19, an optional peer dependency that only this entry imports. |
+| `@ai-food-focus/feedbakkr-core/react` | `FeedbakkrForm`, `useFeedbakkrForm` and `DynamicForm`. Needs `react` 19, an optional peer dependency that only this entry imports. |
 | `@ai-food-focus/feedbakkr-core/builder` | `FeedbakkrBuilder`, the form builder. Needs the optional peer dependencies below and `builder.css`. |
 | `@ai-food-focus/feedbakkr-core/builder.css` | The builder's stylesheet. |
 
@@ -59,7 +59,8 @@ loudly instead of dropping conditions. The format is in
   with `if`/`then` and `superRefine`; a test runs both, and
   `validateSubmission`, over thousands of answer combinations and requires
   the same verdict.
-- `DynamicForm`, `generateZod` and the builder are still v1 only.
+- `FeedbakkrForm` renders v2. `DynamicForm`, `generateZod` and the builder
+  are still v1 only.
 
 ## Check and store answers
 
@@ -133,7 +134,25 @@ a field when the person leaves it, all of them on submit. `onSubmit` gets
 the normalised values. `setErrors` shows errors from the server, `validate`
 checks chosen fields, and `reset` starts again. It renders nothing.
 
-## Render a form
+## Render a form: FeedbakkrForm
+
+```tsx
+import { FeedbakkrForm } from "@ai-food-focus/feedbakkr-core/react";
+
+<FeedbakkrForm schema={schema} onSubmit={(answers) => send(answers)} />;
+```
+
+`FeedbakkrForm` renders v1 and v2 schemas on `useFeedbakkrForm`, so it
+checks answers with the server's rules and follows conditions. It takes
+`DynamicForm`'s props (`initialValues`, `submitting`, `renderFooter`,
+`className`, `style`) and adds `components` (the app's own building blocks;
+plain elements with `data-fbk` attributes by default), `widgets` (a control
+per field type), `strings` (every label, and wording per error code),
+controlled `values` and `onChange`, `errors` from the server, and
+`layout="steps"` for sections. Errors and help text are linked to their
+inputs for screen readers, and tests run axe on the rendered fixtures.
+
+## Render a form: DynamicForm (v1)
 
 ```tsx
 import { DynamicForm } from "@ai-food-focus/feedbakkr-core/react";

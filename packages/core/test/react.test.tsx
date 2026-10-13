@@ -165,7 +165,8 @@ describe("DynamicForm", () => {
 		expect(wrapper.querySelector("p")).toBeNull();
 	});
 
-	it.todo("links each error to its control with aria-describedby (milestone 9)");
+	// DynamicForm stays as FeedBakkr's: errors are not linked to their inputs.
+	// FeedbakkrForm, which replaces it, links them (feedbakkr-form.test.tsx).
 
 	// Intentional difference 12 (see intentional-differences.test.ts).
 	it("drops list entries that were added but left empty", () => {

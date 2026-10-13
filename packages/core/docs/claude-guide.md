@@ -166,34 +166,37 @@ const form = useFeedbakkrForm(contactForm, {
 
 ## Showing a form without custom components
 
-`DynamicForm` from `@ai-food-focus/feedbakkr-core/react` renders any v1
-schema (React 19):
+`FeedbakkrForm` from `@ai-food-focus/feedbakkr-core/react` renders any v1 or
+v2 schema with the same checks as the server:
 
 ```tsx
-// in the page
-import { DynamicForm } from "@ai-food-focus/feedbakkr-core/react";
+import { FeedbakkrForm } from "@ai-food-focus/feedbakkr-core/react";
 import { contactForm } from "../forms/contact.js";
 
-<DynamicForm
+<FeedbakkrForm
 	schema={contactForm}
 	initialValues={{ source_page: location.href }}
 	submitting={sending}
 	onSubmit={(answers) => send(answers)}
-	className="contact-form"
+	errors={serverErrors}
+	components={{ Input: TextInput, Select: SelectInput, Button: AppButton }}
+	strings={{ submit: "Send", errors: { required: "Please fill this in" } }}
 />;
 ```
 
-- It checks the answers with `generateZod` before calling `onSubmit`, and
-  shows the first problem under each field. The route must still check them
-  (rule 3).
-- `onSubmit` gets the checked answers. Errors from the server are not shown
-  by the form, so show them on the page.
-- Hidden fields are not rendered. Fill them through `initialValues`.
-- `submitting` disables the Submit button. `renderFooter` replaces the
-  button with your own.
-- The look is fixed: plain inputs with inline styles and English text
-  ("Submit", "Select..."). `className` and `style` go on the `<form>`
-  element. When the app needs its own components, build the form from the
-  schema's fields instead, and keep rules 2 and 3.
-- Errors are not yet linked to their inputs for screen readers. A renderer
-  that can be styled comes in a later release; until then, use the hook.
+- With no `components` it renders plain, unstyled elements marked with
+  `data-fbk` attributes. Pass the app's own `Input`, `Textarea`, `Select`,
+  `Checkbox`, `Label`, `FieldWrapper`, `Help`, `Error`, `Button` and
+  `Section` to get the app's look. `widgets` replaces the control for a
+  field type, such as `date`.
+- `strings` holds every built-in label, and `strings.errors` maps error
+  codes to the app's wording.
+- `errors` shows errors the route returned; each clears when its field
+  changes. `values` and `onChange` make it controlled.
+- In v2, fields and sections appear as their conditions hold. Sections are
+  stacked; `layout="steps"` shows one at a time with Back and Next.
+- Errors and help are linked to their inputs (`aria-describedby`,
+  `aria-invalid`), and required fields are marked `aria-required`.
+
+`DynamicForm` is FeedBakkr's original renderer, kept unchanged for v1. Use
+`FeedbakkrForm` in new code.

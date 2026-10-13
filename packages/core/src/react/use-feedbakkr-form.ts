@@ -24,6 +24,12 @@ export interface UseFeedbakkrFormOptions {
 	onSubmit?: (values: Record<string, unknown>) => void | Promise<void>;
 	/** Check a field when the person leaves it (default true). */
 	validateOnBlur?: boolean;
+	/**
+	 * Controlled mode: the answers come from here, and every change goes to
+	 * `onValuesChange` instead of the hook's own state.
+	 */
+	values?: Record<string, unknown>;
+	onValuesChange?: (values: Record<string, unknown>) => void;
 }
 
 export interface FeedbakkrFormApi {
@@ -68,15 +74,29 @@ export function useFeedbakkrForm(
 	options: UseFeedbakkrFormOptions = {},
 ): FeedbakkrFormApi {
 	const { initialValues, onSubmit, validateOnBlur = true } = options;
-	const [state, setState] = useState<FormState>(() => createFormState(schema, initialValues));
+	const [ownState, setState] = useState<FormState>(() =>
+		createFormState(schema, options.values ?? initialValues),
+	);
 	const [submitting, setSubmitting] = useState(false);
 	const [submitCount, setSubmitCount] = useState(0);
+	const controlled = options.values !== undefined;
+	const state: FormState = controlled
+		? { ...ownState, values: options.values as Record<string, unknown> }
+		: ownState;
 	// The latest state, for handlers called before a re-render.
 	const stateRef = useRef(state);
 	stateRef.current = state;
+	const onValuesChangeRef = useRef(options.onValuesChange);
+	onValuesChangeRef.current = options.onValuesChange;
+	const controlledRef = useRef(controlled);
+	controlledRef.current = controlled;
 
 	const update = useCallback((next: (s: FormState) => FormState) => {
-		stateRef.current = next(stateRef.current);
+		const before = stateRef.current;
+		stateRef.current = next(before);
+		if (controlledRef.current && stateRef.current.values !== before.values) {
+			onValuesChangeRef.current?.(stateRef.current.values);
+		}
 		setState(stateRef.current);
 	}, []);
 
