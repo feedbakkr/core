@@ -2,7 +2,9 @@ packages:
   - "packages/*"
 
 # Dependencies allowed to run install scripts (pnpm 11 fails the install on an
-# unapproved one). esbuild fetches its platform binary, which tsup needs.
+# unapproved one). esbuild fetches its platform binary, which tsup needs, and
+# workerd fetches the Workers runtime the Workers smoke test runs in.
 allowBuilds:
   "@biomejs/biome": true
   esbuild: true
+  workerd: true
