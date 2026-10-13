@@ -2,7 +2,8 @@
 
 FeedBakkr's form schema format, its checks and its payload validator, as pure
 TypeScript with `zod` as the only dependency. It runs in Cloudflare Workers,
-Node and browsers. A React form renderer is a separate entry.
+Node and browsers. A React form renderer and the form builder are separate
+entries.
 
 ## Entry points
 
@@ -13,6 +14,8 @@ Node and browsers. A React form renderer is a separate entry.
 | `@ai-food-focus/feedbakkr-core/text` | `parseFormDslText`, `schemaToTextDsl` |
 | `@ai-food-focus/feedbakkr-core/export` | `generateJsonSchema`, `generateZodCode` |
 | `@ai-food-focus/feedbakkr-core/react` | `DynamicForm`. Needs `react` 19, an optional peer dependency that only this entry imports. |
+| `@ai-food-focus/feedbakkr-core/builder` | `FeedbakkrBuilder`, the form builder. Needs the optional peer dependencies below and `builder.css`. |
+| `@ai-food-focus/feedbakkr-core/builder.css` | The builder's stylesheet. |
 
 ## Check a schema
 
@@ -58,6 +61,61 @@ way), `submitting`, `renderFooter`, and `className` and `style` for the
 `<form>`. Tests render every fixture through it and FeedBakkr's copy and
 require the same HTML, and require everything it submits to pass the check
 after a JSON round trip.
+
+## Edit a form: the builder
+
+```tsx
+import { FeedbakkrBuilder } from "@ai-food-focus/feedbakkr-core/builder";
+import "@ai-food-focus/feedbakkr-core/builder.css";
+
+<FeedbakkrBuilder
+	value={schema}
+	onChange={setSchema}        // every edit
+	onSave={save}               // optional: shows a Save button
+	onDirtyChange={setDirty}    // the host blocks navigation while dirty
+	onNotify={(n) => toast(n.message)}
+	readOnly={!canEdit}
+/>;
+```
+
+It is FeedBakkr's builder: a field list with drag to reorder, add and edit
+dialogs, settings for each field type, warnings, inbox preview settings,
+meta, the JSON, Zod and JSON Schema views, export as a JSON template or the
+text format, and import from a template. Beside the list, a preview renders
+the form with `DynamicForm` and checks answers locally. It makes no network
+calls and has no login or routing: the host loads and saves the schema.
+
+`onSave` receives the schema only after `validateSchema` passes; a thrown
+error is shown in the builder. `title` and `description` name the exported
+template, and default to the schema's own.
+
+It needs these optional peer dependencies, which only `/builder` imports:
+`react` and `react-dom` 19, `radix-ui`, `@dnd-kit/core`, `@dnd-kit/sortable`,
+`@dnd-kit/utilities` and `lucide-react`.
+
+`builder.css` is compiled from FeedBakkr's Tailwind classes and scoped to
+`.fbk-builder`, so the host needs neither Tailwind nor shadcn, and nothing
+outside the builder is styled. Change its colours by setting these on
+`.fbk-builder`: `--fbk-accent`, `--fbk-accent-foreground`, `--fbk-background`,
+`--fbk-foreground`, `--fbk-muted`, `--fbk-muted-foreground`, `--fbk-border`
+and `--fbk-destructive`. A `.dark` class on an ancestor switches to dark
+colours.
+
+What differs from FeedBakkr's builder page:
+
+- Loading, saving, permissions and navigation blocking are the host's, through
+  the props above.
+- The schema's `title` and `desc` are kept. FeedBakkr removed them, because a
+  channel holds its own.
+- The preview beside the field list and the check before `onSave` are new.
+  FeedBakkr tested a draft on a separate page, by sending it to the channel's
+  inbox.
+- The warnings button sits in the toolbar rather than the page header.
+- A read-only builder with no fields says so, rather than offering to add one.
+
+Its tests: unit tests for the reducer, component tests, and browser tests
+(`pnpm test:e2e`) that add, edit, reorder, preview, export and save on a test
+page (`e2e/page`), and fail if the page makes any request beyond itself.
 
 ## Store the version a message was validated against
 

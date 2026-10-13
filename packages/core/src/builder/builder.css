@@ -1,0 +1,87 @@
+/*
+ * Source of dist/builder.css (scripts/build-builder-css.mjs). The builder's
+ * components keep FeedBakkr's Tailwind classes; Tailwind compiles the ones
+ * they use into a stylesheet scoped to `.fbk-builder`, so the host needs
+ * neither Tailwind nor shadcn.
+ *
+ * The colours are FeedBakkr's (apps/app/app/app.css at 8ae744e). A host
+ * changes them by setting these variables on `.fbk-builder`:
+ *
+ *   --fbk-accent             buttons, links, focus rings (FeedBakkr's teal)
+ *   --fbk-accent-foreground  text on the accent
+ *   --fbk-background         panels and inputs
+ *   --fbk-foreground         text
+ *   --fbk-muted              quiet backgrounds
+ *   --fbk-muted-foreground   secondary text
+ *   --fbk-border             borders and inputs
+ *   --fbk-destructive        errors and delete
+ *
+ * Dark mode follows a `.dark` class on an ancestor, as in FeedBakkr.
+ */
+@import "tailwindcss" source(none);
+@import "tw-animate-css";
+@source "./";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+	--color-background: var(--fbk-background, oklch(0.995 0.002 60));
+	--color-foreground: var(--fbk-foreground, oklch(0.15 0.01 60));
+	--color-card: var(--fbk-background, oklch(1 0 0));
+	--color-card-foreground: var(--fbk-foreground, oklch(0.15 0.01 60));
+	--color-popover: var(--fbk-background, oklch(1 0 0));
+	--color-popover-foreground: var(--fbk-foreground, oklch(0.15 0.01 60));
+	--color-primary: var(--fbk-accent, oklch(0.55 0.14 195));
+	--color-primary-foreground: var(--fbk-accent-foreground, oklch(0.99 0 0));
+	--color-secondary: var(--fbk-muted, oklch(0.96 0.005 60));
+	--color-secondary-foreground: var(--fbk-foreground, oklch(0.2 0.01 60));
+	--color-muted: var(--fbk-muted, oklch(0.96 0.005 60));
+	--color-muted-foreground: var(--fbk-muted-foreground, oklch(0.5 0.01 60));
+	--color-accent: var(--fbk-muted, oklch(0.94 0.01 195));
+	--color-accent-foreground: var(--fbk-foreground, oklch(0.2 0.01 60));
+	--color-destructive: var(--fbk-destructive, oklch(0.55 0.22 27));
+	--color-border: var(--fbk-border, oklch(0.91 0.005 60));
+	--color-input: var(--fbk-border, oklch(0.91 0.005 60));
+	--color-ring: var(--fbk-accent, oklch(0.55 0.14 195));
+
+	--radius-sm: 0.375rem;
+	--radius-md: 0.5rem;
+	--radius-lg: 0.625rem;
+	--radius-xl: 0.875rem;
+}
+
+.dark {
+	--fbk-background: oklch(0.14 0.01 60);
+	--fbk-foreground: oklch(0.93 0.005 60);
+	--fbk-accent: oklch(0.65 0.15 195);
+	--fbk-accent-foreground: oklch(0.13 0.01 60);
+	--fbk-muted: oklch(0.22 0.01 60);
+	--fbk-muted-foreground: oklch(0.6 0.01 60);
+	--fbk-destructive: oklch(0.6 0.22 27);
+	--fbk-border: oklch(0.26 0.01 60);
+}
+
+/* As FeedBakkr's body: its font, the theme's text colour, and borders in the
+   theme's border colour. Applied to the builder's root and portalled dialogs. */
+@layer base {
+	.fbk-builder {
+		font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+		color: var(--color-foreground);
+		line-height: 1.5;
+	}
+
+	* {
+		border-color: var(--color-border);
+	}
+}
+
+/* As FeedBakkr's app: no zoom into inputs on phones. */
+@media screen and (max-width: 767px) {
+	input,
+	textarea,
+	select {
+		font-size: 16px !important;
+	}
+}

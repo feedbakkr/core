@@ -42,6 +42,10 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
 
+      # Chromium for the builder's browser tests (packages/core/e2e).
+      - name: Install Playwright's Chromium
+        run: pnpm --filter @ai-food-focus/feedbakkr-core exec playwright install --with-deps chromium
+
       - name: Verify
         run: pnpm verify
 
