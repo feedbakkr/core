@@ -39,15 +39,30 @@
  *   - @preview a, b separator=" · " maxLength=100 fallback=c,d prefix="..."
  *   - Blank lines and # comments are ignored
  *
+ * Schema v2 (`@version 2`) adds:
+ *   - help="..." and placeholder="..." on a field line
+ *   - `when <condition>` at the end of a field line (see condition-text.ts)
+ *   - `@section id "Title" desc="..." when <condition>`: the fields that
+ *     follow belong to that section, up to the next @section
+ *
  * Changed from FeedBakkr (8ae744e) so every schema round-trips exactly; each
  * change is listed and tested in test/intentional-differences.test.ts.
  */
 
 import type { DslField, FixedOption, PreviewConfig, SchemaDslV1 } from "../schema/schema-dsl.js";
+import type {
+	Condition,
+	DslFieldV2,
+	SchemaDsl,
+	SchemaDslV2,
+	SchemaSection,
+} from "../schema/schema-dsl-v2.js";
+import { conditionToText, parseCondition } from "./condition-text.js";
 
 export interface TextDslParseResult {
 	ok: true;
-	schema: SchemaDslV1;
+	/** A v1 schema, or v2 when the text says `@version 2`. */
+	schema: SchemaDsl;
 }
 
 export interface TextDslParseError {
@@ -65,7 +80,14 @@ export function parseFormDslText(input: string): TextDslResult {
 	let desc: string | undefined;
 	let meta: string | undefined;
 	let preview: PreviewConfig | undefined;
+	let version = 1;
+	/** The line of the first v2 feature, to report it in a v1 text. */
+	let firstV2Line = 0;
+	const sections: SchemaSection[] = [];
 	const fields: DslField[] = [];
+	const noteV2 = (line: number) => {
+		if (!firstV2Line) firstV2Line = line;
+	};
 
 	let currentField: DslField | null = null;
 	let _currentFieldLine = 0;
@@ -73,6 +95,7 @@ export function parseFormDslText(input: string): TextDslResult {
 	function pushCurrentField() {
 		if (currentField) {
 			fields.push(currentField);
+			sections.at(-1)?.fields.push(currentField.k);
 			currentField = null;
 		}
 	}
@@ -97,10 +120,28 @@ export function parseFormDslText(input: string): TextDslResult {
 			const value = match[2] ?? "";
 			switch (directive) {
 				case "version":
-					if (value.trim() !== "1") {
+					if (value.trim() === "1" || value.trim() === "2") {
+						version = Number(value.trim());
+					} else {
 						errors.push({ line: lineNum, message: `Unsupported version: ${value.trim()}` });
 					}
 					break;
+				case "section": {
+					noteV2(lineNum);
+					if (fields.length > 0 && sections.length === 0) {
+						errors.push({
+							line: lineNum,
+							message:
+								"With sections, every field must be in one: put a @section before the first field",
+						});
+					}
+					try {
+						sections.push(parseSectionDirective(value));
+					} catch (err) {
+						errors.push({ line: lineNum, message: `Invalid section: ${(err as Error).message}` });
+					}
+					break;
+				}
 				case "title":
 					title = value.trim();
 					break;
@@ -149,8 +190,19 @@ export function parseFormDslText(input: string): TextDslResult {
 					continue;
 				}
 				const itemDef = trimmed.slice(itemMatch[0].length).trim();
-				const itemField = parseFieldLine(itemMatch[1] ?? "_item", itemDef);
-				if (itemField) {
+				let itemField: DslFieldV2 | null = null;
+				try {
+					itemField = parseFieldLine(itemMatch[1] ?? "_item", itemDef);
+				} catch (err) {
+					errors.push({ line: lineNum, message: (err as Error).message });
+					continue;
+				}
+				if (itemField && (itemField.when || itemField.help || itemField.placeholder)) {
+					errors.push({
+						line: lineNum,
+						message: "A list's item takes no when, help or placeholder",
+					});
+				} else if (itemField) {
 					(field as any).item = itemField;
 				} else {
 					errors.push({ line: lineNum, message: `Invalid item definition: ${trimmed}` });
@@ -178,7 +230,14 @@ export function parseFormDslText(input: string): TextDslResult {
 			continue;
 		}
 
-		const field = parseFieldLine(key, rest);
+		let field: DslFieldV2 | null = null;
+		try {
+			field = parseFieldLine(key, rest);
+		} catch (err) {
+			errors.push({ line: lineNum, message: (err as Error).message });
+			continue;
+		}
+		if (field && (field.when || field.help || field.placeholder)) noteV2(lineNum);
 		if (field) {
 			currentField = field;
 			_currentFieldLine = lineNum;
@@ -199,17 +258,22 @@ export function parseFormDslText(input: string): TextDslResult {
 		}
 	}
 
+	if (firstV2Line && version !== 2) {
+		errors.push({
+			line: firstV2Line,
+			message: "Conditions, sections, help and placeholder need @version 2",
+		});
+	}
+
 	if (errors.length > 0) {
 		return { ok: false, errors };
 	}
 
-	const schema: SchemaDslV1 = {
-		v: 1,
-		fields: fields as any,
-	};
+	const schema = { v: version, fields } as SchemaDslV1 | SchemaDslV2;
 	if (title) schema.title = title;
 	if (desc) schema.desc = desc;
 	if (meta) schema.meta = meta;
+	if (sections.length > 0) (schema as SchemaDslV2).sections = sections;
 	if (preview) schema.preview = preview;
 
 	return { ok: true, schema };
@@ -290,7 +354,54 @@ function quote(value: string): string {
 
 // ─── Field line parser ─────────────────────────────────────────────────────
 
-function parseFieldLine(key: string, rest: string): DslField | null {
+/** Splits `... when <condition>` at the first `when` outside quotes. */
+function splitWhen(text: string): [string, string | undefined] {
+	let inQuote = false;
+	for (let i = 0; i < text.length; i++) {
+		const ch = text[i];
+		if (ch === "\\" && inQuote) {
+			i++;
+			continue;
+		}
+		if (ch === '"') inQuote = !inQuote;
+		if (
+			!inQuote &&
+			text.startsWith("when", i) &&
+			(i === 0 || /\s/.test(text[i - 1] as string)) &&
+			(i + 4 === text.length || /\s/.test(text[i + 4] as string))
+		) {
+			return [text.slice(0, i).trim(), text.slice(i + 4).trim()];
+		}
+	}
+	return [text, undefined];
+}
+
+function parseWhen(text: string): Condition {
+	try {
+		return parseCondition(text);
+	} catch (err) {
+		throw new Error(`Invalid condition "${text}": ${(err as Error).message}`);
+	}
+}
+
+function parseSectionDirective(value: string): SchemaSection {
+	const [head, whenText] = splitWhen(value.trim());
+	const tokens = tokenize(head);
+	const id = tokens.shift();
+	if (!id || !/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(id)) throw new Error("expected an id");
+	const titleToken = tokens.shift();
+	if (titleToken === undefined || !isQuoted(titleToken)) throw new Error('expected a "Title"');
+	const section: SchemaSection = { id, title: unquote(titleToken), fields: [] };
+	for (const token of tokens) {
+		if (token.startsWith("desc=")) section.desc = unquote(token.slice(5));
+		else throw new Error(`unexpected ${token}`);
+	}
+	if (whenText !== undefined) section.when = parseWhen(whenText);
+	return section;
+}
+
+function parseFieldLine(key: string, line: string): DslFieldV2 | null {
+	const [rest, whenText] = splitWhen(line);
 	const tokens = tokenize(rest);
 
 	// Type (first word)
@@ -315,6 +426,8 @@ function parseFieldLine(key: string, rest: string): DslField | null {
 	let maxItems: number | undefined;
 	let minSpanDays: number | undefined;
 	let maxSpanDays: number | undefined;
+	let help: string | undefined;
+	let placeholder: string | undefined;
 
 	for (const token of tokens) {
 		if (token === "required") {
@@ -350,6 +463,12 @@ function parseFieldLine(key: string, rest: string): DslField | null {
 			case "meta":
 				meta = value;
 				break;
+			case "help":
+				help = value;
+				break;
+			case "placeholder":
+				placeholder = value;
+				break;
 			// A quoted bound is always a string (min="today+5d"); an unquoted one
 			// is a number when it reads as one.
 			case "min":
@@ -378,45 +497,48 @@ function parseFieldLine(key: string, rest: string): DslField | null {
 	if (sensitive !== undefined) base.sensitive = sensitive;
 	if (defaultVal !== undefined) base.default = defaultVal;
 	if (meta) base.meta = meta;
+	if (help !== undefined) base.help = help;
+	if (placeholder !== undefined) base.placeholder = placeholder;
+	if (whenText !== undefined) base.when = parseWhen(whenText);
 
 	switch (fieldType) {
 		case "text":
 		case "textarea":
 			if (minNum !== undefined) base.min = minNum;
 			if (maxNum !== undefined) base.max = maxNum;
-			return base as DslField;
+			return base as DslFieldV2;
 		case "markdown":
 		case "email":
 		case "url":
 		case "phone":
 			if (maxNum !== undefined) base.max = maxNum;
-			return base as DslField;
+			return base as DslFieldV2;
 		case "number":
 		case "integer":
 			if (minNum !== undefined) base.min = minNum;
 			if (maxNum !== undefined) base.max = maxNum;
-			return base as DslField;
+			return base as DslFieldV2;
 		case "bool":
-			return base as DslField;
+			return base as DslFieldV2;
 		case "date":
 		case "datetime":
 		case "time":
 			if (minBound !== undefined) base.min = minBound;
 			if (maxBound !== undefined) base.max = maxBound;
-			return base as DslField;
+			return base as DslFieldV2;
 		case "daterange":
 			if (minBound !== undefined) base.min = minBound;
 			if (maxBound !== undefined) base.max = maxBound;
 			if (minSpanDays !== undefined) base.minSpanDays = minSpanDays;
 			if (maxSpanDays !== undefined) base.maxSpanDays = maxSpanDays;
-			return base as DslField;
+			return base as DslFieldV2;
 		case "fixed":
 			base.opts = [];
-			return base as DslField;
+			return base as DslFieldV2;
 		case "dynlist":
 			base.item = { k: "item", label: "Item", t: "text" };
 			if (maxItems !== undefined) base.maxItems = maxItems;
-			return base as DslField;
+			return base as DslFieldV2;
 		default:
 			return null;
 	}
@@ -511,17 +633,26 @@ function splitList(list: string): string[] {
 
 // ─── Serializer (schema → text DSL) ────────────────────────────────────────
 
-export function schemaToTextDsl(schema: SchemaDslV1): string {
+export function schemaToTextDsl(schema: SchemaDsl): string {
 	const lines: string[] = [];
+	const sectionStarts = new Map<string, SchemaSection>();
+	if (schema.v === 2) {
+		for (const section of schema.sections ?? []) {
+			const first = section.fields[0];
+			if (first !== undefined) sectionStarts.set(first, section);
+		}
+	}
 
-	lines.push("@version 1");
+	lines.push(`@version ${schema.v}`);
 	if (schema.title) lines.push(`@title ${schema.title}`);
 	if (schema.desc) lines.push(`@description ${schema.desc}`);
 	if (schema.meta) lines.push(`@meta ${schema.meta}`);
 	if (schema.preview) lines.push(`@preview ${previewToText(schema.preview)}`);
 	lines.push("");
 
-	for (const field of schema.fields) {
+	for (const field of schema.fields as DslFieldV2[]) {
+		const section = sectionStarts.get(field.k);
+		if (section) lines.push(sectionToLine(section));
 		lines.push(fieldToLine(`${field.k}:`, field));
 
 		if (field.t === "fixed") {
@@ -539,6 +670,13 @@ export function schemaToTextDsl(schema: SchemaDslV1): string {
 	}
 
 	return lines.join("\n");
+}
+
+function sectionToLine(section: SchemaSection): string {
+	let line = `@section ${section.id} ${quote(section.title)}`;
+	if (section.desc !== undefined) line += ` desc=${quote(section.desc)}`;
+	if (section.when) line += ` when ${conditionToText(section.when)}`;
+	return line;
 }
 
 function previewToText(preview: PreviewConfig): string {
@@ -570,7 +708,7 @@ function defaultToText(value: unknown): string {
 	return JSON.stringify(value);
 }
 
-function fieldToLine(head: string, field: DslField): string {
+function fieldToLine(head: string, field: DslFieldV2): string {
 	let line = `${head} ${field.t} ${quote(field.label)}`;
 	if (field.req === true) line += " required";
 	else if (field.req === false) line += " optional";
@@ -617,5 +755,8 @@ function fieldToLine(head: string, field: DslField): string {
 	if (field.t === "dynlist" && field.maxItems !== undefined) {
 		line += ` maxItems=${field.maxItems}`;
 	}
+	if (field.help !== undefined) line += ` help=${quote(field.help)}`;
+	if (field.placeholder !== undefined) line += ` placeholder=${quote(field.placeholder)}`;
+	if (field.when) line += ` when ${conditionToText(field.when)}`;
 	return line;
 }

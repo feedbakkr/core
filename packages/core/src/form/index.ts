@@ -5,6 +5,8 @@ export {
 	checkFields,
 	createFormState,
 	type FormState,
+	type SectionStatus,
+	sectionStatus,
 	setValue,
 	touch,
 } from "./state.js";

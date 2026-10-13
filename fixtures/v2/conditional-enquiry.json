@@ -1,0 +1,69 @@
+{
+	"v": 2,
+	"title": "Work with us",
+	"desc": "Tell us who you are and what you need.",
+	"fields": [
+		{ "k": "name", "label": "Your name", "t": "text", "req": true, "max": 100 },
+		{ "k": "email", "label": "Email", "t": "email", "req": true, "placeholder": "you@example.com" },
+		{
+			"k": "enquiryType",
+			"label": "Enquiry type",
+			"t": "fixed",
+			"req": true,
+			"opts": [
+				{ "k": "supplier", "label": "I'm a supplier" },
+				{ "k": "venue", "label": "I run a venue" },
+				{ "k": "other", "label": "Something else" }
+			]
+		},
+		{
+			"k": "volume",
+			"label": "Expected monthly volume",
+			"t": "integer",
+			"req": true,
+			"min": 1,
+			"help": "Roughly, in cases a month.",
+			"when": { "k": "enquiryType", "eq": "supplier" }
+		},
+		{
+			"k": "products",
+			"label": "What do you supply?",
+			"t": "dynlist",
+			"maxItems": 5,
+			"item": { "k": "product", "label": "Product", "t": "text", "max": 60 },
+			"when": { "k": "enquiryType", "eq": "supplier" }
+		},
+		{
+			"k": "covers",
+			"label": "Covers per night",
+			"t": "integer",
+			"req": true,
+			"min": 1,
+			"max": 1000,
+			"when": { "k": "enquiryType", "eq": "venue" }
+		},
+		{
+			"k": "bigVenueContact",
+			"label": "Head office phone",
+			"t": "phone",
+			"req": true,
+			"when": { "all": [{ "k": "enquiryType", "eq": "venue" }, { "k": "covers", "filled": true }] }
+		},
+		{ "k": "details", "label": "Details", "t": "textarea", "req": true, "min": 10, "max": 2000 },
+		{ "k": "callMe", "label": "Call me back", "t": "bool" },
+		{ "k": "callTime", "label": "Best time to call", "t": "time", "req": true, "when": { "k": "callMe", "eq": true } },
+		{ "k": "source_page", "label": "Page", "t": "url", "hidden": true }
+	],
+	"sections": [
+		{ "id": "you", "title": "About you", "fields": ["name", "email", "enquiryType"] },
+		{
+			"id": "business",
+			"title": "Your business",
+			"desc": "Only for suppliers and venues.",
+			"fields": ["volume", "products", "covers", "bigVenueContact"],
+			"when": { "k": "enquiryType", "in": ["supplier", "venue"] }
+		},
+		{ "id": "request", "title": "Your request", "fields": ["details", "callMe", "callTime", "source_page"] }
+	],
+	"preview": { "mode": "custom", "fields": ["name", "enquiryType"] }
+}

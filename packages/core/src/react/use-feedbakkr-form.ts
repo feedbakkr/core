@@ -4,10 +4,12 @@ import {
 	checkFields,
 	createFormState,
 	type FormState,
+	type SectionStatus,
+	sectionStatus,
 	setValue as setFormValue,
 	touch,
 } from "../form/state.js";
-import type { DslField, SchemaDslV1 } from "../schema/schema-dsl.js";
+import type { DslFieldV2, SchemaDsl } from "../schema/schema-dsl-v2.js";
 import type { SubmissionErrors } from "../submissions/errors.js";
 import { validateSubmission } from "../submissions/validate.js";
 
@@ -25,8 +27,16 @@ export interface UseFeedbakkrFormOptions {
 }
 
 export interface FeedbakkrFormApi {
-	/** The fields to show, in order. Hidden fields are filled through values. */
-	fields: DslField[];
+	/**
+	 * The fields to show now, in order: in schema v2 only those whose
+	 * conditions hold for the current answers. Hidden fields are filled
+	 * through values.
+	 */
+	fields: DslFieldV2[];
+	/** Each section's fields and status (schema v2), for steps or pages. */
+	sections: SectionStatus[];
+	/** Checks one section's fields and shows their errors. True when they pass. */
+	validateSection: (id: string) => boolean;
 	/** The answers as entered. */
 	values: Record<string, unknown>;
 	errors: SubmissionErrors;
@@ -54,7 +64,7 @@ export interface FeedbakkrFormApi {
  * fills the form in. It renders nothing.
  */
 export function useFeedbakkrForm(
-	schema: SchemaDslV1,
+	schema: SchemaDsl,
 	options: UseFeedbakkrFormOptions = {},
 ): FeedbakkrFormApi {
 	const { initialValues, onSubmit, validateOnBlur = true } = options;
@@ -128,10 +138,21 @@ export function useFeedbakkrForm(
 		[schema, initialValues, update],
 	);
 
-	const fields = useMemo(() => applicableFields(schema), [schema]);
+	const fields = useMemo(() => applicableFields(schema, state.values), [schema, state.values]);
+	const sections = useMemo(() => sectionStatus(schema, state), [schema, state]);
+
+	const validateSection = useCallback(
+		(id: string) => {
+			const section = schema.v === 2 ? schema.sections?.find((s) => s.id === id) : undefined;
+			return validate(section?.fields ?? []);
+		},
+		[schema, validate],
+	);
 
 	return {
 		fields,
+		sections,
+		validateSection,
 		values: state.values,
 		errors: state.errors,
 		touched: state.touched,

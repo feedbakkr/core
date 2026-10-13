@@ -13,6 +13,7 @@ form, a form hook and the form builder are separate entries.
 | `@ai-food-focus/feedbakkr-core/schema` | Schema DSL v1 types and Zod schema, `validateSchema`, `generateZod`, `hashSchema`, sample data, date bounds, preview helpers |
 | `@ai-food-focus/feedbakkr-core/submissions` | `validateSubmission`, `validateFields`, `normalizeSubmission`, error codes |
 | `@ai-food-focus/feedbakkr-core/messages` | `prepareMessage`, `interpretSubmission`, `summarizeSubmission` |
+| `@ai-food-focus/feedbakkr-core/conditions` | Schema v2: `evaluateCondition`, `visibleFields`, `visibleSections`, `resolveForm` |
 | `@ai-food-focus/feedbakkr-core/form` | Form state as plain data: `createFormState`, `setValue`, `checkFields` |
 | `@ai-food-focus/feedbakkr-core/text` | `parseFormDslText`, `schemaToTextDsl` |
 | `@ai-food-focus/feedbakkr-core/export` | `generateJsonSchema`, `generateZodCode` |
@@ -34,6 +35,31 @@ if (!result.ok) {
 Without `publish: true` it runs the checks FeedBakkr runs when a draft is
 saved (structure and defaults). With it, it also runs the publish checks
 (at least one field, unique keys, a valid preview).
+
+## Schema v2: conditions and sections
+
+A v2 schema (`"v": 2`) is v1 plus `when` conditions on fields and sections,
+`sections` that group the fields, and `help` and `placeholder` text. v1 is
+unchanged, and FeedBakkr's own parser rejects v2, so an old reader fails
+loudly instead of dropping conditions. The format is in
+[docs/schema-guide.md](docs/schema-guide.md#schema-v2-conditions-and-sections).
+
+- `validateSchema(input, { allowV2: true })` accepts either version; without
+  `allowV2` a v2 schema is refused, so a v1-only app cannot take one in.
+  `maxFields` caps the number of fields (v2 has no cap of its own; v1 keeps
+  FeedBakkr's 25).
+- A condition names only earlier fields, so there are no cycles and a form
+  is judged top to bottom in one pass. A field whose condition does not hold
+  is not checked, not required, and its answer is dropped.
+- `validateSubmission`, `validateFields`, `prepareMessage`, the form state
+  and the hook all follow conditions. `sectionStatus` (in `/form`) and
+  `form.sections` give each section's fields and whether they pass.
+- The text format writes v2 with `@version 2`, `@section` lines and
+  `when <condition>`. JSON Schema and Zod code exports express conditions
+  with `if`/`then` and `superRefine`; a test runs both, and
+  `validateSubmission`, over thousands of answer combinations and requires
+  the same verdict.
+- `DynamicForm`, `generateZod` and the builder are still v1 only.
 
 ## Check and store answers
 

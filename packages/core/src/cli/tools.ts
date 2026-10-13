@@ -5,9 +5,11 @@
 import { interpretSubmission } from "../messages/interpret.js";
 import { summarizeSubmission } from "../messages/summarize.js";
 import type { SchemaDslV1 } from "../schema/schema-dsl.js";
+import type { SchemaDsl } from "../schema/schema-dsl-v2.js";
 import { generateSamplePayload } from "../schema/schema-utils.js";
 import { type SchemaIssue, validateSchema } from "../schema/validate-schema.js";
 import type { SubmissionErrors } from "../submissions/errors.js";
+import { normalizeSubmission } from "../submissions/normalize.js";
 import { validateSubmission } from "../submissions/validate.js";
 import { parseFormDslText, schemaToTextDsl } from "../text/form-dsl-text.js";
 
@@ -44,9 +46,12 @@ export function formatIssues(issues: SchemaIssue[]): string {
 		.join("\n");
 }
 
-function describe(schema: SchemaDslV1): string {
+function describe(schema: SchemaDsl): string {
 	const n = schema.fields.length;
-	return `${n} field${n === 1 ? "" : "s"}`;
+	const fields = `${n} field${n === 1 ? "" : "s"}`;
+	if (schema.v !== 2) return fields;
+	const sections = schema.sections?.length ?? 0;
+	return `v2, ${fields}${sections > 0 ? `, ${sections} section${sections === 1 ? "" : "s"}` : ""}`;
 }
 
 /**
@@ -64,7 +69,8 @@ function longNameHint(input: unknown): string {
 }
 
 export function validateTool(input: unknown, publish: boolean): ToolResult {
-	const result = validateSchema(input, { publish });
+	// The tools check schemas of either version.
+	const result = validateSchema(input, { publish, allowV2: true });
 	const checks = publish ? "including the publish checks" : "without the publish checks";
 	if (result.ok) {
 		return {
@@ -97,8 +103,8 @@ export function fromTextTool(text: string, publish: boolean): ToolResult {
 }
 
 /** Runs the structure and default checks, which the conversions need to trust their input. */
-function checkedSchema(input: unknown): { ok: true; schema: SchemaDslV1 } | ToolResult {
-	const result = validateSchema(input);
+function checkedSchema(input: unknown): { ok: true; schema: SchemaDsl } | ToolResult {
+	const result = validateSchema(input, { allowV2: true });
 	if (result.ok) return { ok: true, schema: result.schema };
 	return {
 		ok: false,
@@ -116,7 +122,12 @@ export function toTextTool(input: unknown): ToolResult {
 export function sampleTool(input: unknown): ToolResult {
 	const checked = checkedSchema(input);
 	if (!("schema" in checked)) return checked;
-	const answers = generateSamplePayload(checked.schema);
+	// The sample has an answer for every field; in v2, those whose conditions
+	// do not hold for it are then left out, as the server would.
+	const answers = normalizeSubmission(
+		checked.schema,
+		generateSamplePayload(checked.schema as SchemaDslV1),
+	);
 	return { ok: true, text: JSON.stringify(answers, null, 2), data: answers };
 }
 
@@ -144,7 +155,7 @@ function formatAnswerErrors(errors: SubmissionErrors): string {
 		.join("\n");
 }
 
-function checkAnswers(schema: SchemaDslV1, answers: unknown, strip: boolean) {
+function checkAnswers(schema: SchemaDsl, answers: unknown, strip: boolean) {
 	const result = validateSubmission(schema, answers, {
 		unknownFields: strip ? "strip" : "reject",
 	});

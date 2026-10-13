@@ -1,4 +1,6 @@
-import type { DslField, SchemaDslV1 } from "../schema/schema-dsl.js";
+import type { DslField } from "../schema/schema-dsl.js";
+import type { Condition, DslFieldV2, SchemaDsl } from "../schema/schema-dsl-v2.js";
+import { conditionalFields, isList } from "./conditions.js";
 
 interface JsonSchemaProperty {
 	type?: string;
@@ -14,6 +16,7 @@ interface JsonSchemaProperty {
 	properties?: Record<string, JsonSchemaProperty>;
 	required?: string[];
 	additionalProperties?: boolean;
+	description?: string;
 }
 
 function fieldToJsonSchema(field: DslField): JsonSchemaProperty {
@@ -97,16 +100,47 @@ function fieldToJsonSchema(field: DslField): JsonSchemaProperty {
 	}
 }
 
-export function generateJsonSchema(dsl: SchemaDslV1): Record<string, unknown> {
+/** A condition (schema v2) as JSON Schema, judged on stored answers. */
+function conditionToJsonSchema(dsl: SchemaDsl, c: Condition): Record<string, unknown> {
+	if ("all" in c) return { allOf: c.all.map((x) => conditionToJsonSchema(dsl, x)) };
+	if ("any" in c) return { anyOf: c.any.map((x) => conditionToJsonSchema(dsl, x)) };
+	const has = { required: [c.k] };
+	const value = (match: Record<string, unknown>) => ({
+		...has,
+		properties: { [c.k]: isList(dsl, c.k) ? { contains: match } : match },
+	});
+	if ("eq" in c) return value({ const: c.eq });
+	if ("neq" in c) return { not: value({ const: c.neq }) };
+	if ("in" in c) return value({ enum: c.in });
+	if ("filled" in c) return has;
+	return { not: has };
+}
+
+export function generateJsonSchema(dsl: SchemaDsl): Record<string, unknown> {
 	const properties: Record<string, JsonSchemaProperty> = {};
 	const required: string[] = [];
+	const conditional = new Map(conditionalFields(dsl).map((c) => [c.field.k, c.when]));
 
-	for (const field of dsl.fields) {
+	for (const field of dsl.fields as DslFieldV2[]) {
 		properties[field.k] = fieldToJsonSchema(field);
-		if (field.req) {
+		if (field.help) properties[field.k] = { ...properties[field.k], description: field.help };
+		if (field.req && !conditional.has(field.k)) {
 			required.push(field.k);
 		}
 	}
+
+	// A field with a condition is required (if `req`) when the condition
+	// holds, and absent when it does not.
+	const rules = [...conditional].map(([key, when]) => {
+		const field = dsl.fields.find((f) => f.k === key);
+		const absent = { not: { required: [key] } };
+		const holds = conditionToJsonSchema(dsl, when);
+		return field?.req
+			? // biome-ignore lint/suspicious/noThenProperty: JSON Schema's if/then/else keywords
+				{ if: holds, then: { required: [key] }, else: absent }
+			: // biome-ignore lint/suspicious/noThenProperty: JSON Schema's if/then keywords
+				{ if: { not: holds }, then: absent };
+	});
 
 	return {
 		$schema: "http://json-schema.org/draft-07/schema#",
@@ -115,6 +149,7 @@ export function generateJsonSchema(dsl: SchemaDslV1): Record<string, unknown> {
 		description: dsl.desc,
 		properties,
 		required: required.length > 0 ? required : undefined,
+		...(rules.length > 0 ? { allOf: rules } : {}),
 		additionalProperties: false,
 	};
 }

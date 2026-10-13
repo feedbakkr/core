@@ -6,7 +6,8 @@
 //   preview but produced nothing for them.
 // - sensitive fields are skipped here. FeedBakkr removed them before calling
 //   generatePreviewText, so the summary is the same.
-import type { DslField, SchemaDslV1 } from "../schema/schema-dsl.js";
+import type { DslField } from "../schema/schema-dsl.js";
+import type { SchemaDsl } from "../schema/schema-dsl-v2.js";
 import { isPreviewableType } from "../schema/schema-utils.js";
 
 const DEFAULT_MAX_LENGTH = 100;
@@ -72,7 +73,7 @@ function truncate(text: string, maxLength: number): string {
 }
 
 function collectFieldValues(
-	schema: SchemaDslV1,
+	schema: SchemaDsl,
 	fieldKeys: string[],
 	fields: Record<string, unknown>,
 	separator: string,
@@ -90,11 +91,7 @@ function collectFieldValues(
 	return parts.join(separator);
 }
 
-function autoDetect(
-	schema: SchemaDslV1,
-	fields: Record<string, unknown>,
-	maxLength: number,
-): string {
+function autoDetect(schema: SchemaDsl, fields: Record<string, unknown>, maxLength: number): string {
 	for (const field of schema.fields) {
 		if (!isPreviewableType(field.t)) continue;
 		const val = extractFieldValue(field, fields[field.k]);
@@ -107,7 +104,7 @@ function autoDetect(
  * The one-line summary of a submission for an inbox list, following the
  * schema's `preview` setting. Empty when there is nothing to show.
  */
-export function summarizeSubmission(schema: SchemaDslV1, values: Record<string, unknown>): string {
+export function summarizeSubmission(schema: SchemaDsl, values: Record<string, unknown>): string {
 	const config = schema.preview;
 	const maxLength =
 		(config && "maxLength" in config ? config.maxLength : undefined) ?? DEFAULT_MAX_LENGTH;

@@ -1,5 +1,5 @@
 import { hashSchema } from "../schema/hash.js";
-import type { SchemaDslV1 } from "../schema/schema-dsl.js";
+import type { SchemaDsl } from "../schema/schema-dsl-v2.js";
 import type { SubmissionErrors } from "../submissions/errors.js";
 import { type ValidateSubmissionOptions, validateSubmission } from "../submissions/validate.js";
 import { type InterpretOptions, interpretSubmission, type SubmissionRow } from "./interpret.js";
@@ -30,7 +30,7 @@ export type PrepareMessageResult =
  * and nothing else.
  */
 export async function prepareMessage(
-	schema: SchemaDslV1,
+	schema: SchemaDsl,
 	raw: unknown,
 	options: ValidateSubmissionOptions & InterpretOptions = {},
 ): Promise<PrepareMessageResult> {

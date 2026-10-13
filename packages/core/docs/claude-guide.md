@@ -20,6 +20,9 @@ Core holds the form schema format and the code that checks it:
 - `parseFormDslText` and `schemaToTextDsl` convert to and from the text
   format.
 - `hashSchema(schema)` gives a stable id for a schema version.
+- Schema **v2** adds conditions (`when`), sections, `help` and
+  `placeholder`. Write v1 unless the form needs them. See "Schema v2" in
+  the schema guide.
 
 It runs in Workers, Node and browsers, and depends only on `zod`. The
 React form, `DynamicForm`, and the builder, `FeedbakkrBuilder`, are separate
@@ -62,7 +65,8 @@ pnpm exec feedbakkr sample form.json          # example answers
    for the person filling in the form, not for security.
 4. **Check schemas that people edit.** Where a schema is saved from an
    editor or an API, run `validateSchema` on the server before storing it,
-   with `publish: true` when it goes live.
+   with `publish: true` when it goes live, and `allowV2: true` only where
+   the app can show v2 forms.
 5. **Store which version an answer was checked against.** Save
    `schemaHash` from `prepareMessage` (or `await hashSchema(schema)`) with
    each submission, and keep that schema, so old answers can still be read
@@ -155,6 +159,10 @@ const form = useFeedbakkrForm(contactForm, {
 - A field is checked when the person leaves it; `validate(keys)` checks a
   step of a multi-step form.
 - `onSubmit` receives the normalised values, only when every field passes.
+- With a v2 schema, `fields` follows the answers: a field appears when its
+  condition holds. For steps, use `form.sections` (each with `applies`,
+  `fields` and `valid`) and `form.validateSection(id)` before moving on;
+  the server's `validateSubmission` then gives the same verdict on the whole.
 
 ## Showing a form without custom components
 

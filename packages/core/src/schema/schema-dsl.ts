@@ -157,6 +157,30 @@ const dslFieldSchema = z.discriminatedUnion("t", [
 	dynlistField,
 ]);
 
+/**
+ * Every v1 field schema, for schema v2 to extend (schema-dsl-v2.ts). Not part
+ * of the public API.
+ */
+export const V1_FIELD_SCHEMAS = [
+	textField,
+	textareaField,
+	markdownField,
+	dateField,
+	datetimeField,
+	timeField,
+	daterangeField,
+	boolField,
+	numberField,
+	integerField,
+	emailField,
+	urlField,
+	phoneField,
+	fixedField,
+	dynlistField,
+] as const;
+
+export const FIELD_KEY_REGEX = fieldKeyRegex;
+
 export const PREVIEWABLE_TYPES = [
 	"text",
 	"textarea",
