@@ -4,6 +4,14 @@
 //
 // Milestone 1 changes only the text format, so that every schema round-trips
 // exactly. Payload and schema validation are unchanged (differential.test.ts).
+//
+// The React form differs in one way, tested in react.test.tsx because it
+// needs a DOM:
+//
+// 12. DynamicForm drops list entries that were added but left empty, and a
+//     list with no entries left, before it checks and submits the answers.
+//     FeedBakkr submits them as `undefined`, which its own check accepts, but
+//     JSON turns them into `null`, which the same check on the server refuses.
 import { describe, expect, it } from "vitest";
 import type { SchemaDslV1 } from "../src/index.js";
 import { parseFormDslText, schemaToTextDsl } from "../src/text/index.js";

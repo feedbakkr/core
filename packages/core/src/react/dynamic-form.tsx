@@ -1,7 +1,8 @@
-// Moved from FeedBakkr (packages/ui/src/dynamic-form.tsx at 8ae744e). Only the
+// Moved from FeedBakkr (packages/ui/src/dynamic-form.tsx at 8ae744e). The
 // imports changed (`ReactNode` is imported rather than read from the global
-// `React`), and a `style` prop was added. Its output must keep matching the
-// reference copy: see test/react.test.tsx.
+// `React`), a `style` prop was added, and empty list entries are dropped on
+// submit (see `withoutEmptyListItems`). Otherwise its output must keep matching
+// the reference copy: see test/react.test.tsx.
 import { type CSSProperties, type FormEvent, type ReactNode, useCallback, useState } from "react";
 import type { ZodError } from "zod";
 import { resolveDateBound } from "../schema/date-bounds.js";
@@ -15,6 +16,27 @@ function resolveBoundAttr(
 	if (!bound) return undefined;
 	const r = resolveDateBound(bound, context, new Date());
 	return r ? r.iso : undefined;
+}
+
+/**
+ * Removes the entries of list fields that were added but left empty, and a
+ * list left with no entries. The answer check accepts an `undefined` entry,
+ * but sent as JSON it becomes `null`, which the same check on the server
+ * refuses. Dropping them makes what the form accepts what the server accepts.
+ */
+function withoutEmptyListItems(
+	schema: SchemaDslV1,
+	values: Record<string, unknown>,
+): Record<string, unknown> {
+	const next = { ...values };
+	for (const field of schema.fields) {
+		const value = next[field.k];
+		if (field.t !== "dynlist" || !Array.isArray(value)) continue;
+		const items = value.filter((item) => item !== undefined && item !== null);
+		if (items.length > 0) next[field.k] = items;
+		else delete next[field.k];
+	}
+	return next;
 }
 
 export interface DynamicFormProps {
@@ -63,7 +85,7 @@ export function DynamicForm({
 		(e: FormEvent) => {
 			e.preventDefault();
 			const zodSchema = generateZod(schema);
-			const result = zodSchema.safeParse(values);
+			const result = zodSchema.safeParse(withoutEmptyListItems(schema, values));
 			if (!result.success) {
 				const fieldErrors: FieldErrors = {};
 				for (const issue of (result.error as ZodError).issues) {

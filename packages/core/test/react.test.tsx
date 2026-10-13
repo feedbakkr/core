@@ -47,6 +47,14 @@ function both(props: Omit<DynamicFormProps, "onSubmit">, act?: (form: HTMLElemen
 	return { core, ref };
 }
 
+/** Presses "+ Add Item" twice on every list, adding two empty entries to each. */
+function addTwoItemsToEveryList(form: HTMLElement) {
+	for (const button of within(form).queryAllByRole("button", { name: "+ Add Item" })) {
+		fireEvent.click(button);
+		fireEvent.click(button);
+	}
+}
+
 const fixtures = allFixtures().map(({ name, schema }) => ({
 	name,
 	schema: schemaDslV1Schema.parse(schema) as SchemaDslV1,
@@ -68,14 +76,22 @@ describe.each(fixtures)("$name", ({ schema }) => {
 	});
 
 	it("adds list items exactly as FeedBakkr does", () => {
-		const addAll = (form: HTMLElement) => {
-			for (const button of within(form).queryAllByRole("button", { name: "+ Add Item" })) {
-				fireEvent.click(button);
-				fireEvent.click(button);
-			}
-		};
-		const { core, ref } = both({ schema }, addAll);
+		const { core, ref } = both({ schema }, addTwoItemsToEveryList);
 		expect(core).toEqual(ref);
+	});
+
+	it("submits only answers the server check accepts after a JSON round trip", () => {
+		const initialValues = generateSampleData(schema);
+		const server = generateZod(schema);
+		for (const act of [undefined, addTwoItemsToEveryList]) {
+			const { core, ref } = both({ schema, initialValues }, act);
+			// The form renders as FeedBakkr's does; only what it submits differs.
+			expect(core.before).toEqual(ref.before);
+			for (const [answers] of core.submitted) {
+				const sent = JSON.parse(JSON.stringify(answers));
+				expect(server.safeParse(sent).success, JSON.stringify(sent)).toBe(true);
+			}
+		}
 	});
 
 	it("gives every control a label", () => {
@@ -150,6 +166,43 @@ describe("DynamicForm", () => {
 	});
 
 	it.todo("links each error to its control with aria-describedby (milestone 9)");
+
+	// Intentional difference 12 (see intentional-differences.test.ts).
+	it("drops list entries that were added but left empty", () => {
+		const schema = schemaDslV1Schema.parse({
+			v: 1,
+			fields: [
+				{
+					k: "dietary",
+					label: "Dietary needs",
+					t: "dynlist",
+					item: { k: "need", label: "Need", t: "text" },
+				},
+				{ k: "extras", label: "Extras", t: "dynlist", item: { k: "x", label: "X", t: "text" } },
+			],
+		});
+		const fill = (form: HTMLElement) => {
+			const [dietary, extras] = within(form).getAllByRole("button", { name: "+ Add Item" });
+			fireEvent.click(dietary as HTMLElement);
+			fireEvent.click(dietary as HTMLElement);
+			fireEvent.change(within(form).getAllByLabelText("Item 1")[0] as HTMLElement, {
+				target: { value: "Vegan" },
+			});
+			fireEvent.click(extras as HTMLElement);
+		};
+		const { core, ref } = both({ schema }, fill);
+		const server = generateZod(schema);
+
+		// FeedBakkr submits the empty entries, which JSON turns into nulls that
+		// the server refuses.
+		expect(ref.submitted).toEqual([[{ dietary: ["Vegan", undefined], extras: [undefined] }]]);
+		const refSent = JSON.parse(JSON.stringify(ref.submitted[0]?.[0]));
+		expect(server.safeParse(refSent).success).toBe(false);
+
+		// Core leaves them out, and a list with nothing in it altogether.
+		expect(core.submitted).toEqual([[{ dietary: ["Vegan"] }]]);
+		expect(server.safeParse(JSON.parse(JSON.stringify(core.submitted[0]?.[0]))).success).toBe(true);
+	});
 
 	it("passes className and style to the form", () => {
 		const { container } = render(
