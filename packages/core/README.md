@@ -51,3 +51,44 @@ const hash = await hashSchema(schema); // SHA-256 of key-sorted JSON
 `canonicalizeDsl` and `hashDsl` are FeedBakkr's own versions, which depend
 on key order. They are kept for comparing against hashes FeedBakkr has
 already stored.
+
+## The `feedbakkr` command
+
+Installing the package adds a `feedbakkr` command (Node 22 or later):
+
+```bash
+pnpm exec feedbakkr validate --publish form.json   # check schemas, JSON or text format
+pnpm exec feedbakkr text form.json                 # JSON to text, or text to JSON
+pnpm exec feedbakkr sample form.json               # example answers that pass
+pnpm exec feedbakkr guide                          # the schema format
+pnpm exec feedbakkr mcp                            # the MCP server, on stdio
+```
+
+`validate` exits 1 when a schema is invalid, so it can run in CI.
+
+## MCP server for coding agents
+
+`feedbakkr mcp` is a local MCP server with the tools `schema_guide`,
+`validate_schema`, `schema_from_text`, `schema_to_text` and `sample_payload`,
+and the two guides as resources. To use it from Claude Code, add it to the
+app's `.mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "feedbakkr": { "command": "pnpm", "args": ["exec", "feedbakkr", "mcp"] }
+  }
+}
+```
+
+It runs on the developer's machine, holds no data and makes no network
+calls.
+
+## Guides
+
+- [`docs/schema-guide.md`](docs/schema-guide.md): the schema format, for
+  people and agents writing schemas.
+- [`docs/claude-guide.md`](docs/claude-guide.md): how an app should use
+  core, for coding agents. Point to it from the app's `CLAUDE.md`.
+
+Both ship in the package, and every example in them is tested.
