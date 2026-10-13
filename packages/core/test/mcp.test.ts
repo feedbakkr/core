@@ -48,7 +48,7 @@ describe("MCP handler", () => {
 		expect(future).toMatchObject({ result: { protocolVersion: PROTOCOL_VERSIONS[0] } });
 	});
 
-	it("lists the five tools with object input schemas", () => {
+	it("lists the seven tools with object input schemas", () => {
 		const response = request("tools/list");
 		const tools = (response as { result: { tools: { name: string; inputSchema: unknown }[] } })
 			.result.tools;
@@ -58,6 +58,8 @@ describe("MCP handler", () => {
 			"schema_from_text",
 			"schema_to_text",
 			"sample_payload",
+			"validate_submission",
+			"interpret_submission",
 		]);
 		for (const tool of tools) expect(tool.inputSchema).toMatchObject({ type: "object" });
 	});
@@ -125,12 +127,52 @@ describe("MCP handler", () => {
 		});
 	});
 
+	it("checks answers as the server does", () => {
+		const ok = call("validate_submission", {
+			schema: contact,
+			answers: { name: " Ada ", email: "ada@example.com", topic: "order" },
+		});
+		expect(ok.isError).toBeUndefined();
+		expect(ok.content[0]?.text).toContain('"name": "Ada"');
+
+		const refused = call("validate_submission", {
+			schema: contact,
+			answers: { name: "   ", email: "nope", colour: "red" },
+		});
+		expect(refused.isError).toBe(true);
+		expect(refused.content[0]?.text).toContain("- name: Required (required)");
+		expect(refused.content[0]?.text).toContain("- email: Invalid email address (invalid_email)");
+		expect(refused.content[0]?.text).toContain(
+			"- colour: Not a field of this form (unknown_field)",
+		);
+
+		const stripped = call("validate_submission", {
+			schema: contact,
+			answers: JSON.stringify({ name: "Ada", email: "ada@example.com", colour: "red" }),
+			strip: true,
+		});
+		expect(stripped.isError).toBeUndefined();
+	});
+
+	it("shows answers as an inbox would", () => {
+		const result = call("interpret_submission", {
+			schema: contact,
+			answers: { name: "Ada", email: "ada@example.com", topic: "order" },
+		});
+		expect(result.content[0]?.text).toBe(
+			"Summary: Ada\n\n- Name: Ada\n- Email: ada@example.com\n- Topic: order",
+		);
+	});
+
 	it("answers protocol errors as JSON-RPC errors", () => {
 		expect(request("nope")).toMatchObject({ error: { code: -32601 } });
 		expect(request("tools/call", { name: "nope" })).toMatchObject({ error: { code: -32602 } });
 		expect(request("tools/call", { name: "validate_schema", arguments: {} })).toMatchObject({
 			error: { code: -32602 },
 		});
+		expect(
+			request("tools/call", { name: "validate_submission", arguments: { schema: contact } }),
+		).toMatchObject({ error: { code: -32602 } });
 		expect(request("resources/read", { uri: "feedbakkr://nope" })).toMatchObject({
 			error: { code: -32602 },
 		});
@@ -162,7 +204,7 @@ describe.runIf(BUILT)("feedbakkr mcp with the MCP SDK client", () => {
 	it("connects and lists the tools and resources", async () => {
 		expect(client.getServerVersion()).toMatchObject({ name: "feedbakkr" });
 		const { tools } = await client.listTools();
-		expect(tools).toHaveLength(5);
+		expect(tools).toHaveLength(7);
 		const { resources } = await client.listResources();
 		expect(resources).toHaveLength(2);
 	});

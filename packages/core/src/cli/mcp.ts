@@ -10,10 +10,13 @@ import type { Readable, Writable } from "node:stream";
 import { readPackageFile } from "./package-files.js";
 import {
 	fromTextTool,
+	interpretSubmissionTool,
+	readJsonArgument,
 	readSchemaArgument,
 	sampleTool,
 	type ToolResult,
 	toTextTool,
+	validateSubmissionTool,
 	validateTool,
 } from "./tools.js";
 
@@ -26,7 +29,8 @@ const CLAUDE_GUIDE_URI = "feedbakkr://guide/claude";
 const INSTRUCTIONS =
 	"Tools for FeedBakkr form schemas. Read the format with schema_guide before writing a " +
 	"schema, and check every schema you write or change with validate_schema, passing " +
-	'"publish": true for forms people will fill in.';
+	'"publish": true for forms people will fill in. Check example answers with ' +
+	"validate_submission, and see how they read in an inbox with interpret_submission.";
 
 const schemaProperty = {
 	type: "object",
@@ -34,6 +38,11 @@ const schemaProperty = {
 		'A FeedBakkr schema as a JSON object (not a string), for example { "v": 1, "fields": ' +
 		'[{ "k": "email", "label": "Email", "t": "email", "req": true }] }. Fields use k, t ' +
 		"and req, never key, type or required.",
+};
+
+const answersProperty = {
+	type: "object",
+	description: 'The answers, keyed by field: { "email": "ada@example.com", "guests": 2 }.',
 };
 
 const TOOLS = [
@@ -98,6 +107,48 @@ const TOOLS = [
 			"Example answers for a schema, keyed by field, that pass its checks. Use them in " +
 			"tests and fixtures.",
 		inputSchema: { type: "object", properties: { schema: schemaProperty }, required: ["schema"] },
+		annotations: { readOnlyHint: true, openWorldHint: false },
+	},
+	{
+		name: "validate_submission",
+		title: "Validate answers",
+		description:
+			"Check answers to a form exactly as the server does with validateSubmission: " +
+			"strings trimmed, empty answers count as not given, required text must not be " +
+			"blank, unknown keys refused. Returns the stored values, or each problem with " +
+			"its code.",
+		inputSchema: {
+			type: "object",
+			properties: {
+				schema: schemaProperty,
+				answers: answersProperty,
+				strip: {
+					type: "boolean",
+					description: "Drop answers to unknown keys instead of refusing them.",
+				},
+			},
+			required: ["schema", "answers"],
+		},
+		annotations: { readOnlyHint: true, openWorldHint: false },
+	},
+	{
+		name: "interpret_submission",
+		title: "Show answers as a message",
+		description:
+			"Check answers, then show them as an inbox would: each field's label and its " +
+			"answer as text (option labels, Yes or No, dates), and the one-line summary.",
+		inputSchema: {
+			type: "object",
+			properties: {
+				schema: schemaProperty,
+				answers: answersProperty,
+				strip: {
+					type: "boolean",
+					description: "Drop answers to unknown keys instead of refusing them.",
+				},
+			},
+			required: ["schema", "answers"],
+		},
 		annotations: { readOnlyHint: true, openWorldHint: false },
 	},
 ] as const;
@@ -169,6 +220,21 @@ function callTool(name: string, args: Record<string, unknown>) {
 			if (name === "validate_schema") return toCallResult(validateTool(schema.value, publish));
 			if (name === "schema_to_text") return toCallResult(toTextTool(schema.value));
 			return toCallResult(sampleTool(schema.value));
+		}
+		case "validate_submission":
+		case "interpret_submission": {
+			if (!("schema" in args)) throw new RpcError(INVALID_PARAMS, "schema is required");
+			if (!("answers" in args)) throw new RpcError(INVALID_PARAMS, "answers is required");
+			const schema = readSchemaArgument(args.schema);
+			if (!("value" in schema)) return toCallResult(schema);
+			const answers = readJsonArgument(args.answers, "answers");
+			if (!("value" in answers)) return toCallResult(answers);
+			const strip = args.strip === true;
+			return toCallResult(
+				name === "validate_submission"
+					? validateSubmissionTool(schema.value, answers.value, strip)
+					: interpretSubmissionTool(schema.value, answers.value, strip),
+			);
 		}
 		default:
 			throw new RpcError(INVALID_PARAMS, `Unknown tool: ${name}`);

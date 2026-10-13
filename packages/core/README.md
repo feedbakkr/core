@@ -1,19 +1,22 @@
 # @ai-food-focus/feedbakkr-core
 
-FeedBakkr's form schema format, its checks and its payload validator, as pure
-TypeScript with `zod` as the only dependency. It runs in Cloudflare Workers,
-Node and browsers. A React form renderer and the form builder are separate
-entries.
+FeedBakkr's form schema format and its checks, the pipeline that checks and
+stores answers, and the text format, as pure TypeScript with `zod` as the
+only dependency. It runs in Cloudflare Workers, Node and browsers. A React
+form, a form hook and the form builder are separate entries.
 
 ## Entry points
 
 | Import | What it holds |
 | --- | --- |
-| `@ai-food-focus/feedbakkr-core` | Same as `/schema` |
+| `@ai-food-focus/feedbakkr-core` | `/schema`, `/submissions` and `/messages` together: what a server needs |
 | `@ai-food-focus/feedbakkr-core/schema` | Schema DSL v1 types and Zod schema, `validateSchema`, `generateZod`, `hashSchema`, sample data, date bounds, preview helpers |
+| `@ai-food-focus/feedbakkr-core/submissions` | `validateSubmission`, `validateFields`, `normalizeSubmission`, error codes |
+| `@ai-food-focus/feedbakkr-core/messages` | `prepareMessage`, `interpretSubmission`, `summarizeSubmission` |
+| `@ai-food-focus/feedbakkr-core/form` | Form state as plain data: `createFormState`, `setValue`, `checkFields` |
 | `@ai-food-focus/feedbakkr-core/text` | `parseFormDslText`, `schemaToTextDsl` |
 | `@ai-food-focus/feedbakkr-core/export` | `generateJsonSchema`, `generateZodCode` |
-| `@ai-food-focus/feedbakkr-core/react` | `DynamicForm`. Needs `react` 19, an optional peer dependency that only this entry imports. |
+| `@ai-food-focus/feedbakkr-core/react` | `DynamicForm` and `useFeedbakkrForm`. Needs `react` 19, an optional peer dependency that only this entry imports. |
 | `@ai-food-focus/feedbakkr-core/builder` | `FeedbakkrBuilder`, the form builder. Needs the optional peer dependencies below and `builder.css`. |
 | `@ai-food-focus/feedbakkr-core/builder.css` | The builder's stylesheet. |
 
@@ -32,17 +35,77 @@ Without `publish: true` it runs the checks FeedBakkr runs when a draft is
 saved (structure and defaults). With it, it also runs the publish checks
 (at least one field, unique keys, a valid preview).
 
-## Validate a submission
+## Check and store answers
 
 ```ts
-import { generateZod } from "@ai-food-focus/feedbakkr-core";
+import { prepareMessage } from "@ai-food-focus/feedbakkr-core";
 
-const parsed = generateZod(result.schema).safeParse(body.fields);
+const message = await prepareMessage(schema, body.answers);
+if (!message.ok) return json({ errors: message.errors }, 400);
+// message.values      the checked answers, to store
+// message.rows        one row per field: label, value, display text
+// message.summary     the one-line inbox summary
+// message.schemaHash  which version of the schema the answers belong to
+// message.searchText  plain text of the answers that are not sensitive
 ```
 
-`generateZod` behaves exactly as FeedBakkr's: unknown keys are stripped, and
-an optional field may be left out. Stricter submission validation comes in a
-later release.
+`prepareMessage` runs these steps, each available on its own:
+
+1. `normalizeSubmission(schema, raw)`: trims text; an empty or blank answer
+   and `null` count as not given; numbers and yes or no are read from form
+   text; empty list entries are dropped; a hidden field that was not given
+   takes its default. Only the schema's fields are kept.
+2. `validateSubmission(schema, raw, { unknownFields })`: normalises, then
+   checks every answer. A blank required answer is refused, and so are
+   answers to keys the schema does not have, unless `unknownFields: "strip"`.
+   Errors are keyed by field, each `{ code, message, path? }`, with stable
+   codes: `required`, `invalid_type`, `too_short`, `too_long`,
+   `invalid_email`, `invalid_url`, `invalid_phone`, `invalid_date`,
+   `invalid_datetime`, `invalid_time`, `invalid_range`, `out_of_range`,
+   `not_integer`, `invalid_option`, `too_many_items`, `unknown_field`.
+3. `interpretSubmission(schema, values)`: display rows in schema order, with
+   option labels, Yes or No, and dates written out ("15 June 2026"), plain
+   text only. Fields with no answer read "Not provided".
+4. `summarizeSubmission(schema, values)`: the inbox summary from the
+   schema's `preview` setting.
+
+`validateFields(schema, values, keys)` checks some fields only, for one step
+of a form.
+
+Once answers are normalised, the checks are FeedBakkr's: a test runs every
+fixture and probe through both and requires the same verdict. Where core is
+stricter or more forgiving than FeedBakkr's `generateZod`, the difference is
+listed and tested in `test/submissions.test.ts`. The summary differs in one
+way: email, url and phone answers appear in it, where FeedBakkr showed
+nothing for them.
+
+`generateZod` is still exported, unchanged, and `DynamicForm` still uses it.
+
+## A form from your own components
+
+```tsx
+import { useFeedbakkrForm } from "@ai-food-focus/feedbakkr-core/react";
+
+const form = useFeedbakkrForm(schema, { onSubmit: (values) => send(values) });
+
+<form onSubmit={form.handleSubmit} noValidate>
+	{form.fields.map((field) => (
+		<MyInput
+			key={field.k}
+			label={field.label}
+			value={String(form.values[field.k] ?? "")}
+			onChange={(v) => form.setValue(field.k, v)}
+			onBlur={() => form.blur(field.k)}
+			error={form.errorFor(field.k)}
+		/>
+	))}
+</form>;
+```
+
+The hook holds the answers and errors and runs `validateSubmission`'s checks:
+a field when the person leaves it, all of them on submit. `onSubmit` gets
+the normalised values. `setErrors` shows errors from the server, `validate`
+checks chosen fields, and `reset` starts again. It renders nothing.
 
 ## Render a form
 

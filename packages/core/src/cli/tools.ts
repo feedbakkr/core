@@ -2,9 +2,13 @@
 // a person or an agent to read, and the data a caller can use directly, so
 // the CLI and the MCP server stay thin and say the same things.
 
+import { interpretSubmission } from "../messages/interpret.js";
+import { summarizeSubmission } from "../messages/summarize.js";
 import type { SchemaDslV1 } from "../schema/schema-dsl.js";
 import { generateSamplePayload } from "../schema/schema-utils.js";
 import { type SchemaIssue, validateSchema } from "../schema/validate-schema.js";
+import type { SubmissionErrors } from "../submissions/errors.js";
+import { validateSubmission } from "../submissions/validate.js";
 import { parseFormDslText, schemaToTextDsl } from "../text/form-dsl-text.js";
 
 export interface ToolResult {
@@ -114,4 +118,78 @@ export function sampleTool(input: unknown): ToolResult {
 	if (!("schema" in checked)) return checked;
 	const answers = generateSamplePayload(checked.schema);
 	return { ok: true, text: JSON.stringify(answers, null, 2), data: answers };
+}
+
+/** Answers may arrive as a JSON string as well; anything else is used as it is. */
+export function readJsonArgument(
+	value: unknown,
+	what: string,
+): { ok: true; value: unknown } | ToolResult {
+	if (typeof value !== "string") return { ok: true, value };
+	try {
+		return { ok: true, value: JSON.parse(value) };
+	} catch {
+		return { ok: false, text: `The ${what} are a string but not valid JSON. Pass a JSON object.` };
+	}
+}
+
+function formatAnswerErrors(errors: SubmissionErrors): string {
+	return Object.entries(errors)
+		.flatMap(([key, list]) =>
+			list.map((e) => {
+				const where = [key || "(answers)", ...(e.path ?? [])].join(".");
+				return `- ${where}: ${e.message} (${e.code})`;
+			}),
+		)
+		.join("\n");
+}
+
+function checkAnswers(schema: SchemaDslV1, answers: unknown, strip: boolean) {
+	const result = validateSubmission(schema, answers, {
+		unknownFields: strip ? "strip" : "reject",
+	});
+	if (result.ok) return result;
+	const n = Object.values(result.errors).reduce((sum, list) => sum + list.length, 0);
+	return {
+		ok: false as const,
+		text: `Refused answers, ${n} problem${n === 1 ? "" : "s"}:\n${formatAnswerErrors(result.errors)}`,
+		data: result,
+	};
+}
+
+/** validateSubmission, as the server runs it. */
+export function validateSubmissionTool(
+	input: unknown,
+	answers: unknown,
+	strip: boolean,
+): ToolResult {
+	const checked = checkedSchema(input);
+	if (!("schema" in checked)) return checked;
+	const result = checkAnswers(checked.schema, answers, strip);
+	if (!result.ok) return result;
+	return {
+		ok: true,
+		text: `Valid answers. They are stored as:\n${JSON.stringify(result.values, null, 2)}`,
+		data: result,
+	};
+}
+
+/** The answers as display rows and the inbox summary, after checking them. */
+export function interpretSubmissionTool(
+	input: unknown,
+	answers: unknown,
+	strip: boolean,
+): ToolResult {
+	const checked = checkedSchema(input);
+	if (!("schema" in checked)) return checked;
+	const result = checkAnswers(checked.schema, answers, strip);
+	if (!result.ok) return result;
+	const rows = interpretSubmission(checked.schema, result.values);
+	const summary = summarizeSubmission(checked.schema, result.values);
+	const lines = rows.map((r) => `- ${r.label}: ${r.display}`).join("\n");
+	return {
+		ok: true,
+		text: `Summary: ${summary || "(none)"}\n\n${lines}`,
+		data: { values: result.values, rows, summary },
+	};
 }

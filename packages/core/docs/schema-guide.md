@@ -134,10 +134,16 @@ only `"HH:MM"`.
 
 ## Required answers
 
-`req: true` means the key must be present in the answers. A required `text`
-or `textarea` still accepts an empty string, so give it `"min": 1` (or more)
-when a real answer is needed. A field without `req` may be left out
-entirely. Answers for keys the schema does not list are dropped.
+`req: true` means an answer must be given. A field without `req` may be
+left out entirely.
+
+The server checks answers with `validateSubmission` (the
+`validate_submission` tool), which trims text and treats an empty or blank
+answer as not given, so a blank answer to a required field is refused. It
+also refuses answers to keys the schema does not list. `DynamicForm` and
+`generateZod` follow FeedBakkr's older rules: a required `text` or
+`textarea` accepts an empty string there, so give it `"min": 1` (or more)
+when a real answer is needed, and unknown keys are dropped.
 
 ## Defaults
 
