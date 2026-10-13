@@ -1,6 +1,6 @@
 # Reference copy: FeedBakkr at 8ae744e
 
-Verbatim copies of FeedBakkr's schema parser and payload validator, taken from
+Verbatim copies of FeedBakkr's schema parser, payload validator, inbox preview and form renderer, taken from
 `feedbakkr/feedbakkr` at commit `8ae744e0e66cb14827117950699966a5957b084b`
 (2026-06-30). Only the import paths are changed.
 
@@ -14,3 +14,6 @@ the difference in `test/intentional-differences.test.ts` instead.
 | `date-bounds.ts` | `packages/shared/src/date-bounds.ts` |
 | `form-dsl-text.ts` | `packages/shared/src/form-dsl-text.ts` |
 | `generate-zod.ts` | `packages/ui/src/generators/generate-zod.ts` (imports from `@feedbakkr/shared` pointed at the copies) |
+| `dynamic-form.tsx` | `packages/ui/src/dynamic-form.tsx` (imports pointed at the copies and sorted) |
+| `schema-utils.ts` | `packages/shared/src/schema-utils.ts` |
+| `preview-generation.ts` | `apps/api/src/features/channels/services/preview-generation.service.ts` (imports from `@feedbakkr/shared` pointed at the copies) |

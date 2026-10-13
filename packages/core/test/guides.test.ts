@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { prepareMessage } from "../src/messages/prepare.js";
 import { generateZod } from "../src/schema/generate-zod.js";
 import type { SchemaDslV1 } from "../src/schema/schema-dsl.js";
 import { validateSchema } from "../src/schema/validate-schema.js";
@@ -98,7 +99,24 @@ describe("claude-guide.md", () => {
 		expect(example).toContain("} satisfies SchemaDslV1;");
 	});
 
-	it("is a valid form whose server check rejects an empty name", () => {
+	it("has the route from the guide, which refuses a blank name", async () => {
+		const [, route] = codeBlocks("claude-guide.md", "ts");
+		expect(route).toContain("await prepareMessage(contactForm, body.answers);");
+		const ok = await prepareMessage(contactForm, {
+			name: "Sam",
+			email: "sam@example.com",
+			message: "Hello there",
+		});
+		expect(ok).toMatchObject({ ok: true, summary: "Sam" });
+		const blank = await prepareMessage(contactForm, {
+			name: "  ",
+			email: "sam@example.com",
+			message: "Hello there",
+		});
+		expect(blank).toMatchObject({ ok: false, errors: { name: [{ code: "required" }] } });
+	});
+
+	it("is a valid form whose browser check rejects an empty name", () => {
 		expect(validateSchema(contactForm, { publish: true }).ok).toBe(true);
 		const answers = generateZod(contactForm);
 		expect(

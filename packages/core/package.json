@@ -1,7 +1,7 @@
 {
 	"name": "@ai-food-focus/feedbakkr-core",
-	"version": "0.4.0",
-	"description": "FeedBakkr form toolkit: schema format, validation, text format, exports, a React form and the form builder.",
+	"version": "0.5.0",
+	"description": "FeedBakkr form toolkit: schema format, validation, submissions and messages, text format, exports, a React form and hook, and the form builder.",
 	"license": "UNLICENSED",
 	"repository": {
 		"type": "git",
@@ -33,6 +33,18 @@
 		"./export": {
 			"types": "./dist/export.d.ts",
 			"import": "./dist/export.js"
+		},
+		"./submissions": {
+			"types": "./dist/submissions.d.ts",
+			"import": "./dist/submissions.js"
+		},
+		"./messages": {
+			"types": "./dist/messages.d.ts",
+			"import": "./dist/messages.js"
+		},
+		"./form": {
+			"types": "./dist/form.d.ts",
+			"import": "./dist/form.js"
 		},
 		"./react": {
 			"types": "./dist/react.d.ts",

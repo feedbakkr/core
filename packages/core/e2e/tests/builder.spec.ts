@@ -1,19 +1,8 @@
 // The builder in a real browser, on the test page (e2e/page). Every test also
 // checks the page made no request beyond the test server itself.
 import { readFile } from "node:fs/promises";
-import { test as base, expect, type Page } from "@playwright/test";
-
-const test = base.extend<{ requests: string[] }>({
-	requests: async ({ page, baseURL }, use) => {
-		const outside: string[] = [];
-		page.on("request", (request) => {
-			const url = request.url();
-			if (!url.startsWith(`${baseURL}/`) && !/^(data|blob):/.test(url)) outside.push(url);
-		});
-		await use(outside);
-		expect(outside, "requests outside the test page").toEqual([]);
-	},
-});
+import type { Page } from "@playwright/test";
+import { expect, test } from "./no-requests.js";
 
 async function schema(page: Page) {
 	return JSON.parse((await page.getByTestId("schema").textContent()) ?? "null");
@@ -23,8 +12,7 @@ async function schema(page: Page) {
 const fieldList = (page: Page) =>
 	page.getByRole("button").filter({ has: page.getByRole("button", { name: /^Reorder / }) });
 
-test.beforeEach(async ({ page, requests }) => {
-	void requests;
+test.beforeEach(async ({ page }) => {
 	await page.goto("/");
 	await expect(page.getByText("3 fields")).toBeVisible();
 });

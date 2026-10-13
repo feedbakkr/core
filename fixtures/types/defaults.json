@@ -1,0 +1,17 @@
+{
+	"v": 1,
+	"title": "Defaults and edges",
+	"desc": "Fields that rely on default limits, so the tests reach those limits.",
+	"fields": [
+		{ "k": "line", "label": "Line", "t": "text" },
+		{ "k": "body", "label": "Body", "t": "textarea", "req": true },
+		{ "k": "notes", "label": "Notes", "t": "markdown" },
+		{ "k": "email", "label": "Email", "t": "email" },
+		{ "k": "site", "label": "Site", "t": "url" },
+		{ "k": "phone", "label": "Phone", "t": "phone" },
+		{ "k": "trip", "label": "Trip", "t": "daterange" },
+		{ "k": "tags", "label": "Tags", "t": "dynlist", "maxItems": 3, "item": { "k": "tag", "label": "Tag", "t": "text", "max": 20 } },
+		{ "k": "count", "label": "Count", "t": "integer" }
+	],
+	"preview": { "mode": "auto" }
+}
