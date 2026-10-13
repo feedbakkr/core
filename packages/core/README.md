@@ -49,12 +49,15 @@ import { DynamicForm } from "@ai-food-focus/feedbakkr-core/react";
 <DynamicForm schema={schema} onSubmit={(answers) => send(answers)} />;
 ```
 
-`DynamicForm` is FeedBakkr's form renderer, moved unchanged: plain inputs
-with inline styles, one per field type, checked with `generateZod` before
-`onSubmit` is called. It takes `initialValues` (hidden fields are filled this
+`DynamicForm` is FeedBakkr's form renderer: plain inputs with inline styles,
+one per field type, checked with `generateZod` before `onSubmit` is called.
+It differs from FeedBakkr's in one way: list entries that were added but left
+empty are left out, so the answers still pass the check after being sent as
+JSON. It takes `initialValues` (hidden fields are filled this
 way), `submitting`, `renderFooter`, and `className` and `style` for the
 `<form>`. Tests render every fixture through it and FeedBakkr's copy and
-require the same HTML.
+require the same HTML, and require everything it submits to pass the check
+after a JSON round trip.
 
 ## Store the version a message was validated against
 
