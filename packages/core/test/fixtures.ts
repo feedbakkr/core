@@ -5,7 +5,9 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
-const ROOT = new URL("../../../fixtures/", import.meta.url).pathname;
+// import.meta.dirname, not a URL: the React tests run under jsdom, whose URL
+// resolves relative paths differently.
+const ROOT = join(import.meta.dirname, "../../../fixtures/");
 
 export interface Fixture {
 	name: string;

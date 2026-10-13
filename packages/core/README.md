@@ -2,7 +2,7 @@
 
 FeedBakkr's form schema format, its checks and its payload validator, as pure
 TypeScript with `zod` as the only dependency. It runs in Cloudflare Workers,
-Node and browsers.
+Node and browsers. A React form renderer is a separate entry.
 
 ## Entry points
 
@@ -12,6 +12,7 @@ Node and browsers.
 | `@ai-food-focus/feedbakkr-core/schema` | Schema DSL v1 types and Zod schema, `validateSchema`, `generateZod`, `hashSchema`, sample data, date bounds, preview helpers |
 | `@ai-food-focus/feedbakkr-core/text` | `parseFormDslText`, `schemaToTextDsl` |
 | `@ai-food-focus/feedbakkr-core/export` | `generateJsonSchema`, `generateZodCode` |
+| `@ai-food-focus/feedbakkr-core/react` | `DynamicForm`. Needs `react` 19, an optional peer dependency that only this entry imports. |
 
 ## Check a schema
 
@@ -39,6 +40,21 @@ const parsed = generateZod(result.schema).safeParse(body.fields);
 `generateZod` behaves exactly as FeedBakkr's: unknown keys are stripped, and
 an optional field may be left out. Stricter submission validation comes in a
 later release.
+
+## Render a form
+
+```tsx
+import { DynamicForm } from "@ai-food-focus/feedbakkr-core/react";
+
+<DynamicForm schema={schema} onSubmit={(answers) => send(answers)} />;
+```
+
+`DynamicForm` is FeedBakkr's form renderer, moved unchanged: plain inputs
+with inline styles, one per field type, checked with `generateZod` before
+`onSubmit` is called. It takes `initialValues` (hidden fields are filled this
+way), `submitting`, `renderFooter`, and `className` and `style` for the
+`<form>`. Tests render every fixture through it and FeedBakkr's copy and
+require the same HTML.
 
 ## Store the version a message was validated against
 

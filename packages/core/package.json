@@ -1,7 +1,7 @@
 {
 	"name": "@ai-food-focus/feedbakkr-core",
-	"version": "0.2.0",
-	"description": "FeedBakkr form toolkit: schema format, validation, text format and exports.",
+	"version": "0.3.0",
+	"description": "FeedBakkr form toolkit: schema format, validation, text format, exports and a React form.",
 	"license": "UNLICENSED",
 	"repository": {
 		"type": "git",
@@ -32,6 +32,10 @@
 			"types": "./dist/export.d.ts",
 			"import": "./dist/export.js"
 		},
+		"./react": {
+			"types": "./dist/react.d.ts",
+			"import": "./dist/react.js"
+		},
 		"./package.json": "./package.json"
 	},
 	"files": [
@@ -45,19 +49,34 @@
 	},
 	"scripts": {
 		"build": "tsup",
-		"typecheck": "tsc --noEmit",
+		"typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.react.json",
 		"test": "vitest run && vitest run --config vitest.workers.config.ts",
 		"check:package": "node scripts/check-boundaries.mjs && publint --strict && attw --pack . --profile esm-only"
 	},
 	"dependencies": {
 		"zod": "^4.0.0"
 	},
+	"peerDependencies": {
+		"react": "^19.0.0"
+	},
+	"peerDependenciesMeta": {
+		"react": {
+			"optional": true
+		}
+	},
 	"devDependencies": {
 		"@arethetypeswrong/cli": "^0.18.5",
 		"@cloudflare/vitest-plugin": "^1.4.0",
 		"@modelcontextprotocol/sdk": "^1.32.1",
+		"@testing-library/dom": "^10.4.2",
+		"@testing-library/react": "^16.3.3",
 		"@types/node": "^22.0.0",
+		"@types/react": "^19.3.0",
+		"@types/react-dom": "^19.3.0",
+		"jsdom": "^30.1.2",
 		"publint": "^0.3.25",
+		"react": "^19.3.0",
+		"react-dom": "^19.3.0",
 		"tsup": "^8.5.1",
 		"typescript": "~6.0.3",
 		"vitest": "^4.1.11"

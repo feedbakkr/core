@@ -6,6 +6,7 @@ export default defineConfig({
 		schema: "src/schema/index.ts",
 		text: "src/text/index.ts",
 		export: "src/export/index.ts",
+		react: "src/react/index.ts",
 		// The `feedbakkr` command, run by bin/feedbakkr.js. Node only, and not
 		// an export, so it gets no type declarations.
 		cli: "src/cli/index.ts",
@@ -18,6 +19,7 @@ export default defineConfig({
 			schema: "src/schema/index.ts",
 			text: "src/text/index.ts",
 			export: "src/export/index.ts",
+			react: "src/react/index.ts",
 		},
 		compilerOptions: { types: [] },
 	},

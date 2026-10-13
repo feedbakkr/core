@@ -16,7 +16,9 @@ Core holds the form schema format and the code that checks it:
   format.
 - `hashSchema(schema)` gives a stable id for a schema version.
 
-It runs in Workers, Node and browsers, and depends only on `zod`.
+It runs in Workers, Node and browsers, and depends only on `zod`. The
+React form, `DynamicForm`, is a separate entry, `/react`, so servers never
+load React.
 
 ## Tools
 
@@ -91,8 +93,36 @@ if (!answers.success) {
 Add a test that runs `validateSchema(contactForm, { publish: true })` and
 expects `ok: true`, so a later edit cannot break the form unnoticed.
 
-## Not in core yet
+## Showing the form
 
-Core does not render forms yet. Build the form UI with the app's own
-components, one control per field type, driven by the schema's fields. A
-shared renderer and a form hook come in later releases.
+`DynamicForm` from `@ai-food-focus/feedbakkr-core/react` renders any v1
+schema (React 19):
+
+```tsx
+// in the page
+import { DynamicForm } from "@ai-food-focus/feedbakkr-core/react";
+import { contactForm } from "../forms/contact.js";
+
+<DynamicForm
+	schema={contactForm}
+	initialValues={{ source_page: location.href }}
+	submitting={sending}
+	onSubmit={(answers) => send(answers)}
+	className="contact-form"
+/>;
+```
+
+- It checks the answers with `generateZod` before calling `onSubmit`, and
+  shows the first problem under each field. The route must still check them
+  (rule 3).
+- `onSubmit` gets the checked answers. Errors from the server are not shown
+  by the form, so show them on the page.
+- Hidden fields are not rendered. Fill them through `initialValues`.
+- `submitting` disables the Submit button. `renderFooter` replaces the
+  button with your own.
+- The look is fixed: plain inputs with inline styles and English text
+  ("Submit", "Select..."). `className` and `style` go on the `<form>`
+  element. When the app needs its own components, build the form from the
+  schema's fields instead, and keep rules 2 and 3.
+- Errors are not yet linked to their inputs for screen readers. A headless
+  form hook and a renderer that can be styled come in later releases.

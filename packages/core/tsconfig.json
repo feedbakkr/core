@@ -12,5 +12,8 @@
 		"tsup.config.ts",
 		"vitest.config.ts",
 		"vitest.workers.config.ts"
-	]
+	],
+	// React code needs the DOM types, which clash with the Workers ones, so it
+	// is checked by tsconfig.react.json instead.
+	"exclude": ["src/react/**/*", "test/**/*.tsx"]
 }

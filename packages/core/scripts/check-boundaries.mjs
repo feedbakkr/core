@@ -1,13 +1,15 @@
 // Fails the build if a published entry reaches something it must not.
 //
 // The library entries are pure TypeScript for servers, Workers and browsers
-// alike, so the only package they or their chunks may import is `zod`. React,
+// alike, so the only package they or their chunks may import is `zod`. React
+// (outside the React entry),
 // the builder's UI libraries, the MCP SDK and Node built-ins are all refused,
 // as is code generation at run time (`eval`, `new Function`), which Cloudflare
 // Workers forbid.
 //
+// `react.js`, the React entry, may also import `react`, its peer dependency.
 // `cli.js`, the `feedbakkr` command, runs only in Node and may also import
-// Node built-ins. Nothing else may import it.
+// Node built-ins. Nothing else may import either of them.
 import { builtinModules } from "node:module";
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
@@ -15,6 +17,8 @@ import { join } from "node:path";
 const DIST = new URL("../dist/", import.meta.url).pathname;
 const ALLOWED_PACKAGES = new Set(["zod"]);
 const NODE_ONLY = new Set(["cli.js"]);
+const REACT_ONLY = new Set(["react.js"]);
+const REACT_PACKAGES = new Set(["react"]);
 const NODE_BUILTINS = new Set(builtinModules);
 
 const files = (await readdir(DIST, { recursive: true })).filter((f) => f.endsWith(".js"));
@@ -36,13 +40,16 @@ for (const file of files) {
 	const specs = patterns.flatMap((p) => [...code.matchAll(p)].map((m) => m[1]));
 	for (const spec of specs) {
 		if (spec.startsWith(".")) {
-			if (NODE_ONLY.has(spec.replace(/^\.\//, ""))) problems.push(`${file}: imports the CLI`);
+			const target = spec.replace(/^\.\//, "");
+			if (NODE_ONLY.has(target)) problems.push(`${file}: imports the CLI`);
+			if (REACT_ONLY.has(target)) problems.push(`${file}: imports the React entry`);
 			continue;
 		}
 		if (NODE_ONLY.has(file) && (spec.startsWith("node:") || NODE_BUILTINS.has(spec.split("/")[0]))) {
 			continue;
 		}
 		const pkg = spec.startsWith("@") ? spec.split("/").slice(0, 2).join("/") : spec.split("/")[0];
+		if (REACT_ONLY.has(file) && REACT_PACKAGES.has(pkg)) continue;
 		if (!ALLOWED_PACKAGES.has(pkg)) problems.push(`${file}: imports "${spec}"`);
 	}
 	if (/\beval\s*\(|\bnew\s+Function\s*\(/.test(code)) {
@@ -54,7 +61,7 @@ if (problems.length > 0) {
 	console.error(`check-boundaries: ${problems.length} problem(s)\n  ${problems.join("\n  ")}`);
 	process.exit(1);
 }
-const library = files.length - NODE_ONLY.size;
+const library = files.length - NODE_ONLY.size - REACT_ONLY.size;
 console.log(
-	`check-boundaries: ${library} library files import only ${[...ALLOWED_PACKAGES].join(", ")}; the CLI adds only Node built-ins`,
+	`check-boundaries: ${library} library files import only ${[...ALLOWED_PACKAGES].join(", ")}; the React entry adds only react; the CLI adds only Node built-ins`,
 );
