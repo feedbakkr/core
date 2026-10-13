@@ -1,6 +1,6 @@
 {
 	"name": "@ai-food-focus/feedbakkr-core",
-	"version": "0.6.0",
+	"version": "0.7.0",
 	"description": "FeedBakkr form toolkit: schema format, validation, submissions and messages, text format, exports, a React form and hook, and the form builder.",
 	"license": "UNLICENSED",
 	"repository": {
@@ -129,6 +129,7 @@
 		"@vitejs/plugin-react": "^6.1.2",
 		"ajv": "^8.20.0",
 		"ajv-formats": "^3.0.1",
+		"axe-core": "^4.14.0",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
 		"jsdom": "^30.1.2",
