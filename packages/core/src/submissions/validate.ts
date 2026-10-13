@@ -1,8 +1,9 @@
 import { z } from "zod";
+import { resolveForm } from "../conditions/resolve.js";
 import { compareIso, resolveDateBound } from "../schema/date-bounds.js";
-import type { DslField, SchemaDslV1 } from "../schema/schema-dsl.js";
+import type { DslField } from "../schema/schema-dsl.js";
+import type { SchemaDsl } from "../schema/schema-dsl-v2.js";
 import { type SubmissionError, type SubmissionErrors, submissionError } from "./errors.js";
-import { normalizeSubmission } from "./normalize.js";
 
 // The same limits and patterns as generateZod, which the browser runs.
 const DEFAULT_TEXT_MAX_LENGTH = 500;
@@ -237,18 +238,20 @@ function checkFields(
  * Checks answers to a form on the server. It normalises them first (see
  * `normalizeSubmission`), then applies the rules the browser applies, and
  * refuses answers to keys the schema does not have unless told to drop them.
+ * In schema v2 only the fields that apply are checked: a field whose
+ * condition does not hold is never required, and its answer is dropped.
  *
  * `values` holds the normalised answers to the schema's fields: what to store
  * when `ok` is true.
  */
 export function validateSubmission(
-	schema: SchemaDslV1,
+	schema: SchemaDsl,
 	raw: unknown,
 	options: ValidateSubmissionOptions = {},
 ): SubmissionResult {
 	const now = options.now ?? new Date();
-	const values = normalizeSubmission(schema, raw);
-	const errors = checkFields(schema.fields, values, now);
+	const { values, fields } = resolveForm(schema, raw);
+	const errors = checkFields(fields, values, now);
 	if (options.unknownFields !== "strip" && isPlainObject(raw)) {
 		const known = new Set(schema.fields.map((f) => f.k));
 		for (const key of Object.keys(raw)) {
@@ -265,18 +268,20 @@ export function validateSubmission(
 
 /**
  * Checks only some fields, for a step of a multi-step form or a field the
- * person has just left. The values are normalised as a whole first.
+ * person has just left. Conditions are judged on all the answers, and only
+ * the named fields that apply are checked, so the fields of every step pass
+ * exactly when `validateSubmission` would pass them.
  */
 export function validateFields(
-	schema: SchemaDslV1,
+	schema: SchemaDsl,
 	raw: unknown,
 	keys: readonly string[],
 	options: Pick<ValidateSubmissionOptions, "now"> = {},
 ): { ok: boolean; errors: SubmissionErrors } {
 	const wanted = new Set(keys);
-	const values = normalizeSubmission(schema, raw);
+	const { values, fields } = resolveForm(schema, raw);
 	const errors = checkFields(
-		schema.fields.filter((f) => wanted.has(f.k)),
+		fields.filter((f) => wanted.has(f.k)),
 		values,
 		options.now ?? new Date(),
 	);

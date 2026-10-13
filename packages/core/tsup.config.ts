@@ -9,6 +9,7 @@ export default defineConfig({
 		submissions: "src/submissions/index.ts",
 		messages: "src/messages/index.ts",
 		form: "src/form/index.ts",
+		conditions: "src/conditions/index.ts",
 		react: "src/react/index.ts",
 		builder: "src/builder/index.ts",
 		// The `feedbakkr` command, run by bin/feedbakkr.js. Node only, and not
@@ -26,6 +27,7 @@ export default defineConfig({
 			submissions: "src/submissions/index.ts",
 			messages: "src/messages/index.ts",
 			form: "src/form/index.ts",
+			conditions: "src/conditions/index.ts",
 			react: "src/react/index.ts",
 			builder: "src/builder/index.ts",
 		},

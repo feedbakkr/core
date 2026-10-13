@@ -1,4 +1,6 @@
-import type { DslField, FieldType, SchemaDslV1 } from "../schema/schema-dsl.js";
+import { resolveForm } from "../conditions/resolve.js";
+import type { DslField, FieldType } from "../schema/schema-dsl.js";
+import type { SchemaDsl } from "../schema/schema-dsl-v2.js";
 
 /** One answer, ready to show: what an inbox or an email lists for a field. */
 export interface SubmissionRow {
@@ -13,6 +15,8 @@ export interface SubmissionRow {
 	items?: string[];
 	/** The answer is Markdown; render it safely, or show `display` as text. */
 	markdown?: true;
+	/** The id of the field's section, in a schema v2 with sections. */
+	section?: string;
 	/** A hidden field, filled in by the page rather than the person. */
 	hidden?: true;
 	/** The field is marked sensitive; the host decides who may see it. */
@@ -85,20 +89,25 @@ function displayValue(field: DslField, value: unknown, locale: string): string {
 /**
  * The answers to a form as rows to display, in the schema's order, one per
  * field: the label, the stored value and that value as plain text. Fields
- * with no answer are included, shown as "Not provided". Formatting is plain
- * text; HTML and email layout belong to the host.
+ * with no answer are included, shown as "Not provided". In schema v2, fields
+ * whose conditions do not hold are left out, and each row names its section.
+ * Formatting is plain text; HTML and email layout belong to the host.
  *
  * Use the schema the answers were checked against, so renamed labels and
  * removed options still read as they were submitted.
  */
 export function interpretSubmission(
-	schema: SchemaDslV1,
+	schema: SchemaDsl,
 	values: Record<string, unknown>,
 	options: InterpretOptions = {},
 ): SubmissionRow[] {
 	const locale = options.locale ?? "en-GB";
 	const notProvided = options.notProvided ?? "Not provided";
-	return schema.fields.map((field) => {
+	const sectionOf = new Map<string, string>();
+	if (schema.v === 2) {
+		for (const s of schema.sections ?? []) for (const k of s.fields) sectionOf.set(k, s.id);
+	}
+	return resolveForm(schema, values).fields.map((field) => {
 		const value = values[field.k];
 		const given = value !== undefined && value !== null;
 		const row: SubmissionRow = {
@@ -111,6 +120,8 @@ export function interpretSubmission(
 		if (given && field.t === "dynlist" && Array.isArray(value)) {
 			row.items = value.map((item) => displayValue(field.item as DslField, item, locale));
 		}
+		const section = sectionOf.get(field.k);
+		if (section) row.section = section;
 		if (field.t === "markdown") row.markdown = true;
 		if (field.hidden) row.hidden = true;
 		if (field.sensitive === true) row.sensitive = true;

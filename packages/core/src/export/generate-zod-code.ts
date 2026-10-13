@@ -1,4 +1,6 @@
-import type { DslField, SchemaDslV1 } from "../schema/schema-dsl.js";
+import type { DslField } from "../schema/schema-dsl.js";
+import type { Condition, SchemaDsl } from "../schema/schema-dsl-v2.js";
+import { conditionalFields, isList } from "./conditions.js";
 
 /**
  * Emit Zod code that a developer can paste into their own app. This is a
@@ -7,7 +9,7 @@ import type { DslField, SchemaDslV1 } from "../schema/schema-dsl.js";
  * relative bound is set on a date field the emitted code covers only the
  * format; the server remains authoritative for the range check.
  */
-function fieldToCode(field: DslField, indent: string): string {
+function fieldToCode(field: DslField, indent: string, conditional = false): string {
 	let code: string;
 
 	switch (field.t) {
@@ -89,22 +91,63 @@ function fieldToCode(field: DslField, indent: string): string {
 		}
 	}
 
-	if (!field.req) {
+	if (!field.req || conditional) {
 		code += ".optional()";
 	}
 
 	return code;
 }
 
-export function generateZodCode(dsl: SchemaDslV1): string {
+/** A condition (schema v2) as a JavaScript expression over `data`. */
+function conditionToCode(dsl: SchemaDsl, c: Condition): string {
+	if ("all" in c) return `(${c.all.map((x) => conditionToCode(dsl, x)).join(" && ")})`;
+	if ("any" in c) return `(${c.any.map((x) => conditionToCode(dsl, x)).join(" || ")})`;
+	const ref = `data.${c.k}`;
+	const is = (value: unknown) =>
+		isList(dsl, c.k)
+			? `(${ref} ?? []).includes(${JSON.stringify(value)})`
+			: `${ref} === ${JSON.stringify(value)}`;
+	if ("eq" in c) return is(c.eq);
+	if ("neq" in c) return `!(${is(c.neq)})`;
+	if ("in" in c) return `(${c.in.map(is).join(" || ")})`;
+	if ("filled" in c) return `${ref} !== undefined`;
+	return `${ref} === undefined`;
+}
+
+export function generateZodCode(dsl: SchemaDsl): string {
+	const conditional = conditionalFields(dsl);
+	const keys = new Set(conditional.map((c) => c.field.k));
 	const lines: string[] = ['import { z } from "zod";', "", "export const schema = z.object({"];
 
 	for (const field of dsl.fields) {
-		const code = fieldToCode(field, "  ");
+		const code = fieldToCode(field, "  ", keys.has(field.k));
 		lines.push(`  ${field.k}: ${code},`);
 	}
 
-	lines.push("});", "", "export type FormData = z.infer<typeof schema>;");
+	if (conditional.length === 0) {
+		lines.push("});");
+	} else {
+		// A field with a condition is required (if `req`) when it holds, and
+		// absent when it does not, as in stored answers.
+		lines.push("}).superRefine((data, ctx) => {");
+		for (const { field, when } of conditional) {
+			const path = JSON.stringify([field.k]);
+			const value = `data.${field.k}`;
+			lines.push(`  if (${conditionToCode(dsl, when)}) {`);
+			if (field.req) {
+				lines.push(
+					`    if (${value} === undefined) ctx.addIssue({ code: "custom", path: ${path}, message: "Required" });`,
+				);
+			}
+			lines.push(
+				`  } else if (${value} !== undefined) {`,
+				`    ctx.addIssue({ code: "custom", path: ${path}, message: "Does not apply" });`,
+				"  }",
+			);
+		}
+		lines.push("});");
+	}
+	lines.push("", "export type FormData = z.infer<typeof schema>;");
 
 	return lines.join("\n");
 }

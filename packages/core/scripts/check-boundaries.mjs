@@ -1,7 +1,7 @@
 // Fails the build if a published entry reaches something it must not.
 //
 // The library entries (`index`, `schema`, `submissions`, `messages`, `form`,
-// `text`, `export`) are pure
+// `conditions`, `text`, `export`) are pure
 // TypeScript for servers, Workers and browsers alike, so the only package
 // they, and every chunk they load, may import is `zod`. Code generation at
 // run time (`eval`, `new Function`), which Cloudflare Workers forbid, is
@@ -42,6 +42,7 @@ const ENTRY_EXTRAS = {
 	"submissions.js": [],
 	"messages.js": [],
 	"form.js": [],
+	"conditions.js": [],
 	"react.js": REACT,
 	"builder.js": BUILDER,
 	"cli.js": ["node:"],

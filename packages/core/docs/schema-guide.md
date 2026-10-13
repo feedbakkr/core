@@ -2,7 +2,9 @@
 
 A form is described by a **schema**: a JSON object listing its fields. The
 same schema checks the form in the browser and the answers on the server.
-This guide covers schema format v1, the only version so far.
+This guide covers schema format v1, and v2, which adds conditions and
+sections (see [Schema v2](#schema-v2-conditions-and-sections)). Write v1
+unless the form needs them.
 
 Always check a schema you write. With the MCP server, call `validate_schema`
 with `"publish": true`. Without it, run
@@ -239,6 +241,86 @@ dishes: dynlist "Dishes you tried" maxItems=5
 - Quoted text may contain `\"` and `\\`. List or object defaults are JSON:
   `default=["a","b"]`.
 - Blank lines and lines starting with `#` are ignored.
+
+## Schema v2: conditions and sections
+
+A v2 schema is v1 with `"v": 2` and up to four more things. Use it only when
+the form needs one of them; FeedBakkr itself reads only v1.
+
+```json
+{
+  "v": 2,
+  "title": "Work with us",
+  "fields": [
+    { "k": "name", "label": "Your name", "t": "text", "req": true, "max": 100 },
+    {
+      "k": "kind", "label": "Enquiry type", "t": "fixed", "req": true,
+      "opts": [{ "k": "supplier", "label": "I'm a supplier" }, { "k": "other", "label": "Something else" }]
+    },
+    {
+      "k": "volume", "label": "Monthly volume", "t": "integer", "req": true, "min": 1,
+      "help": "Roughly, in cases a month.",
+      "when": { "k": "kind", "eq": "supplier" }
+    },
+    { "k": "details", "label": "Details", "t": "textarea", "req": true, "min": 10, "max": 2000, "placeholder": "Tell us more" }
+  ],
+  "sections": [
+    { "id": "you", "title": "About you", "fields": ["name", "kind"] },
+    { "id": "business", "title": "Your business", "fields": ["volume"], "when": { "k": "kind", "eq": "supplier" } },
+    { "id": "request", "title": "Your request", "fields": ["details"] }
+  ]
+}
+```
+
+- **`when`** on a field: show and check it only when the condition holds.
+  A field whose condition does not hold is never required, and its answer
+  is dropped.
+- **`sections`**: groups of fields, shown however the page chooses (one
+  page, steps, slides). With sections, every field is in exactly one,
+  listed in the same order as `fields`. A section can have a `when` too.
+- **`help`** (up to 500 characters): guidance shown with the field.
+- **`placeholder`** (up to 200): example text inside an empty input.
+
+A condition names a field that comes **before** it, and compares its answer:
+
+| Condition | Holds when |
+| --- | --- |
+| `{ "k": "kind", "eq": "supplier" }` | The answer is this value. For a list, it contains it. |
+| `{ "k": "kind", "neq": "other" }` | It is not this value (or there is no answer). |
+| `{ "k": "kind", "in": ["supplier", "venue"] }` | It is one of these. |
+| `{ "k": "phone", "filled": true }` | An answer was given. |
+| `{ "k": "phone", "empty": true }` | No answer was given. |
+| `{ "all": [ ... ] }`, `{ "any": [ ... ] }` | Every one, or at least one, of two or more conditions. |
+
+Compared values must suit the field: an option key for `fixed`, `true` or
+`false` for `bool`, a number for `number` and `integer`. A section's `when`
+names only fields of earlier sections.
+
+To check a v2 schema in code, pass `allowV2: true` to `validateSchema`.
+`validate_schema` and `feedbakkr validate` accept both versions.
+
+In the text format, start with `@version 2`, open each section with
+`@section id "Title"`, and end a field line with `when <condition>`:
+
+```text
+@version 2
+@title Work with us
+
+@section you "About you"
+name: text "Your name" required max=100
+kind: fixed "Enquiry type" required
+  - supplier "I'm a supplier"
+  - other "Something else"
+@section business "Your business" when kind = supplier
+volume: integer "Monthly volume" required min=1 help="Roughly, in cases a month." when kind = supplier
+@section request "Your request"
+details: textarea "Details" required min=10 max=2000 placeholder="Tell us more"
+```
+
+Conditions in text: `kind = supplier`, `kind != other`,
+`kind in [supplier, venue]`, `phone filled`, `phone empty`, joined with
+`and` and `or` (`and` first; group with parentheses). Quote a value with
+spaces, or one that would read as a number or `true`: `size = "12"`.
 
 ## Writing a good form
 

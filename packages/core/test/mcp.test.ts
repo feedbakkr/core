@@ -164,6 +164,32 @@ describe("MCP handler", () => {
 		);
 	});
 
+	it("checks v2 schemas and their answers", () => {
+		const v2 = {
+			v: 2,
+			fields: [
+				{ k: "kind", label: "Kind", t: "fixed", opts: [{ k: "a" }, { k: "b" }], req: true },
+				{ k: "detail", label: "Detail", t: "text", req: true, when: { k: "kind", eq: "b" } },
+			],
+		};
+		expect(call("validate_schema", { schema: v2, publish: true }).content[0]?.text).toBe(
+			"Valid schema (v2, 2 fields), including the publish checks.",
+		);
+		const late = { ...v2, fields: [...v2.fields].reverse() };
+		expect(call("validate_schema", { schema: late }).content[0]?.text).toContain(
+			'refers to "kind", which does not come before it',
+		);
+		expect(
+			call("validate_submission", { schema: v2, answers: { kind: "a", detail: "x" } }).isError,
+		).toBeUndefined();
+		expect(
+			call("validate_submission", { schema: v2, answers: { kind: "b" } }).content[0]?.text,
+		).toContain("- detail: Required (required)");
+		expect(call("schema_to_text", { schema: v2 }).content[0]?.text).toContain(
+			'detail: text "Detail" required when kind = b',
+		);
+	});
+
 	it("answers protocol errors as JSON-RPC errors", () => {
 		expect(request("nope")).toMatchObject({ error: { code: -32601 } });
 		expect(request("tools/call", { name: "nope" })).toMatchObject({ error: { code: -32602 } });

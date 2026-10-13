@@ -27,6 +27,17 @@ export {
 	previewConfigSchema,
 	schemaDslV1Schema,
 } from "./schema-dsl.js";
+export {
+	type Condition,
+	type ConditionValue,
+	conditionKeys,
+	conditionSchema,
+	type DslFieldV2,
+	type SchemaDsl,
+	type SchemaDslV2,
+	type SchemaSection,
+	schemaDslV2Schema,
+} from "./schema-dsl-v2.js";
 export type { PreviewValidationResult } from "./schema-utils.js";
 export {
 	buildFieldOptionsMap,

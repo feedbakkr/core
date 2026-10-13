@@ -45,6 +45,18 @@ describe("schema-guide.md", () => {
 		}
 	});
 
+	it("has a v2 schema and a v2 text example that agree and pass every check", () => {
+		const [v2] = json.filter((block) => block.v === 2);
+		expect(validateSchema(v2, { allowV2: true, publish: true }).issues).toEqual([]);
+		const [, text] = codeBlocks("schema-guide.md", "text");
+		const parsed = parseFormDslText(text ?? "");
+		if (!parsed.ok) throw new Error(JSON.stringify(parsed.errors));
+		expect(validateSchema(parsed.schema, { allowV2: true, publish: true }).issues).toEqual([]);
+		const { title: _title, ...fromText } = parsed.schema;
+		const { title: _t, ...fromJson } = v2;
+		expect(fromText).toEqual(fromJson);
+	});
+
 	it("has a text example that reads as a valid schema", () => {
 		const [text] = codeBlocks("schema-guide.md", "text");
 		const parsed = parseFormDslText(text ?? "");

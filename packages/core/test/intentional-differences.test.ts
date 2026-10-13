@@ -23,6 +23,7 @@ import {
 function parsed(text: string): SchemaDslV1 {
 	const result = parseFormDslText(text);
 	if (!result.ok) throw new Error(JSON.stringify(result.errors));
+	if (result.schema.v !== 1) throw new Error("expected a v1 schema");
 	return result.schema;
 }
 
