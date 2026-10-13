@@ -29,11 +29,13 @@ import {
 	EyeOff,
 	FileText,
 	FileUp,
+	GitBranch,
 	GripVertical,
 	Info,
 	LayoutList,
 	Pencil,
 	Plus,
+	SeparatorHorizontal,
 	Shield,
 	Sparkles,
 	Trash2,
@@ -43,17 +45,18 @@ import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "r
 import { generateJsonSchema, generateZodCode } from "../export/index.js";
 import type { DslField, FieldType, PreviewConfig, SchemaDslV1 } from "../schema/schema-dsl.js";
 import { ALLOWED_SEPARATORS, FIELD_TYPES } from "../schema/schema-dsl.js";
+import type { DslFieldV2, SchemaDsl, SchemaSection } from "../schema/schema-dsl-v2.js";
 import { isPreviewableType } from "../schema/schema-utils.js";
 import { validateSchema } from "../schema/validate-schema.js";
+import { conditionToText } from "../text/condition-text.js";
 import { schemaToTextDsl } from "../text/index.js";
 import { CodePreview } from "./code-preview.js";
+import { ConditionEditor } from "./condition-editor.js";
 import { FieldTypeConfig } from "./field-type-config.js";
 import {
 	createDefaultField,
 	FIELD_TYPE_LABELS,
 	migratePreviewConfig,
-	type SchemaAction,
-	schemaReducer,
 	toCamelCase,
 } from "./reducer.js";
 import {
@@ -82,6 +85,7 @@ import { Switch } from "./ui/switch.js";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs.js";
 import { Textarea } from "./ui/textarea.js";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip.js";
+import { type BuilderAction, builderReducer, fieldsBefore } from "./v2-ops.js";
 
 /** A message for the person using the builder, shown however the host shows them. */
 export interface BuilderNotice {
@@ -91,14 +95,14 @@ export interface BuilderNotice {
 
 export interface FeedbakkrBuilderProps {
 	/** The schema being edited. A new value replaces the builder's state. */
-	value: SchemaDslV1;
+	value: SchemaDsl;
 	/** Called with the schema after every edit. */
-	onChange?: (schema: SchemaDslV1) => void;
+	onChange?: (schema: SchemaDsl) => void;
 	/**
 	 * Saves the schema. The builder checks it with `validateSchema` first, and
 	 * shows a Save button only when this is given. A thrown error is shown.
 	 */
-	onSave?: (schema: SchemaDslV1) => void | Promise<void>;
+	onSave?: (schema: SchemaDsl) => void | Promise<void>;
 	/** Shows the fields without editing them. */
 	readOnly?: boolean;
 	/** Called when the schema starts or stops differing from the last save. */
@@ -111,6 +115,14 @@ export interface FeedbakkrBuilderProps {
 	description?: string;
 	/** Added to the builder's root element. */
 	className?: string;
+	/**
+	 * Offer schema v2: conditions, sections, help and placeholder. Off by
+	 * default; on whenever `value` is already v2. The schema becomes v2 only
+	 * once one of these is used, and goes back to v1 when none is left.
+	 */
+	allowV2?: boolean;
+	/** Keys of fields that cannot be deleted, renamed or change type. */
+	lockedFields?: string[];
 }
 
 // ─── Preview Settings ────────────────────────────────────────────────────────
@@ -128,8 +140,17 @@ const MODE_LABELS: Record<string, string> = {
 	custom: "Custom",
 };
 
+/** Problems with a v2 schema's conditions and sections, as warnings. */
+function structureWarnings(schema: SchemaDsl) {
+	const result = validateSchema(schema, { allowV2: true });
+	if (result.ok) return [];
+	return result.issues
+		.filter((i) => i.code === "invalid_structure")
+		.map((i) => ({ fieldKey: null, fieldLabel: null, message: i.message }));
+}
+
 /** Loads a schema the way the route did: an old preview config is upgraded. */
-function loadSchema(schema: SchemaDslV1): SchemaDslV1 {
+function loadSchema(schema: SchemaDsl): SchemaDsl {
 	return schema.preview ? { ...schema, preview: migratePreviewConfig(schema.preview) } : schema;
 }
 
@@ -143,8 +164,11 @@ export function FeedbakkrBuilder({
 	title,
 	description,
 	className,
+	allowV2 = false,
+	lockedFields = [],
 }: FeedbakkrBuilderProps) {
-	const [schema, dispatch] = useReducer(schemaReducer, value, loadSchema);
+	const [schema, dispatch] = useReducer(builderReducer, value, loadSchema);
+	const v2Enabled = allowV2 || value.v === 2 || schema.v === 2;
 	const isLocked = readOnly;
 	const [previewModalOpen, setPreviewModalOpen] = useState(false);
 	const [editFieldIndex, setEditFieldIndex] = useState<number | null>(null);
@@ -153,22 +177,31 @@ export function FeedbakkrBuilder({
 	const [saveError, setSaveError] = useState<string | null>(null);
 
 	// A new value from the host replaces the state; the host echoing back what
-	// onChange gave it does not.
+	// onChange gave it does not, and nor does a host that keeps passing the
+	// same value while the person edits.
 	const schemaJson = JSON.stringify(schema);
-	const lastValueJson = useRef(JSON.stringify(value));
+	const schemaJsonRef = useRef(schemaJson);
+	schemaJsonRef.current = schemaJson;
+	const valueJson = JSON.stringify(value);
+	const lastValueJson = useRef(valueJson);
+	// The schema last given to onChange, or loaded from the host: not reported again.
+	const lastEmittedJson = useRef(schemaJson);
 	useEffect(() => {
-		const json = JSON.stringify(value);
-		if (json === lastValueJson.current) return;
-		lastValueJson.current = json;
-		if (json !== schemaJson) dispatch({ type: "LOAD_SCHEMA", schema: loadSchema(value) });
-	}, [value, schemaJson]);
+		if (valueJson === lastValueJson.current) return;
+		lastValueJson.current = valueJson;
+		if (valueJson !== schemaJsonRef.current) {
+			const loaded = loadSchema(JSON.parse(valueJson) as SchemaDsl);
+			lastEmittedJson.current = JSON.stringify(loaded);
+			dispatch({ type: "LOAD_SCHEMA", schema: loaded });
+		}
+	}, [valueJson]);
 
 	const onChangeRef = useRef(onChange);
 	onChangeRef.current = onChange;
 	useEffect(() => {
-		if (schemaJson === lastValueJson.current) return;
-		lastValueJson.current = schemaJson;
-		onChangeRef.current?.(JSON.parse(schemaJson) as SchemaDslV1);
+		if (schemaJson === lastEmittedJson.current) return;
+		lastEmittedJson.current = schemaJson;
+		onChangeRef.current?.(JSON.parse(schemaJson) as SchemaDsl);
 	}, [schemaJson]);
 
 	// Dirty means different from the last save, or from the first value.
@@ -185,7 +218,7 @@ export function FeedbakkrBuilder({
 
 	const handleSave = useCallback(async () => {
 		if (!onSave) return;
-		const checked = validateSchema(schema);
+		const checked = v2Enabled ? validateSchema(schema, { allowV2: true }) : validateSchema(schema);
 		if (!checked.ok) {
 			setSaveError(checked.issues.map((i) => i.message).join("; "));
 			return;
@@ -301,7 +334,10 @@ export function FeedbakkrBuilder({
 									Unsaved changes
 								</span>
 							)}
-							<SchemaWarningsButton schema={schema} />
+							<SchemaWarningsButton
+								schema={schema as SchemaDslV1}
+								extra={v2Enabled ? structureWarnings(schema) : []}
+							/>
 						</div>
 						<div className="flex items-center gap-2 shrink-0">
 							<Button
@@ -341,6 +377,8 @@ export function FeedbakkrBuilder({
 						onEditField={isLocked ? undefined : setEditFieldIndex}
 						isLocked={isLocked}
 						onNotify={onNotify}
+						v2Enabled={v2Enabled}
+						lockedFields={lockedFields}
 					/>
 
 					{/* Advanced — inbox preview, form meta, validation schemas */}
@@ -393,6 +431,11 @@ export function FeedbakkrBuilder({
 					if (!open) setEditFieldIndex(null);
 				}}
 				field={editFieldIndex !== null ? (schema.fields[editFieldIndex] ?? null) : null}
+				earlier={editFieldIndex !== null ? fieldsBefore(schema, editFieldIndex) : []}
+				v2Enabled={v2Enabled}
+				locked={
+					editFieldIndex !== null && lockedFields.includes(schema.fields[editFieldIndex]?.k ?? "")
+				}
 				onSave={(field) => {
 					if (editFieldIndex !== null) {
 						dispatch({ type: "UPDATE_FIELD", index: editFieldIndex, field });
@@ -508,7 +551,7 @@ export function FeedbakkrBuilder({
 
 // ─── Empty Schema State ──────────────────────────────────────────────────────
 
-function EmptySchemaState({ dispatch }: { dispatch: Dispatch<SchemaAction> }) {
+function EmptySchemaState({ dispatch }: { dispatch: Dispatch<BuilderAction> }) {
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const [templateError, setTemplateError] = useState<string | null>(null);
 
@@ -617,13 +660,32 @@ function SchemaFieldList({
 	onEditField,
 	isLocked,
 	onNotify,
+	v2Enabled = false,
+	lockedFields = [],
 }: {
-	schema: SchemaDslV1;
-	dispatch: Dispatch<SchemaAction>;
+	schema: SchemaDsl;
+	dispatch: Dispatch<BuilderAction>;
 	onEditField?: ((index: number) => void) | undefined;
 	isLocked?: boolean;
 	onNotify?: ((notice: BuilderNotice) => void) | undefined;
+	v2Enabled?: boolean;
+	lockedFields?: string[];
 }) {
+	const sections = schema.v === 2 ? (schema.sections ?? []) : [];
+	const sectionStarts = new Map(sections.map((s) => [s.fields[0], s] as const));
+	const [editSection, setEditSection] = useState<SchemaSection | null>(null);
+	const sectionHeader = (key: string) => {
+		const section = sectionStarts.get(key);
+		if (!section) return null;
+		return (
+			<SectionHeader
+				key={`section-${section.id}`}
+				section={section}
+				onEdit={isLocked ? undefined : () => setEditSection(section)}
+				onRemove={isLocked ? undefined : () => dispatch({ type: "REMOVE_SECTION", id: section.id })}
+			/>
+		);
+	};
 	const sensors = useSensors(
 		useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
 		useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 5 } }),
@@ -646,7 +708,8 @@ function SchemaFieldList({
 			{schema.fields.length > 0 && (
 				<div className="rounded-lg border divide-y mb-3">
 					{isLocked ? (
-						schema.fields.map((field) => (
+						schema.fields.flatMap((field) => [
+							sectionHeader(field.k),
 							<div
 								key={field.k}
 								className={`flex items-center gap-3 px-4 py-2 ${field.hidden ? "opacity-50" : ""}`}
@@ -669,8 +732,8 @@ function SchemaFieldList({
 								<span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
 									{FIELD_TYPE_LABELS[field.t] ?? field.t}
 								</span>
-							</div>
-						))
+							</div>,
+						])
 					) : (
 						<DndContext
 							sensors={sensors}
@@ -678,11 +741,18 @@ function SchemaFieldList({
 							onDragEnd={handleDragEnd}
 						>
 							<SortableContext items={fieldIds} strategy={verticalListSortingStrategy}>
-								{schema.fields.map((field, i) => (
+								{schema.fields.flatMap((field, i) => [
+									sectionHeader(field.k),
 									<SortableFieldRow
 										key={fieldIds[i]!}
 										id={fieldIds[i]!}
 										field={field}
+										locked={lockedFields.includes(field.k)}
+										onStartSection={
+											v2Enabled && sections.length > 0 && !sectionStarts.has(field.k)
+												? () => dispatch({ type: "START_SECTION", index: i })
+												: undefined
+										}
 										onEdit={() => onEditField?.(i)}
 										onDelete={() => {
 											const removedKey = schema.fields[i]?.k;
@@ -698,14 +768,33 @@ function SchemaFieldList({
 														"Preview configuration has been updated because a referenced field was removed.",
 												});
 											}
+											if (removedKey && schema.v === 2 && refersTo(schema, removedKey)) {
+												onNotify?.({
+													type: "info",
+													message: "Conditions on the removed field have been removed.",
+												});
+											}
 											dispatch({ type: "REMOVE_FIELD", index: i });
 										}}
-									/>
-								))}
+									/>,
+								])}
 							</SortableContext>
 						</DndContext>
 					)}
 				</div>
+			)}
+
+			{!isLocked && v2Enabled && sections.length === 0 && schema.fields.length > 0 && (
+				<Button
+					type="button"
+					variant="ghost"
+					size="sm"
+					className="mb-3 h-7 text-xs"
+					onClick={() => dispatch({ type: "START_SECTION", index: 0 })}
+				>
+					<SeparatorHorizontal className="h-3 w-3" />
+					Group into sections
+				</Button>
 			)}
 
 			{!isLocked && (
@@ -715,7 +804,154 @@ function SchemaFieldList({
 					fieldCount={schema.fields.length}
 				/>
 			)}
+
+			<SectionDialog
+				section={editSection}
+				fields={
+					editSection
+						? fieldsBefore(
+								schema,
+								schema.fields.findIndex((f) => f.k === editSection.fields[0]),
+							)
+						: []
+				}
+				onOpenChange={(open) => {
+					if (!open) setEditSection(null);
+				}}
+				onSave={(patch) => {
+					if (editSection) dispatch({ type: "UPDATE_SECTION", id: editSection.id, patch });
+					setEditSection(null);
+				}}
+			/>
 		</div>
+	);
+}
+
+// ─── Sections and conditions (schema v2) ─────────────────────────────────────
+
+/** Whether a condition on a field or section names this key. */
+function refersTo(schema: SchemaDsl, key: string): boolean {
+	if (schema.v !== 2) return false;
+	const conditions = [...schema.fields, ...(schema.sections ?? [])]
+		.map((item) => item.when)
+		.filter((c) => c !== undefined);
+	return conditions.some((c) => JSON.stringify(c).includes(`"k":${JSON.stringify(key)}`));
+}
+
+function SectionHeader({
+	section,
+	onEdit,
+	onRemove,
+}: {
+	section: SchemaSection;
+	onEdit?: (() => void) | undefined;
+	onRemove?: (() => void) | undefined;
+}) {
+	return (
+		<div className="flex items-center gap-2 bg-muted/40 px-4 py-2" data-fbk-section={section.id}>
+			<SeparatorHorizontal className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+			<div className="min-w-0 flex-1">
+				<p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+					{section.title}
+				</p>
+				{section.when && (
+					<p className="font-mono text-[11px] text-muted-foreground">
+						when {conditionToText(section.when)}
+					</p>
+				)}
+			</div>
+			{onEdit && (
+				<button
+					type="button"
+					className="text-xs text-primary hover:underline"
+					onClick={onEdit}
+					aria-label={`Edit section ${section.title}`}
+				>
+					Edit
+				</button>
+			)}
+			{onRemove && (
+				<button
+					type="button"
+					className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+					onClick={onRemove}
+					aria-label={`Remove section ${section.title}`}
+				>
+					<Trash2 className="h-3.5 w-3.5" />
+				</button>
+			)}
+		</div>
+	);
+}
+
+function SectionDialog({
+	section,
+	fields,
+	onOpenChange,
+	onSave,
+}: {
+	section: SchemaSection | null;
+	fields: DslField[];
+	onOpenChange: (open: boolean) => void;
+	onSave: (patch: Partial<Omit<SchemaSection, "id" | "fields">>) => void;
+}) {
+	const [draft, setDraft] = useState<SchemaSection | null>(null);
+	useEffect(() => {
+		if (section) setDraft(structuredClone(section));
+	}, [section]);
+	if (!draft) return null;
+	return (
+		<Dialog open={section !== null} onOpenChange={onOpenChange}>
+			<DialogContent className="sm:max-w-md">
+				<DialogHeader>
+					<DialogTitle>Edit Section</DialogTitle>
+				</DialogHeader>
+				<div className="space-y-4 py-2">
+					<div className="space-y-1">
+						<Label className="text-xs" htmlFor="fbk-section-title">
+							Title
+						</Label>
+						<Input
+							id="fbk-section-title"
+							value={draft.title}
+							maxLength={200}
+							onChange={(e) => setDraft({ ...draft, title: e.target.value })}
+						/>
+					</div>
+					<div className="space-y-1">
+						<Label className="text-xs" htmlFor="fbk-section-desc">
+							Description
+						</Label>
+						<Textarea
+							id="fbk-section-desc"
+							value={draft.desc ?? ""}
+							rows={2}
+							maxLength={2000}
+							onChange={(e) => setDraft({ ...draft, desc: e.target.value || undefined })}
+						/>
+					</div>
+					<ConditionEditor
+						subject="this section"
+						fields={fields}
+						value={draft.when}
+						onChange={(when) => setDraft({ ...draft, when })}
+					/>
+				</div>
+				<DialogFooter>
+					<DialogClose asChild>
+						<Button variant="outline">Cancel</Button>
+					</DialogClose>
+					<Button
+						disabled={draft.title.trim() === ""}
+						onClick={() =>
+							onSave({ title: draft.title.trim(), desc: draft.desc, when: draft.when })
+						}
+					>
+						Save
+					</Button>
+				</DialogFooter>
+			</DialogContent>
+		</Dialog>
 	);
 }
 
@@ -726,11 +962,15 @@ function SortableFieldRow({
 	field,
 	onEdit,
 	onDelete,
+	locked = false,
+	onStartSection,
 }: {
 	id: string;
-	field: DslField;
+	field: DslFieldV2;
 	onEdit: () => void;
 	onDelete: () => void;
+	locked?: boolean;
+	onStartSection?: (() => void) | undefined;
 }) {
 	const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
 		id,
@@ -783,23 +1023,45 @@ function SortableFieldRow({
 					)}
 				</div>
 				<span className="mt-0.5 font-mono text-xs text-muted-foreground">{field.k}</span>
+				{field.when && (
+					<span className="mt-0.5 flex items-center gap-1 font-mono text-[11px] text-muted-foreground">
+						<GitBranch className="h-3 w-3 shrink-0" />
+						when {conditionToText(field.when)}
+					</span>
+				)}
 			</div>
 			<div className="flex items-center gap-1.5 shrink-0">
 				<span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
 					{FIELD_TYPE_LABELS[field.t] ?? field.t}
 				</span>
+				{onStartSection && (
+					<button
+						type="button"
+						onClick={(e) => {
+							e.stopPropagation();
+							onStartSection();
+						}}
+						className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-muted"
+						aria-label={`Start a new section at ${field.label}`}
+						title="Start a new section here"
+					>
+						<SeparatorHorizontal className="h-3.5 w-3.5" />
+					</button>
+				)}
 				<Pencil className="h-3.5 w-3.5 text-muted-foreground" />
-				<button
-					type="button"
-					onClick={(e) => {
-						e.stopPropagation();
-						onDelete();
-					}}
-					className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
-					aria-label={`Delete ${field.label}`}
-				>
-					<Trash2 className="h-3.5 w-3.5" />
-				</button>
+				{!locked && (
+					<button
+						type="button"
+						onClick={(e) => {
+							e.stopPropagation();
+							onDelete();
+						}}
+						className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+						aria-label={`Delete ${field.label}`}
+					>
+						<Trash2 className="h-3.5 w-3.5" />
+					</button>
+				)}
 			</div>
 		</div>
 	);
@@ -1007,7 +1269,7 @@ function AdvancedSection({ children }: { children: React.ReactNode }) {
 
 // ─── Inbox Preview Section ──────────────────────────────────────────────────
 
-function getPreviewSummary(schema: SchemaDslV1): string {
+function getPreviewSummary(schema: SchemaDsl): string {
 	const mode = schema.preview?.mode;
 	if (!mode || mode === "auto") return "Uses the first text field automatically";
 	if (mode === "none") return "No preview text will be generated for inbox messages";
@@ -1030,7 +1292,7 @@ function InboxPreviewSection({
 	onConfigure,
 	onEnableAuto,
 }: {
-	schema: SchemaDslV1;
+	schema: SchemaDsl;
 	previewMode: string;
 	onConfigure: () => void;
 	onEnableAuto: () => void;
@@ -1095,7 +1357,7 @@ function ValidationPanel({
 	zodCode,
 	jsonSchemaStr,
 }: {
-	schema: SchemaDslV1;
+	schema: SchemaDsl;
 	zodCode: string;
 	jsonSchemaStr: string;
 }) {
@@ -1145,13 +1407,21 @@ function EditFieldModal({
 	onOpenChange,
 	field,
 	onSave,
+	earlier = [],
+	v2Enabled = false,
+	locked = false,
 }: {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 	field: DslField | null;
 	onSave: (field: DslField) => void;
+	/** The fields above this one, which a condition may name (schema v2). */
+	earlier?: DslField[];
+	v2Enabled?: boolean;
+	/** Locked by the host: the key and type cannot change. */
+	locked?: boolean;
 }) {
-	const [draft, setDraft] = useState<DslField | null>(null);
+	const [draft, setDraft] = useState<DslFieldV2 | null>(null);
 	const [metaOpen, setMetaOpen] = useState(false);
 
 	// Reset draft when modal opens with a new field
@@ -1165,12 +1435,27 @@ function EditFieldModal({
 
 	const handleTypeChange = (newType: FieldType) => {
 		if (newType === draft.t) return;
-		setDraft(createDefaultField(newType, draft.k, draft.label));
+		// The v2 settings belong to the field, not its type, so they stay.
+		const { when, help, placeholder } = draft;
+		setDraft({
+			...createDefaultField(newType, draft.k, draft.label),
+			...(when ? { when } : {}),
+			...(help !== undefined ? { help } : {}),
+			...(placeholder !== undefined ? { placeholder } : {}),
+		});
+	};
+	const setV2 = (patch: Partial<Pick<DslFieldV2, "when" | "help" | "placeholder">>) => {
+		const next = { ...draft, ...patch } as DslFieldV2 & Record<string, unknown>;
+		for (const key of ["when", "help", "placeholder"] as const) {
+			if (next[key] === undefined || next[key] === "") delete next[key];
+		}
+		setDraft(next);
 	};
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="sm:max-w-md">
+			{/* Scrolls when the v2 settings make it taller than the window. */}
+			<DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
 				<DialogHeader>
 					<DialogTitle>Edit Field</DialogTitle>
 				</DialogHeader>
@@ -1189,6 +1474,7 @@ function EditFieldModal({
 							<Label className="text-xs">Key</Label>
 							<Input
 								value={draft.k}
+								disabled={locked}
 								onChange={(e) =>
 									setDraft({
 										...draft,
@@ -1205,6 +1491,7 @@ function EditFieldModal({
 							<Label className="text-xs">Type</Label>
 							<Select
 								value={draft.t}
+								disabled={locked}
 								onChange={(e) => handleTypeChange(e.target.value as FieldType)}
 							>
 								{FIELD_TYPES.map((ft) => (
@@ -1264,6 +1551,41 @@ function EditFieldModal({
 					</div>
 
 					<FieldTypeConfig field={draft} onChange={(f) => setDraft(f)} />
+
+					{v2Enabled && (
+						<div className="space-y-3 border-t pt-3">
+							<div className="grid grid-cols-2 gap-3">
+								<div className="space-y-1">
+									<Label className="text-xs" htmlFor="fbk-field-help">
+										Help text
+									</Label>
+									<Input
+										id="fbk-field-help"
+										value={draft.help ?? ""}
+										maxLength={500}
+										onChange={(e) => setV2({ help: e.target.value })}
+									/>
+								</div>
+								<div className="space-y-1">
+									<Label className="text-xs" htmlFor="fbk-field-placeholder">
+										Placeholder
+									</Label>
+									<Input
+										id="fbk-field-placeholder"
+										value={draft.placeholder ?? ""}
+										maxLength={200}
+										onChange={(e) => setV2({ placeholder: e.target.value })}
+									/>
+								</div>
+							</div>
+							<ConditionEditor
+								subject="this field"
+								fields={earlier}
+								value={draft.when}
+								onChange={(when) => setV2({ when })}
+							/>
+						</div>
+					)}
 
 					{/* Default value */}
 					<DefaultValueInput field={draft} onChange={(f) => setDraft(f)} />
@@ -1393,7 +1715,7 @@ function PreviewSettingsModal({
 }: {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
-	schema: SchemaDslV1;
+	schema: SchemaDsl;
 	onSave: (preview: PreviewConfig | undefined) => void;
 }) {
 	const previewableFields = schema.fields.filter((f) => isPreviewableType(f.t));

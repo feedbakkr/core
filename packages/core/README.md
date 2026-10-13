@@ -59,8 +59,8 @@ loudly instead of dropping conditions. The format is in
   with `if`/`then` and `superRefine`; a test runs both, and
   `validateSubmission`, over thousands of answer combinations and requires
   the same verdict.
-- `FeedbakkrForm` renders v2. `DynamicForm`, `generateZod` and the builder
-  are still v1 only.
+- `FeedbakkrForm` and the builder handle v2. `DynamicForm` and `generateZod`
+  stay v1 only, as FeedBakkr's.
 
 ## Check and store answers
 
@@ -183,6 +183,8 @@ import "@ai-food-focus/feedbakkr-core/builder.css";
 	onDirtyChange={setDirty}    // the host blocks navigation while dirty
 	onNotify={(n) => toast(n.message)}
 	readOnly={!canEdit}
+	allowV2                     // offer conditions, sections, help, placeholder
+	lockedFields={["name", "email"]}
 />;
 ```
 
@@ -194,7 +196,19 @@ the form with `DynamicForm` and checks answers locally. It makes no network
 calls and has no login or routing: the host loads and saves the schema.
 
 `onSave` receives the schema only after `validateSchema` passes; a thrown
-error is shown in the builder. `title` and `description` name the exported
+error is shown in the builder.
+
+With `allowV2` (or a v2 `value`), the edit dialog has help text, a
+placeholder and "Show this field: Always / Only when [field] [is] [value]";
+"Group into sections" and "Start a new section here" split the field list
+into sections, each with a title, description and condition. Conditions
+follow the fields: renaming a key renames it in conditions, deleting a field
+removes conditions on it, and a moved field joins the section above it. The
+schema is v2 only while it uses one of these, and v1 otherwise. Broken
+conditions (such as one that names a field below it) show as warnings and
+stop a save. `lockedFields` cannot be deleted, renamed or change type. The
+preview uses `FeedbakkrForm`, so it shows and hides fields as conditions
+change. `title` and `description` name the exported
 template, and default to the schema's own.
 
 It needs these optional peer dependencies, which only `/builder` imports:

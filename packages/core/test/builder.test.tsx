@@ -146,6 +146,20 @@ describe("FeedbakkrBuilder", () => {
 		expect(onChange).toHaveBeenCalledTimes(1);
 	});
 
+	it("keeps every edit when the host does not pass the schema back", () => {
+		const onChange = vi.fn();
+		render(<FeedbakkrBuilder value={contact} onChange={onChange} />);
+		addField("Phone");
+		addField("Notes");
+		expect(screen.getByText("4 fields")).toBeTruthy();
+		expect(last<SchemaDslV1>(onChange).fields.map((f) => f.k)).toEqual([
+			"name",
+			"email",
+			"phone",
+			"notes",
+		]);
+	});
+
 	it("shows but does not edit a read-only schema", () => {
 		render(<FeedbakkrBuilder value={contact} readOnly onSave={() => {}} />);
 		expect(inList("Your name")).toBeTruthy();

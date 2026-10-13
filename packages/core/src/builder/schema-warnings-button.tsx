@@ -1,7 +1,7 @@
 import { AlertTriangle } from "lucide-react";
 import { useMemo, useState } from "react";
 import type { SchemaDslV1 } from "../schema/schema-dsl.js";
-import { getSchemaWarnings } from "./schema-warnings.js";
+import { getSchemaWarnings, type SchemaWarning } from "./schema-warnings.js";
 import { Button } from "./ui/button.js";
 import {
 	Dialog,
@@ -12,8 +12,15 @@ import {
 	DialogTitle,
 } from "./ui/dialog.js";
 
-export function SchemaWarningsButton({ schema }: { schema: SchemaDslV1 }) {
-	const warnings = useMemo(() => getSchemaWarnings(schema), [schema]);
+export function SchemaWarningsButton({
+	schema,
+	extra = [],
+}: {
+	schema: SchemaDslV1;
+	/** More warnings from the builder, such as problems with v2 conditions. */
+	extra?: SchemaWarning[];
+}) {
+	const warnings = useMemo(() => [...extra, ...getSchemaWarnings(schema)], [schema, extra]);
 	const [open, setOpen] = useState(false);
 
 	if (warnings.length === 0) return null;

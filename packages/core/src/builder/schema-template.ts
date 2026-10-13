@@ -1,6 +1,6 @@
 import { z } from "zod";
-import type { SchemaDslV1 } from "../schema/schema-dsl.js";
 import { previewConfigSchema, schemaDslV1Schema } from "../schema/schema-dsl.js";
+import { type SchemaDsl, schemaDslV2Schema } from "../schema/schema-dsl-v2.js";
 
 export const schemaTemplateSchema = z.object({
 	format_version: z.literal("1.0"),
@@ -11,7 +11,8 @@ export const schemaTemplateSchema = z.object({
 		.optional(),
 	title: z.string().min(1).max(200),
 	description: z.string().max(2000).optional(),
-	schema: schemaDslV1Schema,
+	// Changed from FeedBakkr: a template may hold a v2 schema too.
+	schema: z.union([schemaDslV1Schema, schemaDslV2Schema]),
 	preview_config: previewConfigSchema.optional(),
 	metadata: z.record(z.string(), z.unknown()).optional(),
 });
@@ -44,7 +45,7 @@ export function generateTemplateId(title: string): string {
 }
 
 export function buildExportTemplate(
-	schema: SchemaDslV1,
+	schema: SchemaDsl,
 	channelTitle: string,
 	channelDescription?: string | null,
 ): SchemaTemplate {
@@ -60,7 +61,7 @@ export function buildExportTemplate(
 	};
 }
 
-export function extractSchemaFromTemplate(template: SchemaTemplate): SchemaDslV1 {
+export function extractSchemaFromTemplate(template: SchemaTemplate): SchemaDsl {
 	const schema = { ...template.schema };
 	if (!schema.preview && template.preview_config) {
 		schema.preview = template.preview_config;
