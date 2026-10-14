@@ -12,7 +12,8 @@ form, a form hook and the form builder are separate entries.
 | `@ai-food-focus/feedbakkr-core` | `/schema`, `/submissions` and `/messages` together: what a server needs |
 | `@ai-food-focus/feedbakkr-core/schema` | Schema DSL v1 types and Zod schema, `validateSchema`, `generateZod`, `hashSchema`, sample data, date bounds, preview helpers |
 | `@ai-food-focus/feedbakkr-core/submissions` | `validateSubmission`, `validateFields`, `normalizeSubmission`, error codes |
-| `@ai-food-focus/feedbakkr-core/messages` | `prepareMessage`, `interpretSubmission`, `summarizeSubmission` |
+| `@ai-food-focus/feedbakkr-core/messages` | `prepareMessage`, `interpretSubmission`, `summarizeSubmission`, `replyToOf` |
+| `@ai-food-focus/feedbakkr-core/inbox` | Managing received messages in one inbox: statuses, notes (`addNote`, `editNote`, `removeNote`), `MessageMeta`, `MessageSender`, `replyAddress` |
 | `@ai-food-focus/feedbakkr-core/conditions` | Schema v2: `evaluateCondition`, `visibleFields`, `visibleSections`, `resolveForm` |
 | `@ai-food-focus/feedbakkr-core/form` | Form state as plain data: `createFormState`, `setValue`, `checkFields` |
 | `@ai-food-focus/feedbakkr-core/text` | `parseFormDslText`, `schemaToTextDsl` |

@@ -212,3 +212,31 @@ describe("saving", () => {
 		expect(screen.getAllByText(/does not come before it/).length).toBeGreaterThan(0);
 	});
 });
+
+describe("the reply address", () => {
+	const twoEmails: SchemaDsl = {
+		v: 1,
+		fields: [...start.fields, { k: "other", label: "Colleague email", t: "email" }],
+	};
+
+	it("is offered on email fields only, makes the schema v2, and moves rather than doubles", () => {
+		const onChange = vi.fn();
+		render(<FeedbakkrBuilder value={twoEmails} onChange={onChange} allowV2 />);
+		let dialog = openField("Volume");
+		expect(within(dialog).queryByLabelText(/Reply address/)).toBeNull();
+		fireEvent.click(within(dialog).getByRole("button", { name: "Cancel" }));
+
+		dialog = openField("Email");
+		fireEvent.click(within(dialog).getByLabelText(/Reply address/));
+		fireEvent.click(within(dialog).getByRole("button", { name: "Save" }));
+		let schema = last(onChange) as SchemaDslV2;
+		expect(schema.v).toBe(2);
+		expect(schema.fields.filter((f) => f.replyTo).map((f) => f.k)).toEqual(["email"]);
+
+		dialog = openField("Colleague email");
+		fireEvent.click(within(dialog).getByLabelText(/Reply address/));
+		fireEvent.click(within(dialog).getByRole("button", { name: "Save" }));
+		schema = last(onChange) as SchemaDslV2;
+		expect(schema.fields.filter((f) => f.replyTo).map((f) => f.k)).toEqual(["other"]);
+	});
+});

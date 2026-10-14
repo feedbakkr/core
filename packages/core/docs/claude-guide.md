@@ -20,9 +20,15 @@ Core holds the form schema format and the code that checks it:
 - `parseFormDslText` and `schemaToTextDsl` convert to and from the text
   format.
 - `hashSchema(schema)` gives a stable id for a schema version.
-- Schema **v2** adds conditions (`when`), sections, `help` and
-  `placeholder`. Write v1 unless the form needs them. See "Schema v2" in
-  the schema guide.
+- Schema **v2** adds conditions (`when`), sections, `help`,
+  `placeholder` and `replyTo`. Write v1 unless the form needs them. See
+  "Schema v2" in the schema guide.
+- `/inbox` holds what managing received messages needs, without storage:
+  the statuses (`new`, `open`, `closed`, `spam`), notes on a message
+  (`addNote`, `editNote`, `removeNote`, kept in `MessageMeta`), who sent a
+  message (`MessageSender`, the app's signed-in user, never the answers)
+  and where a reply goes (`replyAddress`). Store the meta with the
+  message, as JSON, and read it back with `parseMessageMeta`.
 
 It runs in Workers, Node and browsers, and depends only on `zod`. The
 React form, `DynamicForm`, and the builder, `FeedbakkrBuilder`, are separate

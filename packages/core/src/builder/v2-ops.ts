@@ -24,7 +24,11 @@ export type BuilderAction =
 export function usesV2(schema: SchemaDsl): boolean {
 	if (schema.v === 2 && (schema.sections?.length ?? 0) > 0) return true;
 	return (schema.fields as DslFieldV2[]).some(
-		(f) => f.when !== undefined || f.help !== undefined || f.placeholder !== undefined,
+		(f) =>
+			f.when !== undefined ||
+			f.help !== undefined ||
+			f.placeholder !== undefined ||
+			f.replyTo !== undefined,
 	);
 }
 

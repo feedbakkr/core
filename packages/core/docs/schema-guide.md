@@ -280,6 +280,12 @@ the form needs one of them; FeedBakkr itself reads only v1.
   listed in the same order as `fields`. A section can have a `when` too.
 - **`help`** (up to 500 characters): guidance shown with the field.
 - **`placeholder`** (up to 200): example text inside an empty input.
+- **`replyTo: true`** on one `email` field: replies to the message go to
+  this address (`prepareMessage` returns it as `replyTo`). Mark the field
+  where the person gives their own address, not any email field. Without
+  it, a message has no reply address from the form; who sent it (a
+  signed-in user) is the app's to record, never read from the answers.
+  In the text format: `email: email "Your email" required reply-to`.
 
 A condition names a field that comes **before** it, and compares its answer:
 

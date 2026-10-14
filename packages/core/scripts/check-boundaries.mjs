@@ -1,6 +1,6 @@
 // Fails the build if a published entry reaches something it must not.
 //
-// The library entries (`index`, `schema`, `submissions`, `messages`, `form`,
+// The library entries (`index`, `schema`, `submissions`, `messages`, `inbox`, `form`,
 // `conditions`, `text`, `export`) are pure
 // TypeScript for servers, Workers and browsers alike, so the only package
 // they, and every chunk they load, may import is `zod`. Code generation at
@@ -41,6 +41,7 @@ const ENTRY_EXTRAS = {
 	"export.js": [],
 	"submissions.js": [],
 	"messages.js": [],
+	"inbox.js": [],
 	"form.js": [],
 	"conditions.js": [],
 	"react.js": REACT,
