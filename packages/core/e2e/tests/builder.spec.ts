@@ -14,7 +14,7 @@ const fieldList = (page: Page) =>
 
 test.beforeEach(async ({ page }) => {
 	await page.goto("/");
-	await expect(page.getByText("3 fields")).toBeVisible();
+	await expect(page.getByRole("heading", { name: "3 fields" })).toBeVisible();
 });
 
 test("adds a field", async ({ page }) => {
@@ -23,7 +23,7 @@ test("adds a field", async ({ page }) => {
 	await page.getByRole("checkbox").first().check();
 	await page.getByRole("button", { name: "Add", exact: true }).click();
 
-	await expect(page.getByText("4 fields")).toBeVisible();
+	await expect(page.getByRole("heading", { name: "4 fields" })).toBeVisible();
 	expect((await schema(page)).fields.at(-1)).toEqual({
 		k: "phoneNumber",
 		label: "Phone number",
@@ -66,9 +66,12 @@ test("previews the form and checks answers locally", async ({ page }) => {
 	await preview.getByLabel("Email").fill("ada@example.com");
 	await preview.getByRole("button", { name: "Check answers" }).click();
 
-	const status = preview.getByRole("status");
-	await expect(status).toContainText("These answers pass the form's checks.");
-	await expect(status).toContainText('"name": "Ada"');
+	// Shown as the message they make, not as data.
+	const message = page.getByRole("dialog");
+	await expect(message).toContainText("These answers pass the form's checks.");
+	await expect(message).toContainText("Ada");
+	await expect(message).not.toContainText('"name"');
+	await message.getByRole("button", { name: "Close" }).first().click();
 
 	// The preview follows the schema.
 	await page.getByPlaceholder("e.g. Full Name").fill("Company");

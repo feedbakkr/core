@@ -14,7 +14,7 @@ const fieldRow = (page: Page, label: string) =>
 
 test.beforeEach(async ({ page }) => {
 	await page.goto("/?v2");
-	await expect(page.getByText("3 fields")).toBeVisible();
+	await expect(page.getByRole("heading", { name: "3 fields" })).toBeVisible();
 });
 
 test("adds a condition, and the preview follows it", async ({ page }) => {
@@ -51,23 +51,26 @@ test("adds a condition, and the preview follows it", async ({ page }) => {
 	// It is checked only when it applies.
 	await preview.getByLabel(/Email/).fill("jane@example.com");
 	await preview.getByRole("button", { name: "Check answers" }).click();
-	await expect(preview.getByRole("status")).toContainText('"kind": "other"');
+	const message = page.getByRole("dialog");
+	await expect(message).toContainText("These answers pass the form's checks.");
+	await expect(message).toContainText("jane@example.com");
 });
 
 test("groups fields into sections, and the preview shows them", async ({ page }) => {
 	await page.getByRole("button", { name: "Group into sections", exact: true }).click();
 	await page
-		.getByRole("button", { name: "Start a new section at Monthly volume", exact: true })
+		.getByRole("button", { name: "Add a section break above Monthly volume", exact: true })
 		.click();
 	await page.getByRole("button", { name: "Edit section Section 2", exact: true }).click();
 	const dialog = page.getByRole("dialog");
-	await dialog.getByLabel("Title", { exact: true }).fill("Your business");
+	await dialog.getByLabel(/^Name/).fill("Your business");
 	await dialog.getByLabel("Show this section", { exact: true }).selectOption("when");
 	await dialog.getByLabel("Value", { exact: true }).selectOption("supplier");
 	await dialog.getByRole("button", { name: "Save" }).click();
 
 	expect((await schema(page)).sections).toEqual([
-		{ id: "section_1", title: "Section 1", fields: ["kind"] },
+		// Untitled: shown as "Section 1" by its place.
+		{ id: "section_1", fields: ["kind"] },
 		{
 			id: "section_2",
 			title: "Your business",

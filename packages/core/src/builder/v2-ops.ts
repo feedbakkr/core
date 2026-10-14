@@ -185,20 +185,15 @@ export function builderReducer(state: SchemaDsl, action: BuilderAction): SchemaD
 				return withVersion({
 					...state,
 					v: 2,
-					sections: [
-						{ id: newSectionId(state), title: "Section 1", fields: state.fields.map((f) => f.k) },
-					],
+					// Untitled: numbered by its place, so the numbers follow any reordering.
+					sections: [{ id: newSectionId(state), fields: state.fields.map((f) => f.k) }],
 				} as SchemaDslV2);
 			}
 			const key = state.fields[action.index]?.k;
 			const owner = sections.find((s) => s.fields.includes(key ?? ""));
 			if (!key || !owner || owner.fields[0] === key) return state;
 			const at = owner.fields.indexOf(key);
-			const split: SchemaSection = {
-				id: newSectionId(state),
-				title: `Section ${sections.length + 1}`,
-				fields: owner.fields.slice(at),
-			};
+			const split: SchemaSection = { id: newSectionId(state), fields: owner.fields.slice(at) };
 			return withVersion({
 				...state,
 				sections: sections.flatMap((s) =>
@@ -212,7 +207,7 @@ export function builderReducer(state: SchemaDsl, action: BuilderAction): SchemaD
 				sections: sections.map((s) => {
 					if (s.id !== action.id) return s;
 					const next = { ...s, ...action.patch };
-					for (const key of ["desc", "when"] as const) {
+					for (const key of ["title", "desc", "when"] as const) {
 						if (next[key] === undefined) delete next[key];
 					}
 					return next;

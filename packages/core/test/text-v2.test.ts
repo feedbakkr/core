@@ -144,3 +144,16 @@ describe("errors in v2 text", () => {
 		});
 	});
 });
+
+describe("untitled sections in text", () => {
+	it("round-trip without a title", () => {
+		const text =
+			'@version 2\n@section one\nname: text "Name"\n@section two "Details"\nnote: text "Note"';
+		const parsed = parseFormDslText(text);
+		expect(parsed.ok && parsed.schema.v === 2 && parsed.schema.sections).toEqual([
+			{ id: "one", fields: ["name"] },
+			{ id: "two", title: "Details", fields: ["note"] },
+		]);
+		if (parsed.ok) expect(parseFormDslText(schemaToTextDsl(parsed.schema))).toEqual(parsed);
+	});
+});

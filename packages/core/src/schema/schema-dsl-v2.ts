@@ -74,7 +74,8 @@ const dslFieldV2Schema = z.discriminatedUnion("t", [
 /** A group of fields: shown together, as a page, a step or a slide, as the host chooses. */
 export interface SchemaSection {
 	id: string;
-	title: string;
+	/** Optional: an untitled section is "Section 1", "Section 2"… by its place (sectionTitle). */
+	title?: string;
 	desc?: string;
 	/** The keys of the fields in this section, in the schema's order. */
 	fields: string[];
@@ -84,7 +85,7 @@ export interface SchemaSection {
 
 const sectionSchema = z.object({
 	id: fieldKey,
-	title: z.string().min(1).max(200),
+	title: z.string().min(1).max(200).optional(),
 	desc: z.string().max(2000).optional(),
 	fields: z.array(fieldKey).min(1),
 	when: conditionSchema.optional(),
@@ -105,6 +106,14 @@ export interface SchemaDslV2 {
 	fields: DslFieldV2[];
 	sections?: SchemaSection[];
 	preview?: PreviewConfig;
+}
+
+/**
+ * What a section is called: its title, or "Section 1", "Section 2"… by its
+ * place among the sections, so numbering always follows the order.
+ */
+export function sectionTitle(section: Pick<SchemaSection, "title">, index: number): string {
+	return section.title?.trim() || `Section ${index + 1}`;
 }
 
 /** Every key a condition names. */

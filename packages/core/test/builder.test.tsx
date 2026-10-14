@@ -38,13 +38,13 @@ describe("FeedbakkrBuilder", () => {
 		const onChange = vi.fn();
 		render(<FeedbakkrBuilder value={contact} onChange={onChange} />);
 		expect(inList("Your name")).toBeTruthy();
-		expect(screen.getByText("2 fields")).toBeTruthy();
+		expect(screen.getByRole("heading", { name: "2 fields" })).toBeTruthy();
 
 		addField("Phone number", "phone");
 		const next = last<SchemaDslV1>(onChange);
 		expect(next.fields.at(-1)).toEqual({ k: "phoneNumber", label: "Phone number", t: "phone" });
 		expect(next.title).toBe("Contact us");
-		expect(screen.getByText("3 fields")).toBeTruthy();
+		expect(screen.getByRole("heading", { name: "3 fields" })).toBeTruthy();
 	});
 
 	it("refuses a key that is already used", () => {
@@ -137,12 +137,12 @@ describe("FeedbakkrBuilder", () => {
 		addField("Notes");
 		const echoed = last<SchemaDslV1>(onChange);
 		view.rerender(<FeedbakkrBuilder value={echoed} onChange={onChange} />);
-		expect(screen.getByText("3 fields")).toBeTruthy();
+		expect(screen.getByRole("heading", { name: "3 fields" })).toBeTruthy();
 		expect(onChange).toHaveBeenCalledTimes(1);
 
 		const other: SchemaDslV1 = { v: 1, fields: [{ k: "only", label: "Only", t: "text" }] };
 		view.rerender(<FeedbakkrBuilder value={other} onChange={onChange} />);
-		expect(screen.getByText("1 field")).toBeTruthy();
+		expect(screen.getByRole("heading", { name: "1 field" })).toBeTruthy();
 		expect(onChange).toHaveBeenCalledTimes(1);
 	});
 
@@ -151,7 +151,7 @@ describe("FeedbakkrBuilder", () => {
 		render(<FeedbakkrBuilder value={contact} onChange={onChange} />);
 		addField("Phone");
 		addField("Notes");
-		expect(screen.getByText("4 fields")).toBeTruthy();
+		expect(screen.getByRole("heading", { name: "4 fields" })).toBeTruthy();
 		expect(last<SchemaDslV1>(onChange).fields.map((f) => f.k)).toEqual([
 			"name",
 			"email",
@@ -176,9 +176,13 @@ describe("FeedbakkrBuilder", () => {
 			target: { value: "ada@example.com" },
 		});
 		fireEvent.click(within(preview).getByRole("button", { name: "Check answers" }));
-		const status = within(preview).getByRole("status");
-		expect(status.textContent).toContain("These answers pass the form's checks.");
-		expect(status.textContent).toContain('"email": "ada@example.com"');
+		// Shown as the message they make, not as data.
+		const dialog = screen.getByRole("dialog");
+		expect(dialog.textContent).toContain("These answers pass the form's checks.");
+		expect(dialog.textContent).toContain("Your name");
+		expect(dialog.textContent).toContain("Ada");
+		expect(dialog.textContent).toContain("ada@example.com");
+		expect(dialog.textContent).not.toContain('"email"');
 	});
 
 	it("starts empty with the add row and template import", () => {
