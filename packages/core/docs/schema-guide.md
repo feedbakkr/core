@@ -278,6 +278,9 @@ the form needs one of them; FeedBakkr itself reads only v1.
 - **`sections`**: groups of fields, shown however the page chooses (one
   page, steps, slides). With sections, every field is in exactly one,
   listed in the same order as `fields`. A section can have a `when` too.
+  Its `title` is optional: without one it is "Section 1", "Section 2"… by
+  its place (`sectionTitle`), so the numbers follow any reordering. In text,
+  `@section about` or `@section about "About you"`.
 - **`help`** (up to 500 characters): guidance shown with the field.
 - **`placeholder`** (up to 200): example text inside an empty input.
 - **`replyTo: true`** on one `email` field: replies to the message go to

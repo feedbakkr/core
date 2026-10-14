@@ -37,6 +37,7 @@ export {
 	type SchemaDslV2,
 	type SchemaSection,
 	schemaDslV2Schema,
+	sectionTitle,
 } from "./schema-dsl-v2.js";
 export type { PreviewValidationResult } from "./schema-utils.js";
 export {

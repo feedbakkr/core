@@ -393,9 +393,11 @@ function parseSectionDirective(value: string): SchemaSection {
 	const tokens = tokenize(head);
 	const id = tokens.shift();
 	if (!id || !/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(id)) throw new Error("expected an id");
-	const titleToken = tokens.shift();
-	if (titleToken === undefined || !isQuoted(titleToken)) throw new Error('expected a "Title"');
-	const section: SchemaSection = { id, title: unquote(titleToken), fields: [] };
+	// The title is optional: an untitled section is numbered by its place.
+	const section: SchemaSection = { id, fields: [] };
+	if (tokens[0] !== undefined && isQuoted(tokens[0])) {
+		section.title = unquote(tokens.shift() as string);
+	}
 	for (const token of tokens) {
 		if (token.startsWith("desc=")) section.desc = unquote(token.slice(5));
 		else throw new Error(`unexpected ${token}`);
@@ -683,7 +685,8 @@ export function schemaToTextDsl(schema: SchemaDsl): string {
 }
 
 function sectionToLine(section: SchemaSection): string {
-	let line = `@section ${section.id} ${quote(section.title)}`;
+	let line = `@section ${section.id}`;
+	if (section.title !== undefined) line += ` ${quote(section.title)}`;
 	if (section.desc !== undefined) line += ` desc=${quote(section.desc)}`;
 	if (section.when) line += ` when ${conditionToText(section.when)}`;
 	return line;

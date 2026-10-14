@@ -48,7 +48,7 @@ describe("version", () => {
 		expect(sectioned).toEqual({
 			v: 2,
 			fields: v1.fields,
-			sections: [{ id: "section_1", title: "Section 1", fields: ["a", "b"] }],
+			sections: [{ id: "section_1", fields: ["a", "b"] }],
 		});
 		expect(run(sectioned, { type: "REMOVE_SECTION", id: "section_1" })).toEqual(v1);
 	});

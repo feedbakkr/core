@@ -1,5 +1,5 @@
 import { resolveForm } from "../conditions/resolve.js";
-import type { DslFieldV2, SchemaDsl } from "../schema/schema-dsl-v2.js";
+import { type DslFieldV2, type SchemaDsl, sectionTitle } from "../schema/schema-dsl-v2.js";
 import type { SubmissionErrors } from "../submissions/errors.js";
 import { validateFields } from "../submissions/validate.js";
 
@@ -43,7 +43,10 @@ export function applicableFields(
 /** Where a section of a multi-step form stands. */
 export interface SectionStatus {
 	id: string;
+	/** Its title, or "Section 1", "Section 2"… by its place when it has none. */
 	title: string;
+	/** Whether the title is its own rather than its number. */
+	named: boolean;
 	desc?: string;
 	/** The section's condition holds, so it is shown. */
 	applies: boolean;
@@ -67,12 +70,14 @@ export function sectionStatus(
 	const resolved = resolveForm(schema, state.values);
 	const shown = new Set(resolved.fields.filter((f) => !f.hidden).map((f) => f.k));
 	const checkable = new Set(resolved.fields.map((f) => f.k));
-	return resolved.sections.map(({ section, applies }) => {
+	return resolved.sections.map(({ section, applies }, index) => {
 		const fields = resolved.fields.filter((f) => shown.has(f.k) && section.fields.includes(f.k));
 		const keys = section.fields.filter((k) => checkable.has(k));
 		return {
 			id: section.id,
-			title: section.title,
+			// Named, or numbered by its place: always something to show.
+			title: sectionTitle(section, index),
+			named: section.title !== undefined,
 			...(section.desc ? { desc: section.desc } : {}),
 			applies,
 			fields,

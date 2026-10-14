@@ -33,6 +33,7 @@ import {
 	GripVertical,
 	Info,
 	LayoutList,
+	Lock,
 	Pencil,
 	Plus,
 	SeparatorHorizontal,
@@ -41,11 +42,25 @@ import {
 	Trash2,
 } from "lucide-react";
 import type { Dispatch } from "react";
-import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
+import {
+	createContext,
+	useCallback,
+	useContext,
+	useEffect,
+	useMemo,
+	useReducer,
+	useRef,
+	useState,
+} from "react";
 import { generateJsonSchema, generateZodCode } from "../export/index.js";
 import type { DslField, FieldType, PreviewConfig, SchemaDslV1 } from "../schema/schema-dsl.js";
 import { ALLOWED_SEPARATORS, FIELD_TYPES } from "../schema/schema-dsl.js";
-import type { DslFieldV2, SchemaDsl, SchemaSection } from "../schema/schema-dsl-v2.js";
+import {
+	type DslFieldV2,
+	type SchemaDsl,
+	type SchemaSection,
+	sectionTitle,
+} from "../schema/schema-dsl-v2.js";
 import { isPreviewableType } from "../schema/schema-utils.js";
 import { validateSchema } from "../schema/validate-schema.js";
 import { conditionToText } from "../text/condition-text.js";
@@ -87,6 +102,15 @@ import { Textarea } from "./ui/textarea.js";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip.js";
 import { type BuilderAction, builderReducer, fieldsBefore } from "./v2-ops.js";
 
+/**
+ * Simple mode, for people who are not developers: the builder's own parts
+ * read it rather than taking it as one more prop each.
+ */
+const SimpleMode = createContext(false);
+
+/** Why a locked field cannot be removed, for its lock. */
+const LockedReason = createContext("This question is needed, so it cannot be removed.");
+
 /** A message for the person using the builder, shown however the host shows them. */
 export interface BuilderNotice {
 	type: "success" | "info" | "error";
@@ -123,6 +147,20 @@ export interface FeedbakkrBuilderProps {
 	allowV2?: boolean;
 	/** Keys of fields that cannot be deleted, renamed or change type. */
 	lockedFields?: string[];
+	/** Why a locked field stays, shown on its lock. */
+	lockedReason?: string;
+	/**
+	 * For people who are not developers. Hides export, templates, field
+	 * keys, form and field meta, validation schemas and the developer field
+	 * settings (hidden, sensitive, default value), and the preview beside the
+	 * fields (offer `onTest` instead). Keys come from labels. The inbox
+	 * summary setting stays, in plain view.
+	 */
+	simple?: boolean;
+	/** Shows "Test the form" in the toolbar, for the host to open its own test. */
+	onTest?: () => void;
+	/** The host's own controls, on the toolbar row before "Test the form". */
+	toolbar?: React.ReactNode;
 }
 
 // ─── Preview Settings ────────────────────────────────────────────────────────
@@ -166,6 +204,10 @@ export function FeedbakkrBuilder({
 	className,
 	allowV2 = false,
 	lockedFields = [],
+	lockedReason = "This question is needed, so it cannot be removed.",
+	simple = false,
+	onTest,
+	toolbar,
 }: FeedbakkrBuilderProps) {
 	const [schema, dispatch] = useReducer(builderReducer, value, loadSchema);
 	const v2Enabled = allowV2 || value.v === 2 || schema.v === 2;
@@ -182,16 +224,24 @@ export function FeedbakkrBuilder({
 	const schemaJson = JSON.stringify(schema);
 	const schemaJsonRef = useRef(schemaJson);
 	schemaJsonRef.current = schemaJson;
+	// Dirty means different from the last save, or from the value the host last passed.
+	const [savedJson, setSavedJson] = useState(schemaJson);
 	const valueJson = JSON.stringify(value);
 	const lastValueJson = useRef(valueJson);
 	// The schema last given to onChange, or loaded from the host: not reported again.
 	const lastEmittedJson = useRef(schemaJson);
+	// Counts what the host loads, so a save can tell it was answered with the stored copy.
+	const hostLoads = useRef(0);
 	useEffect(() => {
 		if (valueJson === lastValueJson.current) return;
 		lastValueJson.current = valueJson;
 		if (valueJson !== schemaJsonRef.current) {
 			const loaded = loadSchema(JSON.parse(valueJson) as SchemaDsl);
-			lastEmittedJson.current = JSON.stringify(loaded);
+			const loadedJson = JSON.stringify(loaded);
+			lastEmittedJson.current = loadedJson;
+			hostLoads.current += 1;
+			// What the host passes is what it has stored: nothing to save.
+			setSavedJson(loadedJson);
 			dispatch({ type: "LOAD_SCHEMA", schema: loaded });
 		}
 	}, [valueJson]);
@@ -204,8 +254,6 @@ export function FeedbakkrBuilder({
 		onChangeRef.current?.(JSON.parse(schemaJson) as SchemaDsl);
 	}, [schemaJson]);
 
-	// Dirty means different from the last save, or from the first value.
-	const [savedJson, setSavedJson] = useState(schemaJson);
 	const isDirty = schemaJson !== savedJson;
 	const onDirtyChangeRef = useRef(onDirtyChange);
 	onDirtyChangeRef.current = onDirtyChange;
@@ -225,9 +273,12 @@ export function FeedbakkrBuilder({
 		}
 		setSaving(true);
 		setSaveError(null);
+		const loads = hostLoads.current;
 		try {
 			await onSave(checked.schema);
-			setSavedJson(JSON.stringify(schema));
+			// A host that answered with its stored copy (tidied by its server) has
+			// set the saved state already; otherwise what was saved is this.
+			if (hostLoads.current === loads) setSavedJson(JSON.stringify(schema));
 			onNotify?.({ type: "success", message: "Draft saved." });
 		} catch (err) {
 			setSaveError(err instanceof Error ? err.message : "Failed to save schema");
@@ -304,7 +355,9 @@ export function FeedbakkrBuilder({
 				{isLocked ? (
 					<p className="py-8 text-center text-sm text-muted-foreground">No fields yet.</p>
 				) : (
-					<EmptySchemaState dispatch={dispatch} />
+					<SimpleMode.Provider value={simple}>
+						<EmptySchemaState dispatch={dispatch} />
+					</SimpleMode.Provider>
 				)}
 
 				{/* Modals still needed even in empty state */}
@@ -319,248 +372,316 @@ export function FeedbakkrBuilder({
 	}
 
 	return (
-		<div className={rootClass}>
-			<div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]">
-				<div className="min-w-0">
-					{/* Toolbar: save + actions */}
-					<div className="mb-4 flex items-center gap-3">
-						<div className="flex items-center gap-2 flex-1 min-w-0">
-							<span className="text-xs text-muted-foreground">
-								{schema.fields.length} {schema.fields.length === 1 ? "field" : "fields"}
-							</span>
-							{onSave && isDirty && (
-								<span className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-800 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
-									<Circle className="h-2 w-2 fill-current" />
-									Unsaved changes
-								</span>
+		<SimpleMode.Provider value={simple}>
+			<LockedReason.Provider value={lockedReason}>
+				<div className={rootClass}>
+					<div
+						className={
+							simple ? "grid gap-6" : "grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]"
+						}
+					>
+						<div className="min-w-0">
+							{/* Toolbar: save + actions */}
+							<div className="mb-4 flex items-center gap-3">
+								<div className="flex items-center gap-2 flex-1 min-w-0">
+									{/* The list's heading, with how many it holds. */}
+									<h3
+										className="flex items-center gap-2 text-sm font-semibold text-foreground"
+										aria-label={`${schema.fields.length} ${simple ? (schema.fields.length === 1 ? "question" : "questions") : schema.fields.length === 1 ? "field" : "fields"}`}
+									>
+										{simple ? "Questions" : "Fields"}
+										<span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium tabular-nums text-muted-foreground">
+											{schema.fields.length}
+										</span>
+									</h3>
+									{onSave && isDirty && (
+										<span className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-800 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
+											<Circle className="h-2 w-2 fill-current" />
+											Unsaved changes
+										</span>
+									)}
+									<SchemaWarningsButton
+										schema={schema as SchemaDslV1}
+										extra={v2Enabled ? structureWarnings(schema) : []}
+									/>
+								</div>
+								<div className="flex items-center gap-3 shrink-0">
+									{toolbar}
+									{onTest && (
+										<Button
+											type="button"
+											variant="outline"
+											size="sm"
+											className="h-7 cursor-pointer text-xs"
+											onClick={onTest}
+										>
+											<Check className="h-3 w-3" />
+											Test the form
+										</Button>
+									)}
+									{!simple && (
+										<Button
+											type="button"
+											variant="ghost"
+											size="sm"
+											className="h-7 cursor-pointer text-xs"
+											onClick={openExportDialog}
+										>
+											<Download className="h-3 w-3" />
+											Export
+										</Button>
+									)}
+									{onSave && !isLocked && (
+										<Button
+											type="button"
+											disabled={saving || !isDirty}
+											size="sm"
+											className="h-7 cursor-pointer disabled:cursor-default disabled:bg-muted disabled:text-muted-foreground disabled:opacity-100"
+											onClick={handleSave}
+										>
+											{saving ? "Saving..." : "Save Changes"}
+										</Button>
+									)}
+								</div>
+							</div>
+
+							{saveError && (
+								<Alert variant="destructive" className="mb-4">
+									<AlertDescription>{saveError}</AlertDescription>
+								</Alert>
 							)}
-							<SchemaWarningsButton
-								schema={schema as SchemaDslV1}
-								extra={v2Enabled ? structureWarnings(schema) : []}
+
+							{/* Field list */}
+							<SchemaFieldList
+								schema={schema}
+								dispatch={dispatch}
+								onEditField={isLocked ? undefined : setEditFieldIndex}
+								isLocked={isLocked}
+								onNotify={onNotify}
+								v2Enabled={v2Enabled}
+								lockedFields={lockedFields}
 							/>
-						</div>
-						<div className="flex items-center gap-2 shrink-0">
-							<Button
-								type="button"
-								variant="ghost"
-								size="sm"
-								className="h-7 cursor-pointer text-xs"
-								onClick={openExportDialog}
-							>
-								<Download className="h-3 w-3" />
-								Export
-							</Button>
-							{onSave && !isLocked && (
-								<Button
-									type="button"
-									disabled={saving || !isDirty}
-									size="sm"
-									className="h-7 cursor-pointer disabled:cursor-default disabled:bg-muted disabled:text-muted-foreground disabled:opacity-100"
-									onClick={handleSave}
-								>
-									{saving ? "Saving..." : "Save Changes"}
-								</Button>
+
+							{/* Simple: only the inbox summary, in plain view. */}
+							{simple && !isLocked && (
+								<div className="mt-4">
+									<InboxPreviewSection
+										schema={schema}
+										previewMode={previewMode}
+										onConfigure={() => setPreviewModalOpen(true)}
+										onEnableAuto={() =>
+											dispatch({ type: "SET_PREVIEW", preview: { mode: "auto" } })
+										}
+									/>
+								</div>
+							)}
+
+							{/* Advanced — inbox preview, form meta, validation schemas */}
+							{!simple && (
+								<AdvancedSection>
+									{!isLocked && (
+										<InboxPreviewSection
+											schema={schema}
+											previewMode={previewMode}
+											onConfigure={() => setPreviewModalOpen(true)}
+											onEnableAuto={() =>
+												dispatch({ type: "SET_PREVIEW", preview: { mode: "auto" } })
+											}
+										/>
+									)}
+
+									{!isLocked && (
+										<div className="flex items-center gap-2 rounded-lg border px-3 py-2">
+											<Braces className="h-3.5 w-3.5 text-muted-foreground" />
+											{schema.meta ? (
+												<span className="flex items-center gap-1 text-xs text-muted-foreground">
+													Form meta configured
+													<Check className="h-3.5 w-3.5 text-green-600" />
+												</span>
+											) : (
+												<span className="text-xs text-muted-foreground">No form meta</span>
+											)}
+											<button
+												type="button"
+												className="ml-auto cursor-pointer text-xs text-primary hover:underline"
+												onClick={() => setFormMetaOpen(true)}
+											>
+												{schema.meta ? "Edit meta" : "Add meta"}
+											</button>
+										</div>
+									)}
+
+									<ValidationPanel
+										schema={schema}
+										zodCode={zodCode}
+										jsonSchemaStr={jsonSchemaStr}
+									/>
+								</AdvancedSection>
 							)}
 						</div>
+
+						{/* Preview: the form as people will see it, checked locally */}
+						{!simple && (
+							<section aria-label="Preview" className="min-w-0 rounded-lg border p-4">
+								<h3 className="mb-3 text-sm font-semibold">Preview</h3>
+								<TestFormPanel schema={schema} />
+							</section>
+						)}
 					</div>
 
-					{saveError && (
-						<Alert variant="destructive" className="mb-4">
-							<AlertDescription>{saveError}</AlertDescription>
-						</Alert>
-					)}
-
-					{/* Field list */}
-					<SchemaFieldList
-						schema={schema}
-						dispatch={dispatch}
-						onEditField={isLocked ? undefined : setEditFieldIndex}
-						isLocked={isLocked}
-						onNotify={onNotify}
+					{/* Edit Field Modal */}
+					<EditFieldModal
+						open={editFieldIndex !== null}
+						onOpenChange={(open) => {
+							if (!open) setEditFieldIndex(null);
+						}}
+						field={editFieldIndex !== null ? (schema.fields[editFieldIndex] ?? null) : null}
+						earlier={editFieldIndex !== null ? fieldsBefore(schema, editFieldIndex) : []}
 						v2Enabled={v2Enabled}
-						lockedFields={lockedFields}
+						locked={
+							editFieldIndex !== null &&
+							lockedFields.includes(schema.fields[editFieldIndex]?.k ?? "")
+						}
+						onSave={(field) => {
+							if (editFieldIndex !== null) {
+								// One reply address: marking this field unmarks any other.
+								if ((field as DslFieldV2).replyTo) {
+									schema.fields.forEach((other, i) => {
+										if (i !== editFieldIndex && (other as DslFieldV2).replyTo) {
+											const { replyTo: _r, ...rest } = other as DslFieldV2;
+											dispatch({ type: "UPDATE_FIELD", index: i, field: rest as DslField });
+										}
+									});
+								}
+								dispatch({ type: "UPDATE_FIELD", index: editFieldIndex, field });
+								setEditFieldIndex(null);
+							}
+						}}
 					/>
 
-					{/* Advanced — inbox preview, form meta, validation schemas */}
-					<AdvancedSection>
-						{!isLocked && (
-							<InboxPreviewSection
-								schema={schema}
-								previewMode={previewMode}
-								onConfigure={() => setPreviewModalOpen(true)}
-								onEnableAuto={() => dispatch({ type: "SET_PREVIEW", preview: { mode: "auto" } })}
-							/>
-						)}
+					{/* Preview Settings Modal */}
+					<PreviewSettingsModal
+						open={previewModalOpen}
+						onOpenChange={setPreviewModalOpen}
+						schema={schema}
+						onSave={(preview) => dispatch({ type: "SET_PREVIEW", preview })}
+					/>
 
-						{!isLocked && (
-							<div className="flex items-center gap-2 rounded-lg border px-3 py-2">
-								<Braces className="h-3.5 w-3.5 text-muted-foreground" />
-								{schema.meta ? (
-									<span className="flex items-center gap-1 text-xs text-muted-foreground">
-										Form meta configured
-										<Check className="h-3.5 w-3.5 text-green-600" />
-									</span>
-								) : (
-									<span className="text-xs text-muted-foreground">No form meta</span>
-								)}
-								<button
-									type="button"
-									className="ml-auto cursor-pointer text-xs text-primary hover:underline"
-									onClick={() => setFormMetaOpen(true)}
-								>
-									{schema.meta ? "Edit meta" : "Add meta"}
-								</button>
-							</div>
-						)}
+					{/* Form Meta dialog */}
+					<MetaEditorDialog
+						open={formMetaOpen}
+						onOpenChange={setFormMetaOpen}
+						value={schema.meta ?? ""}
+						onSave={(value) => {
+							dispatch({ type: "SET_META", meta: value || undefined });
+							setFormMetaOpen(false);
+						}}
+					/>
 
-						<ValidationPanel schema={schema} zodCode={zodCode} jsonSchemaStr={jsonSchemaStr} />
-					</AdvancedSection>
+					{/* Export dialog */}
+					<Dialog open={exportOpen} onOpenChange={setExportOpen}>
+						<DialogContent className="sm:max-w-lg">
+							<DialogHeader>
+								<DialogTitle>Export Schema</DialogTitle>
+							</DialogHeader>
+
+							{exportFormat === "choose" ? (
+								<div className="grid gap-3 py-2">
+									<button
+										type="button"
+										className="flex items-start gap-3 rounded-lg border p-3 text-left transition-colors hover:bg-muted/50"
+										onClick={() => setExportFormat("json")}
+									>
+										<Braces className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
+										<div>
+											<p className="text-sm font-medium">JSON Schema</p>
+											<p className="text-xs text-muted-foreground mt-0.5">
+												Full schema as a JSON template file. Use for importing into other channels
+												or sharing with developers.
+											</p>
+										</div>
+									</button>
+									<button
+										type="button"
+										className="flex items-start gap-3 rounded-lg border p-3 text-left transition-colors hover:bg-muted/50"
+										onClick={() => setExportFormat("text")}
+									>
+										<FileText className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
+										<div>
+											<p className="text-sm font-medium">Text DSL</p>
+											<p className="text-xs text-muted-foreground mt-0.5">
+												Human-readable text format. Easy to read, edit, and use with AI tools to
+												generate or modify forms.
+											</p>
+										</div>
+									</button>
+								</div>
+							) : (
+								<>
+									<div className="pt-2">
+										<pre className="rounded-md border bg-muted/30 p-3 text-xs font-mono max-h-80 overflow-auto whitespace-pre-wrap break-words">
+											{exportContent}
+										</pre>
+									</div>
+									<DialogFooter className="flex-row justify-between sm:justify-between">
+										<Button
+											size="sm"
+											variant="ghost"
+											className="text-xs"
+											onClick={() => setExportFormat("choose")}
+										>
+											<ArrowLeft className="h-3 w-3" />
+											Back
+										</Button>
+										<div className="flex gap-2">
+											<Button
+												size="sm"
+												variant="outline"
+												className="text-xs"
+												onClick={handleExportCopy}
+											>
+												{exportCopied ? (
+													<Check className="h-3 w-3" />
+												) : (
+													<Copy className="h-3 w-3" />
+												)}
+												{exportCopied ? "Copied" : "Copy"}
+											</Button>
+											<Button
+												size="sm"
+												className="text-xs"
+												onClick={() => {
+													handleExportDownload();
+													setExportOpen(false);
+												}}
+											>
+												<Download className="h-3 w-3" />
+												Save as file
+											</Button>
+										</div>
+									</DialogFooter>
+								</>
+							)}
+						</DialogContent>
+					</Dialog>
 				</div>
-
-				{/* Preview: the form as people will see it, checked locally */}
-				<section aria-label="Preview" className="min-w-0 rounded-lg border p-4">
-					<h3 className="mb-3 text-sm font-semibold">Preview</h3>
-					<TestFormPanel schema={schema} />
-				</section>
-			</div>
-
-			{/* Edit Field Modal */}
-			<EditFieldModal
-				open={editFieldIndex !== null}
-				onOpenChange={(open) => {
-					if (!open) setEditFieldIndex(null);
-				}}
-				field={editFieldIndex !== null ? (schema.fields[editFieldIndex] ?? null) : null}
-				earlier={editFieldIndex !== null ? fieldsBefore(schema, editFieldIndex) : []}
-				v2Enabled={v2Enabled}
-				locked={
-					editFieldIndex !== null && lockedFields.includes(schema.fields[editFieldIndex]?.k ?? "")
-				}
-				onSave={(field) => {
-					if (editFieldIndex !== null) {
-						// One reply address: marking this field unmarks any other.
-						if ((field as DslFieldV2).replyTo) {
-							schema.fields.forEach((other, i) => {
-								if (i !== editFieldIndex && (other as DslFieldV2).replyTo) {
-									const { replyTo: _r, ...rest } = other as DslFieldV2;
-									dispatch({ type: "UPDATE_FIELD", index: i, field: rest as DslField });
-								}
-							});
-						}
-						dispatch({ type: "UPDATE_FIELD", index: editFieldIndex, field });
-						setEditFieldIndex(null);
-					}
-				}}
-			/>
-
-			{/* Preview Settings Modal */}
-			<PreviewSettingsModal
-				open={previewModalOpen}
-				onOpenChange={setPreviewModalOpen}
-				schema={schema}
-				onSave={(preview) => dispatch({ type: "SET_PREVIEW", preview })}
-			/>
-
-			{/* Form Meta dialog */}
-			<MetaEditorDialog
-				open={formMetaOpen}
-				onOpenChange={setFormMetaOpen}
-				value={schema.meta ?? ""}
-				onSave={(value) => {
-					dispatch({ type: "SET_META", meta: value || undefined });
-					setFormMetaOpen(false);
-				}}
-			/>
-
-			{/* Export dialog */}
-			<Dialog open={exportOpen} onOpenChange={setExportOpen}>
-				<DialogContent className="sm:max-w-lg">
-					<DialogHeader>
-						<DialogTitle>Export Schema</DialogTitle>
-					</DialogHeader>
-
-					{exportFormat === "choose" ? (
-						<div className="grid gap-3 py-2">
-							<button
-								type="button"
-								className="flex items-start gap-3 rounded-lg border p-3 text-left transition-colors hover:bg-muted/50"
-								onClick={() => setExportFormat("json")}
-							>
-								<Braces className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
-								<div>
-									<p className="text-sm font-medium">JSON Schema</p>
-									<p className="text-xs text-muted-foreground mt-0.5">
-										Full schema as a JSON template file. Use for importing into other channels or
-										sharing with developers.
-									</p>
-								</div>
-							</button>
-							<button
-								type="button"
-								className="flex items-start gap-3 rounded-lg border p-3 text-left transition-colors hover:bg-muted/50"
-								onClick={() => setExportFormat("text")}
-							>
-								<FileText className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
-								<div>
-									<p className="text-sm font-medium">Text DSL</p>
-									<p className="text-xs text-muted-foreground mt-0.5">
-										Human-readable text format. Easy to read, edit, and use with AI tools to
-										generate or modify forms.
-									</p>
-								</div>
-							</button>
-						</div>
-					) : (
-						<>
-							<div className="pt-2">
-								<pre className="rounded-md border bg-muted/30 p-3 text-xs font-mono max-h-80 overflow-auto whitespace-pre-wrap break-words">
-									{exportContent}
-								</pre>
-							</div>
-							<DialogFooter className="flex-row justify-between sm:justify-between">
-								<Button
-									size="sm"
-									variant="ghost"
-									className="text-xs"
-									onClick={() => setExportFormat("choose")}
-								>
-									<ArrowLeft className="h-3 w-3" />
-									Back
-								</Button>
-								<div className="flex gap-2">
-									<Button
-										size="sm"
-										variant="outline"
-										className="text-xs"
-										onClick={handleExportCopy}
-									>
-										{exportCopied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-										{exportCopied ? "Copied" : "Copy"}
-									</Button>
-									<Button
-										size="sm"
-										className="text-xs"
-										onClick={() => {
-											handleExportDownload();
-											setExportOpen(false);
-										}}
-									>
-										<Download className="h-3 w-3" />
-										Save as file
-									</Button>
-								</div>
-							</DialogFooter>
-						</>
-					)}
-				</DialogContent>
-			</Dialog>
-		</div>
+			</LockedReason.Provider>
+		</SimpleMode.Provider>
 	);
+}
+
+/** The key, or the key with the lowest free number after it. */
+function uniqueKey(base: string, taken: readonly string[]): string {
+	if (!taken.includes(base)) return base;
+	let n = 2;
+	while (taken.includes(`${base}${n}`)) n++;
+	return `${base}${n}`;
 }
 
 // ─── Empty Schema State ──────────────────────────────────────────────────────
 
 function EmptySchemaState({ dispatch }: { dispatch: Dispatch<BuilderAction> }) {
+	const simple = useContext(SimpleMode);
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const [templateError, setTemplateError] = useState<string | null>(null);
 
@@ -607,7 +728,9 @@ function EmptySchemaState({ dispatch }: { dispatch: Dispatch<BuilderAction> }) {
 				</div>
 				<h3 className="text-base font-semibold">No fields yet</h3>
 				<p className="mt-1 max-w-xs text-sm text-muted-foreground">
-					Add your first field below, or load one from a template.
+					{simple
+						? "Add your first question below."
+						: "Add your first field below, or load one from a template."}
 				</p>
 			</div>
 			<AddFieldRow
@@ -616,46 +739,50 @@ function EmptySchemaState({ dispatch }: { dispatch: Dispatch<BuilderAction> }) {
 				fieldCount={0}
 			/>
 
-			<div className="relative flex items-center gap-3">
-				<div className="flex-1 border-t" />
-				<span className="text-xs text-muted-foreground">or</span>
-				<div className="flex-1 border-t" />
-			</div>
+			{!simple && (
+				<>
+					<div className="relative flex items-center gap-3">
+						<div className="flex-1 border-t" />
+						<span className="text-xs text-muted-foreground">or</span>
+						<div className="flex-1 border-t" />
+					</div>
 
-			{/* biome-ignore lint/a11y/noStaticElementInteractions: drag-and-drop target */}
-			<div
-				className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 text-center transition-colors hover:border-primary/50"
-				onDrop={handleDrop}
-				onDragOver={(e) => e.preventDefault()}
-			>
-				<FileUp className="mb-2 h-6 w-6 text-muted-foreground" />
-				<p className="text-sm font-medium">Load from Template</p>
-				<p className="mt-1 text-xs text-muted-foreground">
-					Drop a .template.json file here, or{" "}
-					<button
-						type="button"
-						className="text-primary underline hover:no-underline"
-						onClick={() => fileInputRef.current?.click()}
+					{/* biome-ignore lint/a11y/noStaticElementInteractions: drag-and-drop target */}
+					<div
+						className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 text-center transition-colors hover:border-primary/50"
+						onDrop={handleDrop}
+						onDragOver={(e) => e.preventDefault()}
 					>
-						browse
-					</button>
-				</p>
-				<input
-					ref={fileInputRef}
-					type="file"
-					accept=".json"
-					className="hidden"
-					onChange={(e) => {
-						const file = e.target.files?.[0];
-						if (file) handleTemplateFile(file);
-					}}
-				/>
-			</div>
+						<FileUp className="mb-2 h-6 w-6 text-muted-foreground" />
+						<p className="text-sm font-medium">Load from Template</p>
+						<p className="mt-1 text-xs text-muted-foreground">
+							Drop a .template.json file here, or{" "}
+							<button
+								type="button"
+								className="text-primary underline hover:no-underline"
+								onClick={() => fileInputRef.current?.click()}
+							>
+								browse
+							</button>
+						</p>
+						<input
+							ref={fileInputRef}
+							type="file"
+							accept=".json"
+							className="hidden"
+							onChange={(e) => {
+								const file = e.target.files?.[0];
+								if (file) handleTemplateFile(file);
+							}}
+						/>
+					</div>
 
-			{templateError && (
-				<Alert variant="destructive">
-					<AlertDescription>{templateError}</AlertDescription>
-				</Alert>
+					{templateError && (
+						<Alert variant="destructive">
+							<AlertDescription>{templateError}</AlertDescription>
+						</Alert>
+					)}
+				</>
 			)}
 		</div>
 	);
@@ -680,6 +807,7 @@ function SchemaFieldList({
 	v2Enabled?: boolean;
 	lockedFields?: string[];
 }) {
+	const simple = useContext(SimpleMode);
 	const sections = schema.v === 2 ? (schema.sections ?? []) : [];
 	const sectionStarts = new Map(sections.map((s) => [s.fields[0], s] as const));
 	const [editSection, setEditSection] = useState<SchemaSection | null>(null);
@@ -690,6 +818,7 @@ function SchemaFieldList({
 			<SectionHeader
 				key={`section-${section.id}`}
 				section={section}
+				index={sections.indexOf(section)}
 				onEdit={isLocked ? undefined : () => setEditSection(section)}
 				onRemove={isLocked ? undefined : () => dispatch({ type: "REMOVE_SECTION", id: section.id })}
 			/>
@@ -736,7 +865,11 @@ function SchemaFieldList({
 											</span>
 										)}
 									</div>
-									<span className="mt-0.5 font-mono text-xs text-muted-foreground">{field.k}</span>
+									{!simple && (
+										<span className="mt-0.5 font-mono text-xs text-muted-foreground">
+											{field.k}
+										</span>
+									)}
 								</div>
 								<span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
 									{FIELD_TYPE_LABELS[field.t] ?? field.t}
@@ -752,16 +885,20 @@ function SchemaFieldList({
 							<SortableContext items={fieldIds} strategy={verticalListSortingStrategy}>
 								{schema.fields.flatMap((field, i) => [
 									sectionHeader(field.k),
+									// Between two questions of one section: a line to start a new
+									// section above this one.
+									v2Enabled && sections.length > 0 && i > 0 && !sectionStarts.has(field.k) ? (
+										<SectionBreak
+											key={`break-${fieldIds[i]}`}
+											label={field.label}
+											onAdd={() => dispatch({ type: "START_SECTION", index: i })}
+										/>
+									) : null,
 									<SortableFieldRow
 										key={fieldIds[i]!}
 										id={fieldIds[i]!}
 										field={field}
 										locked={lockedFields.includes(field.k)}
-										onStartSection={
-											v2Enabled && sections.length > 0 && !sectionStarts.has(field.k)
-												? () => dispatch({ type: "START_SECTION", index: i })
-												: undefined
-										}
 										onEdit={() => onEditField?.(i)}
 										onDelete={() => {
 											const removedKey = schema.fields[i]?.k;
@@ -794,16 +931,19 @@ function SchemaFieldList({
 			)}
 
 			{!isLocked && v2Enabled && sections.length === 0 && schema.fields.length > 0 && (
-				<Button
-					type="button"
-					variant="ghost"
-					size="sm"
-					className="mb-3 h-7 text-xs"
-					onClick={() => dispatch({ type: "START_SECTION", index: 0 })}
-				>
-					<SeparatorHorizontal className="h-3 w-3" />
-					Group into sections
-				</Button>
+				<div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1">
+					<Button
+						type="button"
+						variant="ghost"
+						size="sm"
+						className="h-7 text-xs"
+						onClick={() => dispatch({ type: "START_SECTION", index: 0 })}
+					>
+						<SeparatorHorizontal className="h-3 w-3" />
+						Group into sections
+					</Button>
+					<p className="text-xs text-muted-foreground">{SECTIONS_HINT}</p>
+				</div>
 			)}
 
 			{!isLocked && (
@@ -816,6 +956,7 @@ function SchemaFieldList({
 
 			<SectionDialog
 				section={editSection}
+				index={editSection ? sections.findIndex((s) => s.id === editSection.id) : 0}
 				fields={
 					editSection
 						? fieldsBefore(
@@ -849,10 +990,12 @@ function refersTo(schema: SchemaDsl, key: string): boolean {
 
 function SectionHeader({
 	section,
+	index,
 	onEdit,
 	onRemove,
 }: {
 	section: SchemaSection;
+	index: number;
 	onEdit?: (() => void) | undefined;
 	onRemove?: (() => void) | undefined;
 }) {
@@ -861,7 +1004,7 @@ function SectionHeader({
 			<SeparatorHorizontal className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
 			<div className="min-w-0 flex-1">
 				<p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-					{section.title}
+					{sectionTitle(section, index)}
 				</p>
 				{section.when && (
 					<p className="font-mono text-[11px] text-muted-foreground">
@@ -874,7 +1017,7 @@ function SectionHeader({
 					type="button"
 					className="text-xs text-primary hover:underline"
 					onClick={onEdit}
-					aria-label={`Edit section ${section.title}`}
+					aria-label={`Edit section ${sectionTitle(section, index)}`}
 				>
 					Edit
 				</button>
@@ -884,7 +1027,7 @@ function SectionHeader({
 					type="button"
 					className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
 					onClick={onRemove}
-					aria-label={`Remove section ${section.title}`}
+					aria-label={`Remove section ${sectionTitle(section, index)}`}
 				>
 					<Trash2 className="h-3.5 w-3.5" />
 				</button>
@@ -893,13 +1036,18 @@ function SectionHeader({
 	);
 }
 
+const SECTIONS_HINT = "Group questions under a heading. Step by step shows one section per step.";
+
 function SectionDialog({
 	section,
+	index,
 	fields,
 	onOpenChange,
 	onSave,
 }: {
 	section: SchemaSection | null;
+	/** Its place, for the number it shows without a name. */
+	index: number;
 	fields: DslField[];
 	onOpenChange: (open: boolean) => void;
 	onSave: (patch: Partial<Omit<SchemaSection, "id" | "fields">>) => void;
@@ -915,17 +1063,24 @@ function SectionDialog({
 				<DialogHeader>
 					<DialogTitle>Edit Section</DialogTitle>
 				</DialogHeader>
+				<p className="text-sm text-muted-foreground">
+					{SECTIONS_HINT} This one holds the questions below it.
+				</p>
 				<div className="space-y-4 py-2">
 					<div className="space-y-1">
 						<Label className="text-xs" htmlFor="fbk-section-title">
-							Title
+							Name <span className="font-normal text-muted-foreground">(optional)</span>
 						</Label>
 						<Input
 							id="fbk-section-title"
-							value={draft.title}
+							value={draft.title ?? ""}
+							placeholder={sectionTitle({}, index)}
 							maxLength={200}
 							onChange={(e) => setDraft({ ...draft, title: e.target.value })}
 						/>
+						<p className="text-xs text-muted-foreground">
+							Without a name it is {sectionTitle({}, index)}, numbered by its place.
+						</p>
 					</div>
 					<div className="space-y-1">
 						<Label className="text-xs" htmlFor="fbk-section-desc">
@@ -951,9 +1106,12 @@ function SectionDialog({
 						<Button variant="outline">Cancel</Button>
 					</DialogClose>
 					<Button
-						disabled={draft.title.trim() === ""}
 						onClick={() =>
-							onSave({ title: draft.title.trim(), desc: draft.desc, when: draft.when })
+							onSave({
+								title: draft.title?.trim() || undefined,
+								desc: draft.desc,
+								when: draft.when,
+							})
 						}
 					>
 						Save
@@ -961,6 +1119,34 @@ function SectionDialog({
 				</DialogFooter>
 			</DialogContent>
 		</Dialog>
+	);
+}
+
+/**
+ * Where a new section can start: on the line between two questions, a
+ * dashed rule and "+ Section break" appear on hover or focus (always, on a
+ * touch screen), so it reads as a break inserted at that point.
+ */
+function SectionBreak({ label, onAdd }: { label: string; onAdd: () => void }) {
+	return (
+		<div className="relative h-0 !border-0">
+			<button
+				type="button"
+				onClick={onAdd}
+				aria-label={`Add a section break above ${label}`}
+				title="Start a new section here"
+				className="absolute inset-x-0 -top-2.5 z-10 flex h-5 cursor-pointer items-center justify-center opacity-0 transition-opacity hover:opacity-100 focus-visible:opacity-100 [@media(hover:none)]:opacity-100"
+			>
+				<span
+					aria-hidden
+					className="absolute inset-x-4 top-1/2 border-t border-dashed border-primary/60"
+				/>
+				<span className="relative inline-flex items-center gap-1 rounded-full border border-primary/40 bg-background px-2 py-0.5 text-[11px] font-medium text-primary shadow-sm">
+					<Plus className="h-3 w-3" aria-hidden />
+					Section break
+				</span>
+			</button>
+		</div>
 	);
 }
 
@@ -972,15 +1158,15 @@ function SortableFieldRow({
 	onEdit,
 	onDelete,
 	locked = false,
-	onStartSection,
 }: {
 	id: string;
 	field: DslFieldV2;
 	onEdit: () => void;
 	onDelete: () => void;
 	locked?: boolean;
-	onStartSection?: (() => void) | undefined;
 }) {
+	const simple = useContext(SimpleMode);
+	const lockedReason = useContext(LockedReason);
 	const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
 		id,
 	});
@@ -1031,7 +1217,9 @@ function SortableFieldRow({
 						</span>
 					)}
 				</div>
-				<span className="mt-0.5 font-mono text-xs text-muted-foreground">{field.k}</span>
+				{!simple && (
+					<span className="mt-0.5 font-mono text-xs text-muted-foreground">{field.k}</span>
+				)}
 				{field.when && (
 					<span className="mt-0.5 flex items-center gap-1 font-mono text-[11px] text-muted-foreground">
 						<GitBranch className="h-3 w-3 shrink-0" />
@@ -1043,22 +1231,17 @@ function SortableFieldRow({
 				<span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
 					{FIELD_TYPE_LABELS[field.t] ?? field.t}
 				</span>
-				{onStartSection && (
-					<button
-						type="button"
-						onClick={(e) => {
-							e.stopPropagation();
-							onStartSection();
-						}}
-						className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-muted"
-						aria-label={`Start a new section at ${field.label}`}
-						title="Start a new section here"
-					>
-						<SeparatorHorizontal className="h-3.5 w-3.5" />
-					</button>
-				)}
+
 				<Pencil className="h-3.5 w-3.5 text-muted-foreground" />
-				{!locked && (
+				{locked ? (
+					<span
+						className="flex h-7 w-7 items-center justify-center text-muted-foreground"
+						title={lockedReason}
+					>
+						<Lock className="h-3.5 w-3.5" aria-hidden />
+						<span className="sr-only">{lockedReason}</span>
+					</span>
+				) : (
 					<button
 						type="button"
 						onClick={(e) => {
@@ -1078,15 +1261,25 @@ function SortableFieldRow({
 
 // ─── Add Field Row ───────────────────────────────────────────────────────────
 
-/** Small "i" icon with a hover/focus tooltip explaining a field, sat next to a label. */
+/**
+ * Small "i" icon with a tooltip explaining something, sat next to its label.
+ * It opens quickly on hover or focus, and a click or tap toggles it (a plain
+ * tooltip closes on click, so clicking the icon showed nothing).
+ */
 function InfoTooltip({ text }: { text: string }) {
+	const [open, setOpen] = useState(false);
 	return (
-		<Tooltip>
+		<Tooltip open={open} onOpenChange={setOpen} delayDuration={150}>
 			<TooltipTrigger asChild>
 				<button
 					type="button"
 					aria-label="More information"
-					className="text-muted-foreground/60 transition-colors hover:text-foreground"
+					onClick={(e) => {
+						// Ours, not the tooltip's close-on-click.
+						e.preventDefault();
+						setOpen((o) => !o);
+					}}
+					className="cursor-help text-muted-foreground/60 transition-colors hover:text-foreground"
 				>
 					<Info className="h-3.5 w-3.5" />
 				</button>
@@ -1107,6 +1300,7 @@ function AddFieldRow({
 	onAdd: (field: DslField) => void;
 	fieldCount: number;
 }) {
+	const simple = useContext(SimpleMode);
 	const [label, setLabel] = useState("");
 	const [key, setKey] = useState("");
 	const [fieldType, setFieldType] = useState<FieldType>("text");
@@ -1130,9 +1324,12 @@ function AddFieldRow({
 		}
 	}
 
+	// Simple mode has no key to type: one comes from the label, numbered if taken.
+	const effectiveKey = simple ? uniqueKey(toCamelCase(label) || "question", existingKeys) : key;
+
 	function handleAdd() {
 		const trimmedLabel = label.trim();
-		const trimmedKey = key.trim();
+		const trimmedKey = effectiveKey.trim();
 		if (!trimmedLabel || !trimmedKey) return;
 		if (existingKeys.includes(trimmedKey)) return;
 
@@ -1150,8 +1347,9 @@ function AddFieldRow({
 		keyTouched.current = false;
 	}
 
-	const isKeyDuplicate = key.trim() !== "" && existingKeys.includes(key.trim());
-	const canAdd = label.trim() !== "" && key.trim() !== "" && !isKeyDuplicate && fieldCount < 25;
+	const isKeyDuplicate = effectiveKey.trim() !== "" && existingKeys.includes(effectiveKey.trim());
+	const canAdd =
+		label.trim() !== "" && effectiveKey.trim() !== "" && !isKeyDuplicate && fieldCount < 25;
 
 	if (fieldCount >= 25) {
 		return (
@@ -1166,13 +1364,13 @@ function AddFieldRow({
 			<div className="mb-2 flex items-center gap-1.5">
 				<Sparkles className="h-3.5 w-3.5 text-primary" />
 				<h3 className="text-sm font-semibold text-foreground">Add a field</h3>
-				<span className="text-xs text-muted-foreground">— give it a label, then click Add</span>
+				<span className="text-xs text-muted-foreground">Give it a label, then click Add</span>
 			</div>
 			<div className="flex flex-wrap items-end gap-2">
 				<div className="min-w-[140px] flex-1 space-y-1">
 					<div className="flex items-center gap-1">
 						<Label className="text-xs">Label</Label>
-						<InfoTooltip text="The human-readable title shown to people filling out the form and in your message inbox — e.g. “Full Name”." />
+						<InfoTooltip text="The name people see on the form and in your inbox, such as “Full Name”." />
 					</div>
 					<Input
 						value={label}
@@ -1188,28 +1386,30 @@ function AddFieldRow({
 						}}
 					/>
 				</div>
-				<div className="min-w-[120px] flex-1 space-y-1">
-					<div className="flex items-center gap-1">
-						<Label className="text-xs">Key</Label>
-						<InfoTooltip text="A unique identifier for this field, used in the stored data, API, and SDK — e.g. “fullName”. Letters and numbers only, no spaces." />
+				{!simple && (
+					<div className="min-w-[120px] flex-1 space-y-1">
+						<div className="flex items-center gap-1">
+							<Label className="text-xs">Key</Label>
+							<InfoTooltip text="A unique name for this field in the stored data, API and SDK, such as “fullName”. Letters and numbers only, no spaces." />
+						</div>
+						<Input
+							value={key}
+							onChange={(e) => handleKeyChange(e.target.value)}
+							placeholder="e.g. fullName"
+							className={`h-8 text-sm font-mono bg-background ${isKeyDuplicate ? "border-destructive" : ""}`}
+							onKeyDown={(e) => {
+								if (e.key === "Enter") {
+									e.preventDefault();
+									handleAdd();
+								}
+							}}
+						/>
 					</div>
-					<Input
-						value={key}
-						onChange={(e) => handleKeyChange(e.target.value)}
-						placeholder="e.g. fullName"
-						className={`h-8 text-sm font-mono bg-background ${isKeyDuplicate ? "border-destructive" : ""}`}
-						onKeyDown={(e) => {
-							if (e.key === "Enter") {
-								e.preventDefault();
-								handleAdd();
-							}
-						}}
-					/>
-				</div>
+				)}
 				<div className="min-w-[100px] space-y-1">
 					<div className="flex items-center gap-1">
 						<Label className="text-xs">Type</Label>
-						<InfoTooltip text="The kind of data this field stores (text, number, date, choices, etc.) — it sets the input shown and how the value is validated." />
+						<InfoTooltip text="The kind of answer it takes (text, number, date, a choice and so on). It sets the input shown and how the answer is checked." />
 					</div>
 					<Select
 						value={fieldType}
@@ -1295,6 +1495,9 @@ function getPreviewSummary(schema: SchemaDsl): string {
 	return "Auto-detect";
 }
 
+const INBOX_PREVIEW_HELP =
+	"Each message in the inbox list shows a one-line summary built from its answers, such as the topic and the sender's name, so you can tell messages apart at a glance. Configure chooses which answers it uses.";
+
 function InboxPreviewSection({
 	schema,
 	previewMode,
@@ -1338,10 +1541,16 @@ function InboxPreviewSection({
 		<div className="rounded-lg border px-4 py-3">
 			<div className="flex items-start justify-between gap-3">
 				<div>
-					<p className="text-sm font-medium">Inbox Preview</p>
+					<p className="flex items-center gap-1.5 text-sm font-medium">
+						Inbox Preview
+						<InfoTooltip text={INBOX_PREVIEW_HELP} />
+					</p>
 					<p className="mt-0.5 text-xs text-muted-foreground">
+						The line that sums up each message in your inbox list.
+					</p>
+					<p className="mt-1 text-xs text-muted-foreground">
 						<span className="font-medium">{MODE_LABELS[previewMode] ?? previewMode}</span>
-						{" — "}
+						{": "}
 						{getPreviewSummary(schema)}
 					</p>
 				</div>
@@ -1430,6 +1639,7 @@ function EditFieldModal({
 	/** Locked by the host: the key and type cannot change. */
 	locked?: boolean;
 }) {
+	const simple = useContext(SimpleMode);
 	const [draft, setDraft] = useState<DslFieldV2 | null>(null);
 	const [metaOpen, setMetaOpen] = useState(false);
 
@@ -1479,20 +1689,22 @@ function EditFieldModal({
 								maxLength={200}
 							/>
 						</div>
-						<div className="space-y-1">
-							<Label className="text-xs">Key</Label>
-							<Input
-								value={draft.k}
-								disabled={locked}
-								onChange={(e) =>
-									setDraft({
-										...draft,
-										k: e.target.value.replace(/[^a-zA-Z0-9_]/g, ""),
-									} as DslField)
-								}
-								className="font-mono"
-							/>
-						</div>
+						{!simple && (
+							<div className="space-y-1">
+								<Label className="text-xs">Key</Label>
+								<Input
+									value={draft.k}
+									disabled={locked}
+									onChange={(e) =>
+										setDraft({
+											...draft,
+											k: e.target.value.replace(/[^a-zA-Z0-9_]/g, ""),
+										} as DslField)
+									}
+									className="font-mono"
+								/>
+							</div>
+						)}
 					</div>
 
 					<div className="grid grid-cols-2 gap-3 items-end">
@@ -1522,42 +1734,46 @@ function EditFieldModal({
 						</div>
 					</div>
 
-					{/* Hidden toggle */}
-					<div className="flex items-center gap-2">
-						<Switch
-							checked={draft.hidden ?? false}
-							onCheckedChange={(checked) =>
-								setDraft({
-									...draft,
-									hidden: checked || undefined,
-									req: checked ? undefined : draft.req,
-								} as DslField)
-							}
-						/>
-						<div>
-							<Label className="text-xs">Hidden field</Label>
-							<p className="text-[10px] text-muted-foreground">
-								Not shown in forms. Set by SDK or URL params.
-							</p>
-						</div>
-					</div>
+					{!simple && (
+						<>
+							{/* Hidden toggle */}
+							<div className="flex items-center gap-2">
+								<Switch
+									checked={draft.hidden ?? false}
+									onCheckedChange={(checked) =>
+										setDraft({
+											...draft,
+											hidden: checked || undefined,
+											req: checked ? undefined : draft.req,
+										} as DslField)
+									}
+								/>
+								<div>
+									<Label className="text-xs">Hidden field</Label>
+									<p className="text-[10px] text-muted-foreground">
+										Not shown in forms. Set by SDK or URL params.
+									</p>
+								</div>
+							</div>
 
-					{/* Sensitive toggle */}
-					<div className="flex items-center gap-2">
-						<Switch
-							checked={draft.sensitive === true}
-							onCheckedChange={(checked) =>
-								setDraft({ ...draft, sensitive: checked ? true : undefined } as DslField)
-							}
-						/>
-						<div className="flex-1">
-							<Label className="text-xs">Sensitive (encrypted)</Label>
-							<p className="text-[10px] text-muted-foreground">
-								When on, this field's value is encrypted at rest and excluded from the inbox
-								preview, exports, and unfiltered insights queries. Off by default.
-							</p>
-						</div>
-					</div>
+							{/* Sensitive toggle */}
+							<div className="flex items-center gap-2">
+								<Switch
+									checked={draft.sensitive === true}
+									onCheckedChange={(checked) =>
+										setDraft({ ...draft, sensitive: checked ? true : undefined } as DslField)
+									}
+								/>
+								<div className="flex-1">
+									<Label className="text-xs">Sensitive (encrypted)</Label>
+									<p className="text-[10px] text-muted-foreground">
+										When on, this field's value is encrypted at rest and excluded from the inbox
+										preview, exports, and unfiltered insights queries. Off by default.
+									</p>
+								</div>
+							</div>
+						</>
+					)}
 
 					<FieldTypeConfig field={draft} onChange={(f) => setDraft(f)} />
 
@@ -1608,40 +1824,44 @@ function EditFieldModal({
 						</div>
 					)}
 
-					{/* Default value */}
-					<DefaultValueInput field={draft} onChange={(f) => setDraft(f)} />
+					{!simple && (
+						<>
+							{/* Default value */}
+							<DefaultValueInput field={draft} onChange={(f) => setDraft(f)} />
 
-					{/* Meta */}
-					<div className="flex items-center justify-between border-t pt-3">
-						<div className="flex items-center gap-2">
-							<Braces className="h-3.5 w-3.5 text-muted-foreground" />
-							{draft.meta ? (
-								<span className="flex items-center gap-1 text-xs text-muted-foreground">
-									Meta configured
-									<Check className="h-3.5 w-3.5 text-green-600" />
-								</span>
-							) : (
-								<span className="text-xs text-muted-foreground">No meta</span>
-							)}
-						</div>
-						<button
-							type="button"
-							className="text-xs text-primary hover:underline"
-							onClick={() => setMetaOpen(true)}
-						>
-							{draft.meta ? "Edit meta" : "Add meta"}
-						</button>
-					</div>
+							{/* Meta */}
+							<div className="flex items-center justify-between border-t pt-3">
+								<div className="flex items-center gap-2">
+									<Braces className="h-3.5 w-3.5 text-muted-foreground" />
+									{draft.meta ? (
+										<span className="flex items-center gap-1 text-xs text-muted-foreground">
+											Meta configured
+											<Check className="h-3.5 w-3.5 text-green-600" />
+										</span>
+									) : (
+										<span className="text-xs text-muted-foreground">No meta</span>
+									)}
+								</div>
+								<button
+									type="button"
+									className="text-xs text-primary hover:underline"
+									onClick={() => setMetaOpen(true)}
+								>
+									{draft.meta ? "Edit meta" : "Add meta"}
+								</button>
+							</div>
 
-					<MetaEditorDialog
-						open={metaOpen}
-						onOpenChange={setMetaOpen}
-						value={draft.meta ?? ""}
-						onSave={(value) => {
-							setDraft({ ...draft, meta: value || undefined } as DslField);
-							setMetaOpen(false);
-						}}
-					/>
+							<MetaEditorDialog
+								open={metaOpen}
+								onOpenChange={setMetaOpen}
+								value={draft.meta ?? ""}
+								onSave={(value) => {
+									setDraft({ ...draft, meta: value || undefined } as DslField);
+									setMetaOpen(false);
+								}}
+							/>
+						</>
+					)}
 				</div>
 
 				<DialogFooter>

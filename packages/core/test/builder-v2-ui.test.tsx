@@ -2,6 +2,7 @@
 // The builder's v2 controls: conditions, sections, help and placeholder,
 // locked fields, and the preview following conditions.
 import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import { useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { FeedbakkrBuilder } from "../src/builder/index.js";
 import type { SchemaDsl, SchemaDslV2 } from "../src/schema/schema-dsl-v2.js";
@@ -136,7 +137,7 @@ describe("sections", () => {
 		const onChange = vi.fn();
 		render(<FeedbakkrBuilder value={start} onChange={onChange} allowV2 />);
 		fireEvent.click(screen.getByRole("button", { name: "Group into sections" }));
-		fireEvent.click(screen.getByRole("button", { name: "Start a new section at Volume" }));
+		fireEvent.click(screen.getByRole("button", { name: "Add a section break above Volume" }));
 		expect((last(onChange) as SchemaDslV2).sections?.map((s) => s.fields)).toEqual([
 			["kind"],
 			["volume", "email"],
@@ -144,7 +145,7 @@ describe("sections", () => {
 
 		fireEvent.click(screen.getByRole("button", { name: "Edit section Section 2" }));
 		const dialog = screen.getByRole("dialog");
-		fireEvent.change(within(dialog).getByLabelText("Title"), { target: { value: "Business" } });
+		fireEvent.change(within(dialog).getByLabelText(/^Name/), { target: { value: "Business" } });
 		fireEvent.change(within(dialog).getByLabelText("Show this section"), {
 			target: { value: "when" },
 		});
@@ -158,7 +159,7 @@ describe("sections", () => {
 
 		fireEvent.click(screen.getByRole("button", { name: "Remove section Business" }));
 		expect((last(onChange) as SchemaDslV2).sections).toEqual([
-			{ id: "section_1", title: "Section 1", fields: ["kind", "volume", "email"] },
+			{ id: "section_1", fields: ["kind", "volume", "email"] },
 		]);
 	});
 
@@ -190,6 +191,31 @@ describe("locked fields", () => {
 		expect((label as HTMLInputElement).disabled).toBe(false);
 		expect((type as HTMLSelectElement).disabled).toBe(true);
 	});
+
+	it("say why they stay, where the delete button would be", () => {
+		render(
+			<FeedbakkrBuilder
+				value={start}
+				lockedFields={["email"]}
+				lockedReason="Your replies go to this address."
+			/>,
+		);
+		expect(screen.getByTitle("Your replies go to this address.")).toBeTruthy();
+	});
+});
+
+describe("the toolbar", () => {
+	it("heads the list with how many questions it holds, in plain words when simple", () => {
+		render(<FeedbakkrBuilder value={start} simple />);
+		expect(screen.getByRole("heading", { name: "3 questions" }).textContent).toBe("Questions3");
+	});
+
+	it("has room for the host's own controls", () => {
+		render(
+			<FeedbakkrBuilder value={start} simple toolbar={<button type="button">Titles</button>} />,
+		);
+		expect(screen.getByRole("button", { name: "Titles" })).toBeTruthy();
+	});
 });
 
 describe("saving", () => {
@@ -210,6 +236,29 @@ describe("saving", () => {
 		await act(async () => fireEvent.click(screen.getByRole("button", { name: "Save Changes" })));
 		expect(onSave).not.toHaveBeenCalled();
 		expect(screen.getAllByText(/does not come before it/).length).toBeGreaterThan(0);
+	});
+
+	it("is done in one go when the host answers with its stored, tidied copy", async () => {
+		const dirty: boolean[] = [];
+		function Host() {
+			const [value, setValue] = useState<SchemaDsl>(start);
+			return (
+				<FeedbakkrBuilder
+					value={value}
+					onDirtyChange={(d) => dirty.push(d)}
+					onSave={async (schema) => {
+						// The server stores it with a little more, as a real one might.
+						setValue({ ...schema, title: "Stored" });
+					}}
+				/>
+			);
+		}
+		render(<Host />);
+		fireEvent.change(screen.getByPlaceholderText("e.g. Full Name"), { target: { value: "Notes" } });
+		fireEvent.click(screen.getByRole("button", { name: "Add" }));
+		expect(dirty.at(-1)).toBe(true);
+		await act(async () => fireEvent.click(screen.getByRole("button", { name: "Save Changes" })));
+		expect(dirty.at(-1)).toBe(false);
 	});
 });
 
@@ -238,5 +287,48 @@ describe("the reply address", () => {
 		fireEvent.click(within(dialog).getByRole("button", { name: "Save" }));
 		schema = last(onChange) as SchemaDslV2;
 		expect(schema.fields.filter((f) => f.replyTo).map((f) => f.k)).toEqual(["other"]);
+	});
+});
+
+describe("simple mode", () => {
+	it("leaves out the developer tools, and offers a test instead of the preview", () => {
+		const onTest = vi.fn();
+		render(<FeedbakkrBuilder value={start} allowV2 simple onTest={onTest} />);
+		expect(screen.queryByRole("button", { name: "Export" })).toBeNull();
+		expect(screen.queryByText(/Validation schemas/)).toBeNull();
+		expect(screen.queryByRole("region", { name: "Preview" })).toBeNull();
+		// Keys are not shown or asked for; the inbox summary setting stays.
+		expect(screen.queryByText("volume")).toBeNull();
+		expect(screen.queryByPlaceholderText("e.g. fullName")).toBeNull();
+		expect(screen.getByText(/Inbox Preview/i)).toBeTruthy();
+		fireEvent.click(screen.getByRole("button", { name: "Test the form" }));
+		expect(onTest).toHaveBeenCalled();
+	});
+
+	it("makes keys from labels, numbered when taken", () => {
+		const onChange = vi.fn();
+		render(<FeedbakkrBuilder value={start} onChange={onChange} simple />);
+		fireEvent.change(screen.getByPlaceholderText("e.g. Full Name"), { target: { value: "Email" } });
+		fireEvent.click(screen.getByRole("button", { name: "Add" }));
+		expect(last(onChange).fields.at(-1)?.k).toBe("email2");
+	});
+
+	it("hides key, meta and default value when editing a field", () => {
+		render(<FeedbakkrBuilder value={start} simple />);
+		const dialog = openField("Volume");
+		expect(within(dialog).queryByText("Key")).toBeNull();
+		expect(within(dialog).queryByText(/meta/i)).toBeNull();
+		expect(within(dialog).queryByText("Hidden field")).toBeNull();
+	});
+});
+
+describe("untitled sections", () => {
+	it("are numbered by their place, and a name is optional", () => {
+		const onChange = vi.fn();
+		render(<FeedbakkrBuilder value={start} onChange={onChange} allowV2 />);
+		fireEvent.click(screen.getByRole("button", { name: "Group into sections" }));
+		const grouped = last(onChange) as SchemaDslV2;
+		expect(grouped.sections?.[0]?.title).toBeUndefined();
+		expect(screen.getAllByText("Section 1").length).toBeGreaterThan(0);
 	});
 });
