@@ -3,6 +3,7 @@ import type { SchemaDsl } from "../schema/schema-dsl-v2.js";
 import type { SubmissionErrors } from "../submissions/errors.js";
 import { type ValidateSubmissionOptions, validateSubmission } from "../submissions/validate.js";
 import { type InterpretOptions, interpretSubmission, type SubmissionRow } from "./interpret.js";
+import { replyToOf } from "./reply-to.js";
 import { summarizeSubmission } from "./summarize.js";
 
 /** Everything to store for one accepted submission. */
@@ -17,6 +18,8 @@ export interface PreparedMessage {
 	schemaHash: string;
 	/** Plain text of every answer that is not sensitive, for search. */
 	searchText: string;
+	/** Where a reply goes: the answer to the field marked `replyTo` (see `replyToOf`). */
+	replyTo: string | null;
 }
 
 export type PrepareMessageResult =
@@ -48,5 +51,6 @@ export async function prepareMessage(
 		summary: summarizeSubmission(schema, checked.values),
 		schemaHash: await hashSchema(schema),
 		searchText,
+		replyTo: replyToOf(schema, checked.values),
 	};
 }

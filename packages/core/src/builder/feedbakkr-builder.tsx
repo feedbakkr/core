@@ -438,6 +438,15 @@ export function FeedbakkrBuilder({
 				}
 				onSave={(field) => {
 					if (editFieldIndex !== null) {
+						// One reply address: marking this field unmarks any other.
+						if ((field as DslFieldV2).replyTo) {
+							schema.fields.forEach((other, i) => {
+								if (i !== editFieldIndex && (other as DslFieldV2).replyTo) {
+									const { replyTo: _r, ...rest } = other as DslFieldV2;
+									dispatch({ type: "UPDATE_FIELD", index: i, field: rest as DslField });
+								}
+							});
+						}
 						dispatch({ type: "UPDATE_FIELD", index: editFieldIndex, field });
 						setEditFieldIndex(null);
 					}
@@ -1444,9 +1453,9 @@ function EditFieldModal({
 			...(placeholder !== undefined ? { placeholder } : {}),
 		});
 	};
-	const setV2 = (patch: Partial<Pick<DslFieldV2, "when" | "help" | "placeholder">>) => {
+	const setV2 = (patch: Partial<Pick<DslFieldV2, "when" | "help" | "placeholder" | "replyTo">>) => {
 		const next = { ...draft, ...patch } as DslFieldV2 & Record<string, unknown>;
-		for (const key of ["when", "help", "placeholder"] as const) {
+		for (const key of ["when", "help", "placeholder", "replyTo"] as const) {
 			if (next[key] === undefined || next[key] === "") delete next[key];
 		}
 		setDraft(next);
@@ -1578,6 +1587,18 @@ function EditFieldModal({
 									/>
 								</div>
 							</div>
+							{draft.t === "email" ? (
+								<div className="flex items-start gap-2">
+									<Checkbox
+										id="fbk-field-reply-to"
+										checked={draft.replyTo === true}
+										onChange={(e) => setV2({ replyTo: e.target.checked ? true : undefined })}
+									/>
+									<Label className="text-xs" htmlFor="fbk-field-reply-to">
+										Reply address: replies to a message go to this email
+									</Label>
+								</div>
+							) : null}
 							<ConditionEditor
 								subject="this field"
 								fields={earlier}

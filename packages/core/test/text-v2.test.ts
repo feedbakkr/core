@@ -108,10 +108,10 @@ describe("conditions as text", () => {
 describe("errors in v2 text", () => {
 	it("needs @version 2 for v2 features", () => {
 		expect(errors('@version 1\na: text "A" help="x"')).toEqual([
-			"2: Conditions, sections, help and placeholder need @version 2",
+			"2: Conditions, sections, help, placeholder and reply-to need @version 2",
 		]);
 		expect(errors('a: text "A"\nb: text "B" when a filled')).toEqual([
-			"2: Conditions, sections, help and placeholder need @version 2",
+			"2: Conditions, sections, help, placeholder and reply-to need @version 2",
 		]);
 	});
 
@@ -133,7 +133,7 @@ describe("errors in v2 text", () => {
 	it("refuses conditions on a list's item", () => {
 		expect(
 			errors('@version 2\nok: bool "OK"\nl: dynlist "L"\n  item i: text "I" when ok = true'),
-		).toEqual(["4: A list's item takes no when, help or placeholder"]);
+		).toEqual(["4: A list's item takes no when, help, placeholder or reply-to"]);
 	});
 
 	it("keeps `when` inside quotes as text", () => {

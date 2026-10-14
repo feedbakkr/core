@@ -1,5 +1,5 @@
-// Schema format v2: v1 plus conditions (`when`), sections, and help and
-// placeholder text. Nothing else changes, and a schema that uses none of them
+// Schema format v2: v1 plus conditions (`when`), sections, help and
+// placeholder text, and the reply address (`replyTo`). Nothing else changes, and a schema that uses none of them
 // stays v1. A v2 schema says `v: 2`, so FeedBakkr's v1 parser rejects it
 // rather than silently dropping its conditions.
 import { z } from "zod";
@@ -57,6 +57,12 @@ const v2Extras = {
 	help: z.string().max(500).optional(),
 	/** Example text shown inside an empty input. */
 	placeholder: z.string().max(200).optional(),
+	/**
+	 * This email field is where a reply to the message goes. At most one
+	 * field, and only an email field. Who sent the message is the host's
+	 * business (its signed-in user), never read from the answers.
+	 */
+	replyTo: z.literal(true).optional(),
 };
 
 const [first, ...rest] = V1_FIELD_SCHEMAS.map((field) => field.extend(v2Extras));
@@ -84,7 +90,12 @@ const sectionSchema = z.object({
 	when: conditionSchema.optional(),
 });
 
-export type DslFieldV2 = DslField & { when?: Condition; help?: string; placeholder?: string };
+export type DslFieldV2 = DslField & {
+	when?: Condition;
+	help?: string;
+	placeholder?: string;
+	replyTo?: true;
+};
 
 export interface SchemaDslV2 {
 	v: 2;
@@ -136,7 +147,8 @@ function valueProblem(field: DslField, value: ConditionValue): string | null {
  * - a condition names only fields that come before it;
  * - a compared value suits the field it is compared with;
  * - with sections, every field is in exactly one section, in the fields'
- *   order, and a section's condition names only fields of earlier sections.
+ *   order, and a section's condition names only fields of earlier sections;
+ * - `replyTo` marks at most one field, and only an email field.
  *
  * Naming only earlier fields means conditions can never form a cycle, and
  * every form is evaluated in one pass, top to bottom.
@@ -185,6 +197,25 @@ function checkReferences(schema: SchemaDslV2, ctx: z.RefinementCtx) {
 	schema.fields.forEach((field, i) => {
 		if (field.when) checkCondition(field.when, i, ["fields", i], `Field "${field.k}"`);
 	});
+
+	const replyFields = schema.fields.flatMap((f, i) => (f.replyTo ? [i] : []));
+	for (const i of replyFields) {
+		const field = schema.fields[i] as DslFieldV2;
+		if (field.t !== "email") {
+			ctx.addIssue({
+				code: "custom",
+				path: ["fields", i, "replyTo"],
+				message: `Field "${field.k}" is not an email field, so it cannot be the reply address`,
+			});
+		}
+	}
+	if (replyFields.length > 1) {
+		ctx.addIssue({
+			code: "custom",
+			path: ["fields", replyFields[1] as number, "replyTo"],
+			message: "Only one field can be the reply address",
+		});
+	}
 
 	if (!schema.sections) return;
 	const ids = new Set<string>();

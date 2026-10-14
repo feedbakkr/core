@@ -41,6 +41,7 @@
  *
  * Schema v2 (`@version 2`) adds:
  *   - help="..." and placeholder="..." on a field line
+ *   - reply-to on an email field line: replies go to this address
  *   - `when <condition>` at the end of a field line (see condition-text.ts)
  *   - `@section id "Title" desc="..." when <condition>`: the fields that
  *     follow belong to that section, up to the next @section
@@ -197,10 +198,13 @@ export function parseFormDslText(input: string): TextDslResult {
 					errors.push({ line: lineNum, message: (err as Error).message });
 					continue;
 				}
-				if (itemField && (itemField.when || itemField.help || itemField.placeholder)) {
+				if (
+					itemField &&
+					(itemField.when || itemField.help || itemField.placeholder || itemField.replyTo)
+				) {
 					errors.push({
 						line: lineNum,
-						message: "A list's item takes no when, help or placeholder",
+						message: "A list's item takes no when, help, placeholder or reply-to",
 					});
 				} else if (itemField) {
 					(field as any).item = itemField;
@@ -237,7 +241,7 @@ export function parseFormDslText(input: string): TextDslResult {
 			errors.push({ line: lineNum, message: (err as Error).message });
 			continue;
 		}
-		if (field && (field.when || field.help || field.placeholder)) noteV2(lineNum);
+		if (field && (field.when || field.help || field.placeholder || field.replyTo)) noteV2(lineNum);
 		if (field) {
 			currentField = field;
 			_currentFieldLine = lineNum;
@@ -261,7 +265,7 @@ export function parseFormDslText(input: string): TextDslResult {
 	if (firstV2Line && version !== 2) {
 		errors.push({
 			line: firstV2Line,
-			message: "Conditions, sections, help and placeholder need @version 2",
+			message: "Conditions, sections, help, placeholder and reply-to need @version 2",
 		});
 	}
 
@@ -428,8 +432,13 @@ function parseFieldLine(key: string, line: string): DslFieldV2 | null {
 	let maxSpanDays: number | undefined;
 	let help: string | undefined;
 	let placeholder: string | undefined;
+	let replyTo = false;
 
 	for (const token of tokens) {
+		if (token === "reply-to") {
+			replyTo = true;
+			continue;
+		}
 		if (token === "required") {
 			req = true;
 			continue;
@@ -499,6 +508,7 @@ function parseFieldLine(key: string, line: string): DslFieldV2 | null {
 	if (meta) base.meta = meta;
 	if (help !== undefined) base.help = help;
 	if (placeholder !== undefined) base.placeholder = placeholder;
+	if (replyTo) base.replyTo = true;
 	if (whenText !== undefined) base.when = parseWhen(whenText);
 
 	switch (fieldType) {
@@ -757,6 +767,7 @@ function fieldToLine(head: string, field: DslFieldV2): string {
 	}
 	if (field.help !== undefined) line += ` help=${quote(field.help)}`;
 	if (field.placeholder !== undefined) line += ` placeholder=${quote(field.placeholder)}`;
+	if (field.replyTo) line += " reply-to";
 	if (field.when) line += ` when ${conditionToText(field.when)}`;
 	return line;
 }
