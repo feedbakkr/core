@@ -1,7 +1,8 @@
 # feedbakkr-core
 
 The FeedBakkr form toolkit as one private package, `@ai-food-focus/feedbakkr-core`,
-for apps such as FoodACN. It holds FeedBakkr's schema format and its checks,
+for apps such as FoodACN, and beside it `@ai-food-focus/turnstile`, Cloudflare
+Turnstile for those forms and for any app's login or sign-up. It holds FeedBakkr's schema format and its checks,
 with no database, hosted API or framework attached.
 
 The code was extracted from [FeedBakkr](https://github.com/feedbakkr/feedbakkr)
@@ -18,6 +19,7 @@ packages/core/                  the published package
   test/                         unit, fixture, differential and round-trip tests
   test/reference/feedbakkr-8ae744e/   verbatim FeedBakkr copies the tests compare against
   scripts/check-boundaries.mjs  fails if a built entry imports anything but zod
+packages/turnstile/             @ai-food-focus/turnstile: server check, script loader, React hook
 fixtures/                       74 marketplace templates, 4 platform forms, per-type schemas
 ```
 
@@ -49,7 +51,12 @@ pnpm verify   # biome, build, typecheck, tests, package checks
    A tag with a suffix (`v0.2.0-next.1`) publishes under the `next` dist-tag.
 
 `.github/workflows/release.yml` verifies, packs and publishes to GitHub
-Packages with the workflow's own token. GitHub Packages has no npm provenance,
+Packages with the workflow's own token.
+
+`@ai-food-focus/turnstile` is released on its own: set its version in
+`packages/turnstile/package.json`, merge, and push `turnstile-v<version>`
+(`git tag turnstile-v0.1.0 && git push origin turnstile-v0.1.0`);
+`.github/workflows/release-turnstile.yml` publishes it. GitHub Packages has no npm provenance,
 so the tag is the record of what was published.
 
 ## Installing it in another repo
