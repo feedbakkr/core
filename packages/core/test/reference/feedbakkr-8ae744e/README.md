@@ -4,7 +4,7 @@ Verbatim copies of FeedBakkr's schema parser, payload validator, inbox preview a
 `feedbakkr/feedbakkr` at commit `8ae744e0e66cb14827117950699966a5957b084b`
 (2026-06-30). Only the import paths are changed.
 
-The differential tests compare `@ai-food-focus/feedbakkr-core` against these
+The differential tests compare `@feedbakkr/core` against these
 files. They must never be edited: when core changes behaviour on purpose, list
 the difference in `test/intentional-differences.test.ts` instead.
 

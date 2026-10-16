@@ -27,7 +27,7 @@ jobs:
 
       # Chromium for the builder's browser tests (packages/core/e2e).
       - name: Install Playwright's Chromium
-        run: pnpm --filter @ai-food-focus/feedbakkr-core exec playwright install --with-deps chromium
+        run: pnpm --filter @feedbakkr/core exec playwright install --with-deps chromium
 
       # Biome, build, typecheck, tests (fixtures, differential, round trip),
       # then the package checks: entry boundaries, publint, type resolution.

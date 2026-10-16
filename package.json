@@ -2,7 +2,7 @@
 	"name": "feedbakkr-core-workspace",
 	"version": "0.0.0",
 	"private": true,
-	"description": "Workspace for @ai-food-focus/feedbakkr-core and @ai-food-focus/turnstile.",
+	"description": "Workspace for @feedbakkr/core and @feedbakkr/turnstile.",
 	"type": "module",
 	"scripts": {
 		"build": "pnpm -r build",

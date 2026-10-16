@@ -1,14 +1,14 @@
 name: Release
 
-# Publishes @ai-food-focus/feedbakkr-core to GitHub Packages when a version
-# tag is pushed. The tag must match packages/core/package.json:
+# Publishes @feedbakkr/core to the public npm registry, with provenance, when a
+# version tag is pushed. The tag must match packages/core/package.json:
 #
-#   v0.1.0          -> published under the `latest` dist-tag
-#   v0.2.0-next.1   -> published under the `next` dist-tag
+#   v0.11.0          -> published under the `latest` dist-tag
+#   v0.11.0-next.1   -> published under the `next` dist-tag
 #
-# Auth is the workflow's own GITHUB_TOKEN with `packages: write`. The package
-# lives in the ai-food-focus namespace, the same organisation as this repo,
-# so no personal token is needed.
+# Auth is npm trusted publishing (OIDC): npmjs.com trusts this repository and
+# workflow file, so no npm token is stored. npm 11.5+ (bundled with Node 24) is
+# required for the OIDC exchange.
 
 on:
   push:
@@ -16,11 +16,14 @@ on:
 
 permissions:
   contents: read
-  packages: write
+  id-token: write # npm trusted publishing and provenance
 
 jobs:
   publish:
     runs-on: ubuntu-latest
+    # Requires approval from a required reviewer before publishing (staged release).
+    # Configure the environment in repo settings; reviewer protection needs a public repo on GitHub Free.
+    environment: npm-release
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -44,7 +47,7 @@ jobs:
 
       # Chromium for the builder's browser tests (packages/core/e2e).
       - name: Install Playwright's Chromium
-        run: pnpm --filter @ai-food-focus/feedbakkr-core exec playwright install --with-deps chromium
+        run: pnpm --filter @feedbakkr/core exec playwright install --with-deps chromium
 
       - name: Verify
         run: pnpm verify
@@ -65,14 +68,18 @@ jobs:
             exit 1
           fi
 
+      # Node 24 ships npm 11, which performs the OIDC token exchange. No
+      # registry-url / NODE_AUTH_TOKEN: an _authToken line would force npm onto
+      # token auth instead of OIDC.
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+
       - name: Publish
-        working-directory: packages/core
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" >> ~/.npmrc
           case "$GITHUB_REF_NAME" in
             *-*) tag=next ;;
             *) tag=latest ;;
           esac
-          pnpm publish --no-git-checks --tag "$tag"
+          tgz=$(ls "$RUNNER_TEMP"/*.tgz)
+          npm publish "$tgz" --access public --provenance --tag "$tag"
