@@ -44,6 +44,7 @@ const ENTRY_EXTRAS = {
 	"inbox.js": [],
 	"form.js": [],
 	"conditions.js": [],
+	"transport.js": [],
 	"react.js": REACT,
 	"builder.js": BUILDER,
 	"cli.js": ["node:"],

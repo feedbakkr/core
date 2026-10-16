@@ -17,6 +17,7 @@ form, a form hook and the form builder are separate entries.
 | `@feedbakkr/core/conditions` | Schema v2: `evaluateCondition`, `visibleFields`, `visibleSections`, `resolveForm` |
 | `@feedbakkr/core/form` | Form state as plain data: `createFormState`, `setValue`, `checkFields` |
 | `@feedbakkr/core/text` | `parseFormDslText`, `schemaToTextDsl` |
+| `@feedbakkr/core/transport` | `prepareSubmission`, `httpTransport`, `SubmissionTransport`, `TransportResult`: send checked answers anywhere |
 | `@feedbakkr/core/export` | `generateJsonSchema`, `generateZodCode` |
 | `@feedbakkr/core/react` | `FeedbakkrForm`, `useFeedbakkrForm` and `DynamicForm`. Needs `react` 19, an optional peer dependency that only this entry imports. |
 | `@feedbakkr/core/builder` | `FeedbakkrBuilder`, the form builder. Needs the optional peer dependencies below and `builder.css`. |
@@ -108,6 +109,29 @@ way: email, url and phone answers appear in it, where FeedBakkr showed
 nothing for them.
 
 `generateZod` is still exported, unchanged, and `DynamicForm` still uses it.
+
+## Send a submission
+
+`prepareSubmission` checks the answers exactly as a server does and returns what to send: the validated schema, its fingerprint (`sha256:` + `hashSchema`), the normalised answers and a random idempotency key. A transport delivers it. That can be your own function (`SubmissionTransport`) or the generic `httpTransport`, which POSTs JSON to any endpoint that speaks the same envelope.
+
+```ts
+import { httpTransport, prepareSubmission } from "@feedbakkr/core/transport";
+
+const prepared = await prepareSubmission(schema, answers);
+if (!prepared.ok) return showErrors(prepared); // invalid_schema or invalid_answers
+
+const send = httpTransport({ endpoint: "https://submit.example.com/v1/acme/contact" });
+let result = await send(prepared.submission);
+if (result.status === "form-error" && result.retryable) {
+	result = await send(prepared.submission); // same submission, same Idempotency-Key
+}
+```
+
+- `success`: the receiver stored it (`replayed` is true when it recognised a retry).
+- `field-errors`: errors keyed by field, like `validateSubmission`.
+- `form-error`: with `retryable` set for network failures, timeouts, 429 and 5xx.
+
+The transport never retries on its own. Retry by sending the **same** prepared submission, so its idempotency key is reused; prepare a new one only for a genuinely new submission. Timeouts and cancellation use `AbortSignal`. The transport knows nothing about any particular service: FeedBakkr Cloud is one endpoint that speaks this format, and Core works without it.
 
 ## A form from your own components
 

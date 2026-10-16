@@ -52,6 +52,10 @@
 			"types": "./dist/conditions.d.ts",
 			"import": "./dist/conditions.js"
 		},
+		"./transport": {
+			"types": "./dist/transport.d.ts",
+			"import": "./dist/transport.js"
+		},
 		"./form": {
 			"types": "./dist/form.d.ts",
 			"import": "./dist/form.js"
