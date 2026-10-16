@@ -292,3 +292,7 @@ calls.
   core, for coding agents. Point to it from the app's `CLAUDE.md`.
 
 Both ship in the package, and every example in them is tested.
+
+## Licence
+
+MIT. Copyright © Bytechaser Ltd. See [LICENSE](LICENSE). Parts of the builder come from third-party projects under MIT and Apache-2.0 licences; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

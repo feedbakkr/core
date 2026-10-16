@@ -70,3 +70,7 @@ never deploy them.
 
 Version in `package.json`, then a tag `turnstile-v<version>` (for example
 `turnstile-v0.1.0`) publishes it. Core's own tags (`v<version>`) do not.
+
+## Licence
+
+MIT. Copyright © Bytechaser Ltd. See [LICENSE](LICENSE).

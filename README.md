@@ -71,3 +71,7 @@ The package is private to the ai-food-focus organisation.
   - Give the job `permissions: { contents: read, packages: read }`.
   - Before `pnpm install`, write the same `_authToken` line to `~/.npmrc` using `${{ secrets.GITHUB_TOKEN }}`.
   - An organisation admin adds the repo under the package's **Manage Actions access**, with Read.
+
+## Licence
+
+MIT. Copyright © Bytechaser Ltd. See [LICENSE](LICENSE). The builder bundles third-party code under MIT and Apache-2.0 licences; see [packages/core/THIRD_PARTY_NOTICES.md](packages/core/THIRD_PARTY_NOTICES.md).

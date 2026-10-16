@@ -2,7 +2,7 @@
 	"name": "@ai-food-focus/turnstile",
 	"version": "0.1.0",
 	"description": "Cloudflare Turnstile, done once: a server check for Workers and Node, a script loader for the browser, and a React hook and widget.",
-	"license": "UNLICENSED",
+	"license": "MIT",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/ai-food-focus/feedbakkr-core.git",
@@ -33,7 +33,8 @@
 	},
 	"files": [
 		"dist",
-		"README.md"
+		"README.md",
+		"LICENSE"
 	],
 	"scripts": {
 		"build": "tsup",
