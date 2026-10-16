@@ -1,6 +1,6 @@
 {
 	"name": "@feedbakkr/core",
-	"version": "0.11.0-next.1",
+	"version": "0.12.0-next.1",
 	"description": "FeedBakkr form toolkit: schema format, validation, submissions and messages, text format, exports, a React form and hook, and the form builder.",
 	"license": "MIT",
 	"repository": {
