@@ -1,13 +1,15 @@
 {
-	"name": "@ai-food-focus/feedbakkr-core",
-	"version": "0.10.0",
+	"name": "@feedbakkr/core",
+	"version": "0.11.0-next.1",
 	"description": "FeedBakkr form toolkit: schema format, validation, submissions and messages, text format, exports, a React form and hook, and the form builder.",
-	"license": "UNLICENSED",
+	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/ai-food-focus/feedbakkr-core.git",
+		"url": "git+https://github.com/feedbakkr/core.git",
 		"directory": "packages/core"
 	},
+	"homepage": "https://github.com/feedbakkr/core/tree/main/packages/core#readme",
+	"bugs": "https://github.com/feedbakkr/core/issues",
 	"type": "module",
 	"sideEffects": [
 		"*.css"
@@ -69,10 +71,12 @@
 		"bin",
 		"dist",
 		"docs",
-		"README.md"
+		"README.md",
+		"LICENSE",
+		"THIRD_PARTY_NOTICES.md"
 	],
 	"publishConfig": {
-		"registry": "https://npm.pkg.github.com"
+		"access": "public"
 	},
 	"scripts": {
 		"build": "tsup && node scripts/build-builder-css.mjs",

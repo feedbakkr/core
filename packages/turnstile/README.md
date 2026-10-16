@@ -1,19 +1,19 @@
-# @ai-food-focus/turnstile
+# @feedbakkr/turnstile
 
 Cloudflare Turnstile, done once, for any app: forms sent to FeedBakkr, login,
-sign-up. Private, published to GitHub Packages like `@ai-food-focus/feedbakkr-core`.
+sign-up. Published to npm beside `@feedbakkr/core`. It does not depend on Core, and Core does not depend on it.
 
 | Import | What it holds |
 | --- | --- |
-| `@ai-food-focus/turnstile` | `TURNSTILE_TEST_KEYS`, `TURNSTILE_FIELD`, the result and widget types |
-| `@ai-food-focus/turnstile/server` | `verifyTurnstile(token, options)`: Workers, Node, browsers; needs only `fetch` |
-| `@ai-food-focus/turnstile/browser` | `loadTurnstile()`, `renderTurnstile(element, options)` for pages without React |
-| `@ai-food-focus/turnstile/react` | `useTurnstile(options)` and `TurnstileWidget`. Needs `react` 19, an optional peer dependency |
+| `@feedbakkr/turnstile` | `TURNSTILE_TEST_KEYS`, `TURNSTILE_FIELD`, the result and widget types |
+| `@feedbakkr/turnstile/server` | `verifyTurnstile(token, options)`: Workers, Node, browsers; needs only `fetch` |
+| `@feedbakkr/turnstile/browser` | `loadTurnstile()`, `renderTurnstile(element, options)` for pages without React |
+| `@feedbakkr/turnstile/react` | `useTurnstile(options)` and `TurnstileWidget`. Needs `react` 19, an optional peer dependency |
 
 ## On the server
 
 ```ts
-import { verifyTurnstile } from "@ai-food-focus/turnstile/server";
+import { verifyTurnstile } from "@feedbakkr/turnstile/server";
 
 const check = await verifyTurnstile(body.turnstileToken, {
   secret: env.TURNSTILE_SECRET_KEY,
@@ -38,7 +38,7 @@ soon as one is.
 ## In a React form
 
 ```tsx
-import { TurnstileWidget, useTurnstile } from "@ai-food-focus/turnstile/react";
+import { TurnstileWidget, useTurnstile } from "@feedbakkr/turnstile/react";
 
 const turnstile = useTurnstile({ siteKey, action: "contact" });
 
@@ -70,3 +70,7 @@ never deploy them.
 
 Version in `package.json`, then a tag `turnstile-v<version>` (for example
 `turnstile-v0.1.0`) publishes it. Core's own tags (`v<version>`) do not.
+
+## Licence
+
+MIT. Copyright © Bytechaser Ltd. See [LICENSE](LICENSE).

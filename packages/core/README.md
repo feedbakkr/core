@@ -1,4 +1,4 @@
-# @ai-food-focus/feedbakkr-core
+# @feedbakkr/core
 
 FeedBakkr's form schema format and its checks, the pipeline that checks and
 stores answers, and the text format, as pure TypeScript with `zod` as the
@@ -9,23 +9,23 @@ form, a form hook and the form builder are separate entries.
 
 | Import | What it holds |
 | --- | --- |
-| `@ai-food-focus/feedbakkr-core` | `/schema`, `/submissions` and `/messages` together: what a server needs |
-| `@ai-food-focus/feedbakkr-core/schema` | Schema DSL v1 types and Zod schema, `validateSchema`, `generateZod`, `hashSchema`, sample data, date bounds, preview helpers |
-| `@ai-food-focus/feedbakkr-core/submissions` | `validateSubmission`, `validateFields`, `normalizeSubmission`, error codes |
-| `@ai-food-focus/feedbakkr-core/messages` | `prepareMessage`, `interpretSubmission`, `summarizeSubmission`, `replyToOf` |
-| `@ai-food-focus/feedbakkr-core/inbox` | Managing received messages in one inbox: statuses, notes (`addNote`, `editNote`, `removeNote`), `MessageMeta`, `MessageSender`, `replyAddress` |
-| `@ai-food-focus/feedbakkr-core/conditions` | Schema v2: `evaluateCondition`, `visibleFields`, `visibleSections`, `resolveForm` |
-| `@ai-food-focus/feedbakkr-core/form` | Form state as plain data: `createFormState`, `setValue`, `checkFields` |
-| `@ai-food-focus/feedbakkr-core/text` | `parseFormDslText`, `schemaToTextDsl` |
-| `@ai-food-focus/feedbakkr-core/export` | `generateJsonSchema`, `generateZodCode` |
-| `@ai-food-focus/feedbakkr-core/react` | `FeedbakkrForm`, `useFeedbakkrForm` and `DynamicForm`. Needs `react` 19, an optional peer dependency that only this entry imports. |
-| `@ai-food-focus/feedbakkr-core/builder` | `FeedbakkrBuilder`, the form builder. Needs the optional peer dependencies below and `builder.css`. |
-| `@ai-food-focus/feedbakkr-core/builder.css` | The builder's stylesheet. |
+| `@feedbakkr/core` | `/schema`, `/submissions` and `/messages` together: what a server needs |
+| `@feedbakkr/core/schema` | Schema DSL v1 types and Zod schema, `validateSchema`, `generateZod`, `hashSchema`, sample data, date bounds, preview helpers |
+| `@feedbakkr/core/submissions` | `validateSubmission`, `validateFields`, `normalizeSubmission`, error codes |
+| `@feedbakkr/core/messages` | `prepareMessage`, `interpretSubmission`, `summarizeSubmission`, `replyToOf` |
+| `@feedbakkr/core/inbox` | Managing received messages in one inbox: statuses, notes (`addNote`, `editNote`, `removeNote`), `MessageMeta`, `MessageSender`, `replyAddress` |
+| `@feedbakkr/core/conditions` | Schema v2: `evaluateCondition`, `visibleFields`, `visibleSections`, `resolveForm` |
+| `@feedbakkr/core/form` | Form state as plain data: `createFormState`, `setValue`, `checkFields` |
+| `@feedbakkr/core/text` | `parseFormDslText`, `schemaToTextDsl` |
+| `@feedbakkr/core/export` | `generateJsonSchema`, `generateZodCode` |
+| `@feedbakkr/core/react` | `FeedbakkrForm`, `useFeedbakkrForm` and `DynamicForm`. Needs `react` 19, an optional peer dependency that only this entry imports. |
+| `@feedbakkr/core/builder` | `FeedbakkrBuilder`, the form builder. Needs the optional peer dependencies below and `builder.css`. |
+| `@feedbakkr/core/builder.css` | The builder's stylesheet. |
 
 ## Check a schema
 
 ```ts
-import { validateSchema } from "@ai-food-focus/feedbakkr-core";
+import { validateSchema } from "@feedbakkr/core";
 
 const result = validateSchema(input, { publish: true });
 if (!result.ok) {
@@ -66,7 +66,7 @@ loudly instead of dropping conditions. The format is in
 ## Check and store answers
 
 ```ts
-import { prepareMessage } from "@ai-food-focus/feedbakkr-core";
+import { prepareMessage } from "@feedbakkr/core";
 
 const message = await prepareMessage(schema, body.answers);
 if (!message.ok) return json({ errors: message.errors }, 400);
@@ -112,7 +112,7 @@ nothing for them.
 ## A form from your own components
 
 ```tsx
-import { useFeedbakkrForm } from "@ai-food-focus/feedbakkr-core/react";
+import { useFeedbakkrForm } from "@feedbakkr/core/react";
 
 const form = useFeedbakkrForm(schema, { onSubmit: (values) => send(values) });
 
@@ -138,7 +138,7 @@ checks chosen fields, and `reset` starts again. It renders nothing.
 ## Render a form: FeedbakkrForm
 
 ```tsx
-import { FeedbakkrForm } from "@ai-food-focus/feedbakkr-core/react";
+import { FeedbakkrForm } from "@feedbakkr/core/react";
 
 <FeedbakkrForm schema={schema} onSubmit={(answers) => send(answers)} />;
 ```
@@ -156,7 +156,7 @@ inputs for screen readers, and tests run axe on the rendered fixtures.
 ## Render a form: DynamicForm (v1)
 
 ```tsx
-import { DynamicForm } from "@ai-food-focus/feedbakkr-core/react";
+import { DynamicForm } from "@feedbakkr/core/react";
 
 <DynamicForm schema={schema} onSubmit={(answers) => send(answers)} />;
 ```
@@ -174,8 +174,8 @@ after a JSON round trip.
 ## Edit a form: the builder
 
 ```tsx
-import { FeedbakkrBuilder } from "@ai-food-focus/feedbakkr-core/builder";
-import "@ai-food-focus/feedbakkr-core/builder.css";
+import { FeedbakkrBuilder } from "@feedbakkr/core/builder";
+import "@feedbakkr/core/builder.css";
 
 <FeedbakkrBuilder
 	value={schema}
@@ -243,7 +243,7 @@ page (`e2e/page`), and fail if the page makes any request beyond itself.
 ## Store the version a message was validated against
 
 ```ts
-import { hashSchema } from "@ai-food-focus/feedbakkr-core";
+import { hashSchema } from "@feedbakkr/core";
 
 const hash = await hashSchema(schema); // SHA-256 of key-sorted JSON
 ```
@@ -292,3 +292,7 @@ calls.
   core, for coding agents. Point to it from the app's `CLAUDE.md`.
 
 Both ship in the package, and every example in them is tested.
+
+## Licence
+
+MIT. Copyright © Bytechaser Ltd. See [LICENSE](LICENSE). Parts of the builder come from third-party projects under MIT and Apache-2.0 licences; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

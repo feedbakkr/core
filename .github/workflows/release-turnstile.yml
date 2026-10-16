@@ -1,10 +1,10 @@
 name: Release Turnstile
 
-# Publishes @ai-food-focus/turnstile to GitHub Packages when a tag
-# `turnstile-v<version>` is pushed. The version must match
-# packages/turnstile/package.json; a prerelease (turnstile-v0.2.0-next.1)
-# goes under the `next` dist-tag. Core is released by release.yml on its own
-# `v<version>` tags.
+# Publishes @feedbakkr/turnstile to the public npm registry, with provenance,
+# when a tag `turnstile-v<version>` is pushed. The version must match
+# packages/turnstile/package.json; a prerelease (turnstile-v0.2.0-next.1) goes
+# under the `next` dist-tag. Core is released by release.yml on its own
+# `v<version>` tags. Auth is npm trusted publishing (OIDC), as in release.yml.
 
 on:
   push:
@@ -12,11 +12,14 @@ on:
 
 permissions:
   contents: read
-  packages: write
+  id-token: write # npm trusted publishing and provenance
 
 jobs:
   publish:
     runs-on: ubuntu-latest
+    # Requires approval from a required reviewer before publishing (staged release).
+    # Configure the environment in repo settings; reviewer protection needs a public repo on GitHub Free.
+    environment: npm-release
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -60,14 +63,18 @@ jobs:
             exit 1
           fi
 
+      # Node 24 ships npm 11, which performs the OIDC token exchange. No
+      # registry-url / NODE_AUTH_TOKEN: an _authToken line would force npm onto
+      # token auth instead of OIDC.
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+
       - name: Publish
-        working-directory: packages/turnstile
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" >> ~/.npmrc
           case "$GITHUB_REF_NAME" in
-            *-next*|*-rc*|*-beta*|*-alpha*) tag=next ;;
+            *-*) tag=next ;;
             *) tag=latest ;;
           esac
-          pnpm publish --no-git-checks --tag "$tag"
+          tgz=$(ls "$RUNNER_TEMP"/*.tgz)
+          npm publish "$tgz" --access public --provenance --tag "$tag"

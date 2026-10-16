@@ -1,7 +1,7 @@
 # Working with FeedBakkr Core: notes for Claude
 
 This file is for coding agents working in an app that uses
-`@ai-food-focus/feedbakkr-core`. Read it before writing or changing a form.
+`@feedbakkr/core`. Read it before writing or changing a form.
 
 ## What core is for
 
@@ -85,7 +85,7 @@ pnpm exec feedbakkr sample form.json          # example answers
 
 ```ts
 // forms/contact.ts: imported by the page and by the route
-import type { SchemaDslV1 } from "@ai-food-focus/feedbakkr-core";
+import type { SchemaDslV1 } from "@feedbakkr/core";
 
 export const contactForm = {
 	v: 1,
@@ -101,7 +101,7 @@ export const contactForm = {
 
 ```ts
 // in the route
-import { prepareMessage } from "@ai-food-focus/feedbakkr-core";
+import { prepareMessage } from "@feedbakkr/core";
 import { contactForm } from "../forms/contact.js";
 
 const message = await prepareMessage(contactForm, body.answers);
@@ -122,10 +122,10 @@ expects `ok: true`, so a later edit cannot break the form unnoticed.
 
 ## Letting people edit a form
 
-`FeedbakkrBuilder` from `@ai-food-focus/feedbakkr-core/builder` is the form
+`FeedbakkrBuilder` from `@feedbakkr/core/builder` is the form
 builder. The app loads the schema, passes it as `value`, and saves it in
 `onSave`, which the builder calls only after `validateSchema` passes. Import
-`@ai-food-focus/feedbakkr-core/builder.css` once. The route that stores the
+`@feedbakkr/core/builder.css` once. The route that stores the
 schema must still run `validateSchema` (rule 4), with `publish: true` when it
 goes live. Pass `allowV2` to offer conditions and sections (only where the
 app renders forms with `FeedbakkrForm`), and `lockedFields` for fields the
@@ -134,12 +134,12 @@ peer dependencies.
 
 ## Building the form from the app's components
 
-`useFeedbakkrForm` from `@ai-food-focus/feedbakkr-core/react` holds the
+`useFeedbakkrForm` from `@feedbakkr/core/react` holds the
 answers and errors and runs the server's checks in the browser. It renders
 nothing, so the page uses its own inputs:
 
 ```tsx
-import { useFeedbakkrForm } from "@ai-food-focus/feedbakkr-core/react";
+import { useFeedbakkrForm } from "@feedbakkr/core/react";
 import { contactForm } from "../forms/contact.js";
 
 const form = useFeedbakkrForm(contactForm, {
@@ -175,11 +175,11 @@ const form = useFeedbakkrForm(contactForm, {
 
 ## Showing a form without custom components
 
-`FeedbakkrForm` from `@ai-food-focus/feedbakkr-core/react` renders any v1 or
+`FeedbakkrForm` from `@feedbakkr/core/react` renders any v1 or
 v2 schema with the same checks as the server:
 
 ```tsx
-import { FeedbakkrForm } from "@ai-food-focus/feedbakkr-core/react";
+import { FeedbakkrForm } from "@feedbakkr/core/react";
 import { contactForm } from "../forms/contact.js";
 
 <FeedbakkrForm
