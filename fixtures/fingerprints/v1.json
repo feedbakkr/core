@@ -1,0 +1,223 @@
+{
+	"description": "Golden schema fingerprint vectors (ADR 0004). Generated from @feedbakkr/core; never edit by hand. A change here is a breaking fingerprint change.",
+	"fingerprintVersion": 1,
+	"generatedWith": "@feedbakkr/core@0.11.0-next.1",
+	"vectors": [
+		{
+			"name": "v1-minimal-contact",
+			"schema": {
+				"v": 1,
+				"fields": [
+					{
+						"k": "name",
+						"t": "text",
+						"label": "Name",
+						"req": true
+					},
+					{
+						"k": "email",
+						"t": "email",
+						"label": "Email",
+						"req": true
+					}
+				]
+			},
+			"canonicalJson": "{\"fields\":[{\"k\":\"name\",\"label\":\"Name\",\"req\":true,\"t\":\"text\"},{\"k\":\"email\",\"label\":\"Email\",\"req\":true,\"t\":\"email\"}],\"v\":1}",
+			"fingerprint": "sha256:8cbaad541cca411128af48c8752cad83ba7463408b85d9f101849feb6e833976"
+		},
+		{
+			"name": "v1-field-order-swapped",
+			"schema": {
+				"v": 1,
+				"fields": [
+					{
+						"k": "email",
+						"t": "email",
+						"label": "Email",
+						"req": true
+					},
+					{
+						"k": "name",
+						"t": "text",
+						"label": "Name",
+						"req": true
+					}
+				]
+			},
+			"canonicalJson": "{\"fields\":[{\"k\":\"email\",\"label\":\"Email\",\"req\":true,\"t\":\"email\"},{\"k\":\"name\",\"label\":\"Name\",\"req\":true,\"t\":\"text\"}],\"v\":1}",
+			"fingerprint": "sha256:ef29e0af3d4c6f9fb6b1260621ea8c47c993d5cf78040d8c8a37053849d412d8"
+		},
+		{
+			"name": "v1-label-changed",
+			"schema": {
+				"v": 1,
+				"fields": [
+					{
+						"k": "name",
+						"t": "text",
+						"label": "Your name",
+						"req": true
+					},
+					{
+						"k": "email",
+						"t": "email",
+						"label": "Email",
+						"req": true
+					}
+				]
+			},
+			"canonicalJson": "{\"fields\":[{\"k\":\"name\",\"label\":\"Your name\",\"req\":true,\"t\":\"text\"},{\"k\":\"email\",\"label\":\"Email\",\"req\":true,\"t\":\"email\"}],\"v\":1}",
+			"fingerprint": "sha256:94a5fa95126328aebfcd14cc8863b472fbb1a4ae7dba048e6082de4b4ad4102d"
+		},
+		{
+			"name": "v1-non-ascii",
+			"schema": {
+				"v": 1,
+				"title": "Café — naïve 😀 日本",
+				"fields": [
+					{
+						"k": "note",
+						"t": "textarea",
+						"label": "Ünïcödé “quotes”   line-sep",
+						"max": 500
+					}
+				]
+			},
+			"canonicalJson": "{\"fields\":[{\"k\":\"note\",\"label\":\"Ünïcödé “quotes”   line-sep\",\"max\":500,\"t\":\"textarea\"}],\"title\":\"Café — naïve 😀 日本\",\"v\":1}",
+			"fingerprint": "sha256:b2dda4569a0a4e1484b11ea62139599e7aacae6d72ca5ec9ca50ffc408a272fd"
+		},
+		{
+			"name": "v1-numbers",
+			"schema": {
+				"v": 1,
+				"fields": [
+					{
+						"k": "qty",
+						"t": "integer",
+						"label": "Quantity",
+						"min": 0,
+						"max": 100
+					},
+					{
+						"k": "price",
+						"t": "number",
+						"label": "Price",
+						"min": -1.5,
+						"max": 1e21
+					}
+				]
+			},
+			"canonicalJson": "{\"fields\":[{\"k\":\"qty\",\"label\":\"Quantity\",\"max\":100,\"min\":0,\"t\":\"integer\"},{\"k\":\"price\",\"label\":\"Price\",\"max\":1e+21,\"min\":-1.5,\"t\":\"number\"}],\"v\":1}",
+			"fingerprint": "sha256:27ecaf115e9e2434791d03a7f7151999802a3d55cb5541eca8a855bf93e16064"
+		},
+		{
+			"name": "v1-fixed-options",
+			"schema": {
+				"v": 1,
+				"fields": [
+					{
+						"k": "size",
+						"t": "fixed",
+						"label": "Size",
+						"opts": [
+							{
+								"k": "s",
+								"label": "Small"
+							},
+							{
+								"k": "m",
+								"label": "Medium"
+							},
+							{
+								"k": "l",
+								"label": "Large"
+							}
+						]
+					}
+				]
+			},
+			"canonicalJson": "{\"fields\":[{\"k\":\"size\",\"label\":\"Size\",\"opts\":[{\"k\":\"s\",\"label\":\"Small\"},{\"k\":\"m\",\"label\":\"Medium\"},{\"k\":\"l\",\"label\":\"Large\"}],\"t\":\"fixed\"}],\"v\":1}",
+			"fingerprint": "sha256:2696ffd010865d15c71babad9c1ab39e3d26d14aee9f2b046c1aecd0f988f38e"
+		},
+		{
+			"name": "v1-fixed-options-reordered",
+			"schema": {
+				"v": 1,
+				"fields": [
+					{
+						"k": "size",
+						"t": "fixed",
+						"label": "Size",
+						"opts": [
+							{
+								"k": "l",
+								"label": "Large"
+							},
+							{
+								"k": "m",
+								"label": "Medium"
+							},
+							{
+								"k": "s",
+								"label": "Small"
+							}
+						]
+					}
+				]
+			},
+			"canonicalJson": "{\"fields\":[{\"k\":\"size\",\"label\":\"Size\",\"opts\":[{\"k\":\"l\",\"label\":\"Large\"},{\"k\":\"m\",\"label\":\"Medium\"},{\"k\":\"s\",\"label\":\"Small\"}],\"t\":\"fixed\"}],\"v\":1}",
+			"fingerprint": "sha256:ae818109bc0bf2d5d1200d4416d914ffa9158fae931ca67426d7f0904c126fbd"
+		},
+		{
+			"name": "v2-sections-conditions",
+			"schema": {
+				"v": 2,
+				"fields": [
+					{
+						"k": "topic",
+						"t": "fixed",
+						"label": "Topic",
+						"req": true,
+						"opts": [
+							{
+								"k": "sales"
+							},
+							{
+								"k": "support"
+							}
+						]
+					},
+					{
+						"k": "order",
+						"t": "text",
+						"label": "Order number",
+						"when": {
+							"k": "topic",
+							"eq": "support"
+						}
+					},
+					{
+						"k": "email",
+						"t": "email",
+						"label": "Email",
+						"req": true,
+						"replyTo": true
+					}
+				],
+				"sections": [
+					{
+						"id": "about",
+						"title": "About",
+						"fields": ["topic", "order"]
+					},
+					{
+						"id": "contact",
+						"fields": ["email"]
+					}
+				]
+			},
+			"canonicalJson": "{\"fields\":[{\"k\":\"topic\",\"label\":\"Topic\",\"opts\":[{\"k\":\"sales\"},{\"k\":\"support\"}],\"req\":true,\"t\":\"fixed\"},{\"k\":\"order\",\"label\":\"Order number\",\"t\":\"text\",\"when\":{\"eq\":\"support\",\"k\":\"topic\"}},{\"k\":\"email\",\"label\":\"Email\",\"replyTo\":true,\"req\":true,\"t\":\"email\"}],\"sections\":[{\"fields\":[\"topic\",\"order\"],\"id\":\"about\",\"title\":\"About\"},{\"fields\":[\"email\"],\"id\":\"contact\"}],\"v\":2}",
+			"fingerprint": "sha256:64cf7d8d6b28f61bc9e2b0f474d8aa012c45f1746c58e6857f0e0261ffd3bb4d"
+		}
+	]
+}

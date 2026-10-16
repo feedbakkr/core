@@ -252,6 +252,10 @@ const hash = await hashSchema(schema); // SHA-256 of key-sorted JSON
 on key order. They are kept for comparing against hashes FeedBakkr has
 already stored.
 
+### Fingerprint stability
+
+`hashSchema` is pinned by golden vectors in `fixtures/fingerprints/v1.json`. They record the schema, its canonical JSON (keys sorted at every level, arrays in order, `undefined` dropped, `JSON.stringify` output) and its SHA-256 as lower-case hex. Tests run them in Node and in workerd. FeedBakkr Cloud stores `sha256:` + `hashSchema(schema)` for each schema version it accepts and pins the same file, so a change to these values is a breaking change.
+
 ## The `feedbakkr` command
 
 Installing the package adds a `feedbakkr` command (Node 22 or later):
