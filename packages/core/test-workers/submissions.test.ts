@@ -78,3 +78,17 @@ describe("submissions in the Workers runtime", () => {
 		);
 	});
 });
+
+describe("transport in workerd", () => {
+	it("prepares a submission with WebCrypto (fingerprint and random key)", async () => {
+		const { prepareSubmission } = await import("../dist/transport.js");
+		const result = await prepareSubmission(
+			{ v: 1, fields: [{ k: "email", t: "email", label: "Email", req: true }] },
+			{ email: "pat@example.com" },
+		);
+		expect(result.ok).toBe(true);
+		if (!result.ok) return;
+		expect(result.submission.schemaFingerprint).toMatch(/^sha256:[0-9a-f]{64}$/);
+		expect(result.submission.idempotencyKey).toMatch(/^[0-9a-f-]{36}$/);
+	});
+});
