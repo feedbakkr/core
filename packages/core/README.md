@@ -210,6 +210,7 @@ import "@feedbakkr/core/builder.css";
 	readOnly={!canEdit}
 	allowV2                     // offer conditions, sections, help, placeholder
 	lockedFields={["name", "email"]}
+	showInboxPreview={false}    // optional: hide the inbox summary setting
 />;
 ```
 
@@ -222,6 +223,15 @@ calls and has no login or routing: the host loads and saves the schema.
 
 `onSave` receives the schema only after `validateSchema` passes; a thrown
 error is shown in the builder.
+
+`showInboxPreview={false}` hides the inbox summary setting, for hosts that
+build their own inbox labels. The schema's `preview` is left as it is.
+
+The builder renders the same HTML on the server and in the browser, so a
+host can server-render and hydrate it. Its drag-and-drop IDs come from
+React's `useId`: unique for every builder on a page and never part of the
+schema. A page that hydrates several separate React roots must give each a
+distinct `identifierPrefix`, as React requires for `useId`.
 
 With `allowV2` (or a v2 `value`), the edit dialog has help text, a
 placeholder and "Show this field: Always / Only when [field] [is] [value]";
