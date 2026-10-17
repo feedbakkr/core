@@ -47,6 +47,7 @@ import {
 	useCallback,
 	useContext,
 	useEffect,
+	useId,
 	useMemo,
 	useReducer,
 	useRef,
@@ -831,6 +832,9 @@ function SchemaFieldList({
 			/>
 		);
 	};
+	// dnd-kit numbers its accessibility IDs from a module counter, which differs
+	// between server and browser renders; React's useId is the same in both.
+	const dndId = useId();
 	const sensors = useSensors(
 		useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
 		useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 5 } }),
@@ -885,6 +889,7 @@ function SchemaFieldList({
 						])
 					) : (
 						<DndContext
+							id={dndId}
 							sensors={sensors}
 							collisionDetection={closestCenter}
 							onDragEnd={handleDragEnd}
