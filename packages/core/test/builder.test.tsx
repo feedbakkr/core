@@ -185,6 +185,22 @@ describe("FeedbakkrBuilder", () => {
 		expect(dialog.textContent).not.toContain('"email"');
 	});
 
+	it("hides the inbox summary setting when the host asks, and keeps the schema's preview", () => {
+		const noPreview: SchemaDslV1 = { ...contact, preview: undefined };
+		const { unmount } = render(<FeedbakkrBuilder value={noPreview} simple />);
+		expect(screen.getByText("Inbox preview not configured")).toBeTruthy();
+		unmount();
+
+		const onChange = vi.fn();
+		render(
+			<FeedbakkrBuilder value={noPreview} simple showInboxPreview={false} onChange={onChange} />,
+		);
+		expect(screen.queryByText("Inbox preview not configured")).toBeNull();
+		expect(screen.queryByRole("button", { name: "Enable Auto Preview" })).toBeNull();
+		addField("Topic");
+		expect(last(onChange)).not.toHaveProperty("preview");
+	});
+
 	it("starts empty with the add row and template import", () => {
 		render(<FeedbakkrBuilder value={{ v: 1, fields: [] }} />);
 		expect(screen.getByText("No fields yet")).toBeTruthy();

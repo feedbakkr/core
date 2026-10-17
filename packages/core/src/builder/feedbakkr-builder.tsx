@@ -161,6 +161,12 @@ export interface FeedbakkrBuilderProps {
 	onTest?: () => void;
 	/** The host's own controls, on the toolbar row before "Test the form". */
 	toolbar?: React.ReactNode;
+	/**
+	 * Shows the inbox summary setting (the schema's `preview`). On by default.
+	 * Hosts that build their own inbox labels can turn it off; the schema's
+	 * `preview` is then left exactly as it is.
+	 */
+	showInboxPreview?: boolean;
 }
 
 // ─── Preview Settings ────────────────────────────────────────────────────────
@@ -208,6 +214,7 @@ export function FeedbakkrBuilder({
 	simple = false,
 	onTest,
 	toolbar,
+	showInboxPreview = true,
 }: FeedbakkrBuilderProps) {
 	const [schema, dispatch] = useReducer(builderReducer, value, loadSchema);
 	const v2Enabled = allowV2 || value.v === 2 || schema.v === 2;
@@ -463,7 +470,7 @@ export function FeedbakkrBuilder({
 							/>
 
 							{/* Simple: only the inbox summary, in plain view. */}
-							{simple && !isLocked && (
+							{simple && !isLocked && showInboxPreview && (
 								<div className="mt-4">
 									<InboxPreviewSection
 										schema={schema}
@@ -479,7 +486,7 @@ export function FeedbakkrBuilder({
 							{/* Advanced — inbox preview, form meta, validation schemas */}
 							{!simple && (
 								<AdvancedSection>
-									{!isLocked && (
+									{!isLocked && showInboxPreview && (
 										<InboxPreviewSection
 											schema={schema}
 											previewMode={previewMode}
