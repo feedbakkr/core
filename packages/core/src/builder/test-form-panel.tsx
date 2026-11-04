@@ -4,8 +4,9 @@
 // channel's dev inbox, with an optional sent date; here FeedbakkrForm renders
 // v1 and v2 schemas, so fields appear and disappear as conditions change, and
 // the answers are only checked. Answers that pass open as the message they
-// would make: the summary, where a reply goes, and each answer under its
-// label, as an inbox shows it, rather than as data.
+// would make: the inbox summary (when the host uses it), where a reply goes,
+// and each answer under its label, as an inbox shows it; a JSON tab shows the
+// same answers as data, to copy.
 import { Check, Wand2 } from "lucide-react";
 import { useState } from "react";
 import { interpretSubmission, type SubmissionRow } from "../messages/interpret.js";
@@ -15,12 +16,14 @@ import { FeedbakkrForm, type FormComponents } from "../react/feedbakkr-form.js";
 import { generateSampleData } from "../schema/generate-sample-data.js";
 import type { SchemaDslV1 } from "../schema/schema-dsl.js";
 import type { SchemaDsl } from "../schema/schema-dsl-v2.js";
+import { CodePreview } from "./code-preview.js";
 import { Button } from "./ui/button.js";
 import { Checkbox } from "./ui/checkbox.js";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog.js";
 import { Input } from "./ui/input.js";
 import { Label } from "./ui/label.js";
 import { Select } from "./ui/select.js";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs.js";
 import { Textarea } from "./ui/textarea.js";
 
 /** The preview drawn with the builder's own pieces, so it matches the builder. */
@@ -60,7 +63,14 @@ const PREVIEW_COMPONENTS: Partial<FormComponents> = {
 	),
 };
 
-export function TestFormPanel({ schema }: { schema: SchemaDsl }) {
+export function TestFormPanel({
+	schema,
+	showSummary = true,
+}: {
+	schema: SchemaDsl;
+	/** Shows the inbox summary; off when the host builds its own inbox labels. */
+	showSummary?: boolean;
+}) {
 	const [formKey, setFormKey] = useState(0);
 	const [autofillValues, setAutofillValues] = useState<Record<string, unknown> | undefined>();
 	const [result, setResult] = useState<{ schema: string; answers: Record<string, unknown> }>();
@@ -114,7 +124,27 @@ export function TestFormPanel({ schema }: { schema: SchemaDsl }) {
 						<DialogHeader>
 							<DialogTitle>The message these answers make</DialogTitle>
 						</DialogHeader>
-						<MessagePreview schema={schema} answers={checked} />
+						<p
+							className="-mt-1 mb-2 text-xs font-medium text-green-700 dark:text-green-400"
+							role="status"
+						>
+							These answers pass the form's checks.
+						</p>
+						<Tabs defaultValue="message" className="space-y-1">
+							<TabsList>
+								<TabsTrigger value="message">Message</TabsTrigger>
+								<TabsTrigger value="json">JSON</TabsTrigger>
+							</TabsList>
+							<TabsContent value="message">
+								<MessagePreview schema={schema} answers={checked} showSummary={showSummary} />
+							</TabsContent>
+							<TabsContent value="json" className="space-y-2">
+								<p className="text-xs text-muted-foreground">
+									The <code>answers</code> object, keyed by field key, as your code sends it.
+								</p>
+								<CodePreview code={JSON.stringify(checked, null, 2)} language="json" />
+							</TabsContent>
+						</Tabs>
 						<DialogFooter>
 							<Button type="button" variant="outline" onClick={() => setOpen(false)}>
 								Close
@@ -131,19 +161,23 @@ export function TestFormPanel({ schema }: { schema: SchemaDsl }) {
 function MessagePreview({
 	schema,
 	answers,
+	showSummary,
 }: {
 	schema: SchemaDsl;
 	answers: Record<string, unknown>;
+	showSummary: boolean;
 }) {
 	const rows: SubmissionRow[] = interpretSubmission(schema, answers).filter((r) => !r.hidden);
-	const summary = summarizeSubmission(schema, answers);
+	const summary = showSummary ? summarizeSubmission(schema, answers) : "";
 	const replyTo = replyToOf(schema, answers);
 	return (
-		<div className="space-y-3" role="status">
-			<p className="text-xs font-medium text-green-700 dark:text-green-400">
-				These answers pass the form's checks.
-			</p>
-			{summary && <p className="text-sm font-semibold">{summary}</p>}
+		<div className="space-y-3">
+			{summary && (
+				<div className="rounded-md border px-3 py-2">
+					<p className="text-xs text-muted-foreground">Inbox summary</p>
+					<p className="text-sm font-semibold break-words">{summary}</p>
+				</div>
+			)}
 			{replyTo && (
 				<p className="rounded-md border px-3 py-2 text-sm">
 					<span className="text-muted-foreground">Reply to </span>

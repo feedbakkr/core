@@ -24,21 +24,21 @@ export function toCamelCase(str: string): string {
 }
 
 export const FIELD_TYPE_LABELS: Record<FieldType, string> = {
-	text: "Text",
-	textarea: "Textarea",
-	markdown: "Markdown",
-	email: "Email",
-	url: "URL",
-	phone: "Phone",
+	text: "Short text",
+	textarea: "Long text",
+	markdown: "Formatted text",
+	email: "Email address",
+	url: "Web address",
+	phone: "Phone number",
 	date: "Date",
-	datetime: "Date & Time",
+	datetime: "Date and time",
 	time: "Time",
-	daterange: "Date Range",
-	bool: "Boolean",
+	daterange: "Date range",
+	bool: "Checkbox (yes or no)",
 	number: "Number",
-	integer: "Integer",
-	fixed: "Fixed Options",
-	dynlist: "Dynamic List",
+	integer: "Whole number",
+	fixed: "Choice from a list",
+	dynlist: "List of entries",
 };
 
 export function migratePreviewConfig(preview: unknown): PreviewConfig | undefined {

@@ -29,7 +29,7 @@ function last<T>(fn: { mock: { calls: T[][] } }): T {
 
 function addField(label: string, type?: string) {
 	fireEvent.change(screen.getByPlaceholderText("e.g. Full Name"), { target: { value: label } });
-	if (type) fireEvent.change(screen.getByDisplayValue("Text"), { target: { value: type } });
+	if (type) fireEvent.change(screen.getByDisplayValue("Short text"), { target: { value: type } });
 	fireEvent.click(screen.getByRole("button", { name: "Add" }));
 }
 
@@ -183,6 +183,37 @@ describe("FeedbakkrBuilder", () => {
 		expect(dialog.textContent).toContain("Ada");
 		expect(dialog.textContent).toContain("ada@example.com");
 		expect(dialog.textContent).not.toContain('"email"');
+		// The summary is labelled, so it isn't mistaken for an answer.
+		expect(within(dialog).getByText("Inbox summary")).toBeTruthy();
+
+		// The same answers as data, to copy.
+		fireEvent.click(within(dialog).getByRole("button", { name: "JSON" }));
+		const json = JSON.parse(dialog.querySelector("pre code")?.textContent ?? "");
+		expect(json).toMatchObject({ name: "Ada", email: "ada@example.com" });
+		expect(within(dialog).getByRole("button", { name: "Copy to clipboard" })).toBeTruthy();
+		fireEvent.click(within(dialog).getByRole("button", { name: "Message" }));
+		expect(dialog.textContent).toContain("ada@example.com");
+	});
+
+	it("hides the preview when the host offers its own test", () => {
+		const onTest = vi.fn();
+		render(<FeedbakkrBuilder value={contact} showPreview={false} onTest={onTest} />);
+		expect(screen.queryByRole("region", { name: "Preview" })).toBeNull();
+		fireEvent.click(screen.getByRole("button", { name: "Test the form" }));
+		expect(onTest).toHaveBeenCalledOnce();
+	});
+
+	it("leaves the inbox summary out of checked answers when the host builds its own labels", () => {
+		render(<FeedbakkrBuilder value={contact} showInboxPreview={false} />);
+		const preview = screen.getByRole("region", { name: "Preview" });
+		fireEvent.change(within(preview).getByLabelText(/Your name/), { target: { value: "Ada" } });
+		fireEvent.change(within(preview).getByLabelText(/Email/), {
+			target: { value: "ada@example.com" },
+		});
+		fireEvent.click(within(preview).getByRole("button", { name: "Check answers" }));
+		const dialog = screen.getByRole("dialog");
+		expect(within(dialog).queryByText("Inbox summary")).toBeNull();
+		expect(dialog.textContent).toContain("Ada");
 	});
 
 	it("hides the inbox summary setting when the host asks, and keeps the schema's preview", () => {
@@ -212,5 +243,42 @@ describe("FeedbakkrBuilder", () => {
 		fireEvent.click(screen.getByRole("button", { name: "Export" }));
 		fireEvent.click(screen.getByText("Text DSL"));
 		expect(screen.getByRole("dialog").textContent).toContain('name: text "Your name" required');
+	});
+});
+
+describe("field type guidance", () => {
+	it("puts every field type in exactly one group, with guidance", async () => {
+		const { FIELD_TYPE_GROUPS, FIELD_TYPE_GUIDE } = await import(
+			"../src/builder/field-type-guide.js"
+		);
+		const { FIELD_TYPES } = await import("../src/schema/schema-dsl.js");
+		const grouped = FIELD_TYPE_GROUPS.flatMap((g: { types: string[] }) => g.types);
+		expect([...grouped].sort()).toEqual([...FIELD_TYPES].sort());
+		for (const t of FIELD_TYPES) expect(FIELD_TYPE_GUIDE[t].what).toBeTruthy();
+	});
+
+	it("explains the chosen type, and opens a guide to all of them", () => {
+		render(<FeedbakkrBuilder value={contact} />);
+		const type = screen.getByRole("combobox", { name: /Type/ });
+		const hint = document.getElementById(type.getAttribute("aria-describedby") ?? "");
+		expect(hint?.textContent).toContain("Short text: One line of text.");
+		fireEvent.change(type, { target: { value: "fixed" } });
+		expect(hint?.textContent).toContain(
+			"Choice from a list: One option, picked from a list you write.",
+		);
+
+		const [guideButton] = screen.getAllByRole("button", { name: "Which type should I use?" });
+		if (!guideButton) throw new Error("no guide button");
+		fireEvent.click(guideButton);
+		const guide = screen.getByRole("dialog", { name: "Field types" });
+		for (const group of [
+			"Text",
+			"Contact details",
+			"Dates and times",
+			"Numbers",
+			"Choices and lists",
+		])
+			expect(within(guide).getByRole("heading", { name: group })).toBeTruthy();
+		expect(guide.textContent).toContain("List of entries");
 	});
 });
