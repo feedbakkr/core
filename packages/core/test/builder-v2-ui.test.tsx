@@ -187,7 +187,8 @@ describe("locked fields", () => {
 		const [key] = within(dialog).getAllByDisplayValue("email");
 		expect((key as HTMLInputElement).disabled).toBe(true);
 		// The label input (the type select also shows "Email", and is locked).
-		const [label, type] = within(dialog).getAllByDisplayValue("Email");
+		const label = within(dialog).getByDisplayValue("Email");
+		const type = within(dialog).getByLabelText("Type");
 		expect((label as HTMLInputElement).disabled).toBe(false);
 		expect((type as HTMLSelectElement).disabled).toBe(true);
 	});

@@ -55,7 +55,7 @@ import {
 } from "react";
 import { generateJsonSchema, generateZodCode } from "../export/index.js";
 import type { DslField, FieldType, PreviewConfig, SchemaDslV1 } from "../schema/schema-dsl.js";
-import { ALLOWED_SEPARATORS, FIELD_TYPES } from "../schema/schema-dsl.js";
+import { ALLOWED_SEPARATORS } from "../schema/schema-dsl.js";
 import {
 	type DslFieldV2,
 	type SchemaDsl,
@@ -69,6 +69,7 @@ import { schemaToTextDsl } from "../text/index.js";
 import { CodePreview } from "./code-preview.js";
 import { ConditionEditor } from "./condition-editor.js";
 import { FieldTypeConfig } from "./field-type-config.js";
+import { FieldTypeGuideButton, FieldTypeHint, FieldTypeSelect } from "./field-type-guide.js";
 import {
 	createDefaultField,
 	FIELD_TYPE_LABELS,
@@ -160,6 +161,11 @@ export interface FeedbakkrBuilderProps {
 	simple?: boolean;
 	/** Shows "Test the form" in the toolbar, for the host to open its own test. */
 	onTest?: () => void;
+	/**
+	 * Shows the preview beside the fields (not in `simple`). On by default; a host
+	 * whose `onTest` covers checking answers can turn it off.
+	 */
+	showPreview?: boolean;
 	/** The host's own controls, on the toolbar row before "Test the form". */
 	toolbar?: React.ReactNode;
 	/**
@@ -216,6 +222,7 @@ export function FeedbakkrBuilder({
 	onTest,
 	toolbar,
 	showInboxPreview = true,
+	showPreview = true,
 }: FeedbakkrBuilderProps) {
 	const [schema, dispatch] = useReducer(builderReducer, value, loadSchema);
 	const v2Enabled = allowV2 || value.v === 2 || schema.v === 2;
@@ -385,7 +392,9 @@ export function FeedbakkrBuilder({
 				<div className={rootClass}>
 					<div
 						className={
-							simple ? "grid gap-6" : "grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]"
+							simple || !showPreview
+								? "grid gap-6"
+								: "grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]"
 						}
 					>
 						<div className="min-w-0">
@@ -529,10 +538,10 @@ export function FeedbakkrBuilder({
 						</div>
 
 						{/* Preview: the form as people will see it, checked locally */}
-						{!simple && (
+						{!simple && showPreview && (
 							<section aria-label="Preview" className="min-w-0 rounded-lg border p-4">
 								<h3 className="mb-3 text-sm font-semibold">Preview</h3>
-								<TestFormPanel schema={schema} />
+								<TestFormPanel schema={schema} showSummary={showInboxPreview} />
 							</section>
 						)}
 					</div>
@@ -1316,6 +1325,8 @@ function AddFieldRow({
 	const [label, setLabel] = useState("");
 	const [key, setKey] = useState("");
 	const [fieldType, setFieldType] = useState<FieldType>("text");
+	// Unique per builder: two builders can share a page.
+	const typeId = useId();
 	const [required, setRequired] = useState(false);
 	const keyTouched = useRef(false);
 
@@ -1420,20 +1431,18 @@ function AddFieldRow({
 				)}
 				<div className="min-w-[100px] space-y-1">
 					<div className="flex items-center gap-1">
-						<Label className="text-xs">Type</Label>
+						<Label className="text-xs" htmlFor={typeId}>
+							Type
+						</Label>
 						<InfoTooltip text="The kind of answer it takes (text, number, date, a choice and so on). It sets the input shown and how the answer is checked." />
 					</div>
-					<Select
+					<FieldTypeSelect
+						id={typeId}
 						value={fieldType}
-						onChange={(e) => setFieldType(e.target.value as FieldType)}
+						onChange={setFieldType}
 						className="h-8 text-sm bg-background"
-					>
-						{FIELD_TYPES.map((ft) => (
-							<option key={ft} value={ft}>
-								{FIELD_TYPE_LABELS[ft]}
-							</option>
-						))}
-					</Select>
+						aria-describedby={`${typeId}-hint`}
+					/>
 				</div>
 				<div className="flex items-center gap-1.5 h-8">
 					<Checkbox checked={required} onChange={(e) => setRequired(e.target.checked)} />
@@ -1453,6 +1462,10 @@ function AddFieldRow({
 			{isKeyDuplicate && (
 				<p className="mt-1 text-xs text-destructive">A field with this key already exists.</p>
 			)}
+			<div className="mt-2 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+				<FieldTypeHint type={fieldType} id={`${typeId}-hint`} />
+				<FieldTypeGuideButton />
+			</div>
 		</div>
 	);
 }
@@ -1655,6 +1668,8 @@ function EditFieldModal({
 	const [draft, setDraft] = useState<DslFieldV2 | null>(null);
 	const [metaOpen, setMetaOpen] = useState(false);
 
+	const typeId = useId();
+
 	// Reset draft when modal opens with a new field
 	useEffect(() => {
 		if (open && field) {
@@ -1721,18 +1736,16 @@ function EditFieldModal({
 
 					<div className="grid grid-cols-2 gap-3 items-end">
 						<div className="space-y-1">
-							<Label className="text-xs">Type</Label>
-							<Select
+							<Label className="text-xs" htmlFor={typeId}>
+								Type
+							</Label>
+							<FieldTypeSelect
+								id={typeId}
 								value={draft.t}
 								disabled={locked}
-								onChange={(e) => handleTypeChange(e.target.value as FieldType)}
-							>
-								{FIELD_TYPES.map((ft) => (
-									<option key={ft} value={ft}>
-										{FIELD_TYPE_LABELS[ft]}
-									</option>
-								))}
-							</Select>
+								onChange={handleTypeChange}
+								aria-describedby={`${typeId}-hint`}
+							/>
 						</div>
 						<div className="flex items-center gap-2 pb-1">
 							<Switch
@@ -1744,6 +1757,10 @@ function EditFieldModal({
 							/>
 							<Label className="text-xs">Required</Label>
 						</div>
+					</div>
+					<div className="-mt-1 space-y-1">
+						<FieldTypeHint type={draft.t} id={`${typeId}-hint`} />
+						<FieldTypeGuideButton />
 					</div>
 
 					{!simple && (
