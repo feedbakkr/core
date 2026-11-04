@@ -14,55 +14,55 @@ import {
 } from "./ui/dialog.js";
 import { Select } from "./ui/select.js";
 
-/** What each type collects, and an example of when to use it. */
+/** What each type collects, and an example of when to use it (read after "For example:"). */
 export const FIELD_TYPE_GUIDE: Record<FieldType, { what: string; example: string }> = {
-	text: { what: "One line of text.", example: "A name, a subject or an order number." },
-	textarea: { what: "Several lines of text.", example: "A message, a question or feedback." },
+	text: { what: "One line of text.", example: "a name, a subject or an order number." },
+	textarea: { what: "Several lines of text.", example: "a message, a question or feedback." },
 	markdown: {
 		what: "Several lines where people can use Markdown for bold, lists and links; the inbox shows it formatted.",
-		example: "Bug reports with steps. Most forms want Long text instead.",
+		example: "bug reports with steps. Most forms want Long text instead.",
 	},
 	email: {
 		what: "An email address, checked to be valid.",
-		example: "Where to send your reply.",
+		example: "where to send your reply.",
 	},
 	phone: {
 		what: "A phone number: digits, spaces, dashes, brackets and +. Phones show a number keypad.",
-		example: "A callback number.",
+		example: "a callback number.",
 	},
 	url: {
 		what: "A full web address, starting with https://.",
-		example: "A website or a link to a file.",
+		example: "a website or a link to a file.",
 	},
 	date: {
 		what: "A calendar date. You can set the earliest and latest allowed.",
-		example: "A date of birth or a delivery date.",
+		example: "a date of birth or a delivery date.",
 	},
-	datetime: { what: "A date with a time of day.", example: "An appointment." },
-	time: { what: "A time of day, without a date.", example: "The best time to call." },
+	datetime: { what: "A date with a time of day.", example: "an appointment." },
+	time: { what: "A time of day, without a date.", example: "the best time to call." },
 	daterange: {
 		what: "A start and an end date. You can limit how long the range can be.",
-		example: "Holiday dates or a booking.",
+		example: "holiday dates or a booking.",
 	},
 	number: {
 		what: "Any number, decimals allowed.",
-		example: "A price, a weight or a rating such as 4.5.",
+		example: "a price, a weight or a rating such as 4.5.",
 	},
 	integer: {
 		what: "A number without decimals.",
-		example: "A quantity, an age or a number of guests.",
+		example: "a quantity, an age or a number of guests.",
 	},
 	bool: {
 		what: "A single tick box: ticked means yes.",
-		example: "Consent, or “Sign me up to the newsletter”.",
+		example: "consent, or “Sign me up to the newsletter”.",
 	},
 	fixed: {
 		what: "One option, picked from a list you write.",
-		example: "A topic, a department or a size.",
+		example: "a topic, a department or a size.",
 	},
 	dynlist: {
 		what: "Entries people add one at a time, as many as they need, each of the same type.",
-		example: "The names of everyone attending.",
+		example: "the names of everyone attending.",
 	},
 };
 
@@ -121,7 +121,7 @@ export function FieldTypeHint({ type, id }: { type: FieldType; id?: string }) {
 	return (
 		<p id={id} className="text-xs text-muted-foreground">
 			<span className="font-medium text-foreground">{FIELD_TYPE_LABELS[type]}:</span> {guide.what}{" "}
-			For example: {lowerFirst(guide.example)}
+			For example: {guide.example}
 		</p>
 	);
 }
@@ -159,7 +159,7 @@ export function FieldTypeGuideButton() {
 											<dd className="text-sm text-muted-foreground">
 												{FIELD_TYPE_GUIDE[t].what}{" "}
 												<span className="text-foreground/80">
-													For example: {lowerFirst(FIELD_TYPE_GUIDE[t].example)}
+													For example: {FIELD_TYPE_GUIDE[t].example}
 												</span>
 											</dd>
 										</div>
@@ -172,9 +172,4 @@ export function FieldTypeGuideButton() {
 			</Dialog>
 		</>
 	);
-}
-
-/** "A name, …" reads as "For example: a name, …"; quoted text is left alone. */
-function lowerFirst(text: string): string {
-	return /^[A-Z][a-z]/.test(text) ? text.charAt(0).toLowerCase() + text.slice(1) : text;
 }

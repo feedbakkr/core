@@ -254,14 +254,20 @@ describe("field type guidance", () => {
 		const { FIELD_TYPES } = await import("../src/schema/schema-dsl.js");
 		const grouped = FIELD_TYPE_GROUPS.flatMap((g: { types: string[] }) => g.types);
 		expect([...grouped].sort()).toEqual([...FIELD_TYPES].sort());
-		for (const t of FIELD_TYPES) expect(FIELD_TYPE_GUIDE[t].what).toBeTruthy();
+		for (const t of FIELD_TYPES) {
+			expect(FIELD_TYPE_GUIDE[t].what).toBeTruthy();
+			// Read after "For example:", so it starts in lower case.
+			expect(FIELD_TYPE_GUIDE[t].example).toMatch(/^[a-z]/);
+		}
 	});
 
 	it("explains the chosen type, and opens a guide to all of them", () => {
 		render(<FeedbakkrBuilder value={contact} />);
 		const type = screen.getByRole("combobox", { name: /Type/ });
 		const hint = document.getElementById(type.getAttribute("aria-describedby") ?? "");
-		expect(hint?.textContent).toContain("Short text: One line of text.");
+		expect(hint?.textContent).toContain(
+			"Short text: One line of text. For example: a name, a subject or an order number.",
+		);
 		fireEvent.change(type, { target: { value: "fixed" } });
 		expect(hint?.textContent).toContain(
 			"Choice from a list: One option, picked from a list you write.",
